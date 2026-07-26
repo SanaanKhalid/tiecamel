@@ -1,0 +1,19 @@
+{
+  "name": "tiecamel",
+  "private": true,
+  "packageManager": "pnpm@10.34.5",
+  "scripts": {
+    "build": "pnpm --recursive --filter './apps/*' build",
+    "check": "pnpm --recursive --if-present --filter './apps/*' check",
+    "convex:dev": "pnpm --filter @tiecamel/app convex:dev",
+    "convex:deploy": "pnpm --filter @tiecamel/app convex:deploy",
+    "deploy:app": "pnpm --filter @tiecamel/app run deploy",
+    "deploy:web": "pnpm --filter @tiecamel/web run deploy",
+    "dev": "pnpm --parallel --filter @tiecamel/app --filter @tiecamel/web dev",
+    "dev:app": "pnpm --filter @tiecamel/app dev",
+    "dev:web": "pnpm --filter @tiecamel/web dev",
+    "format": "pnpm --filter @tiecamel/app format",
+    "lint": "pnpm --filter @tiecamel/app lint",
+    "test": "pnpm --recursive --if-present --filter './apps/*' test"
+  }
+}

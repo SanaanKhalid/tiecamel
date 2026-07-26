@@ -1,0 +1,60 @@
+{
+  "name": "@tiecamel/app",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "scripts": {
+    "dev": "vite dev --port 3000",
+    "convex:dev": "convex dev --env-file .env.development.local",
+    "convex:deploy": "convex deploy --env-file .env.development.local",
+    "generate-routes": "tsr generate",
+    "build": "vite build",
+    "deploy": "vite build && wrangler deploy",
+    "cf-typegen": "wrangler types",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "format": "biome format",
+    "lint": "biome lint",
+    "check": "biome check"
+  },
+  "dependencies": {
+    "@clerk/tanstack-react-start": "^1.4.20",
+    "@fontsource/ibm-plex-mono": "^5.2.8",
+    "@fontsource-variable/public-sans": "^5.2.8",
+    "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/react-devtools": "0.10.8",
+    "@tanstack/react-router": "1.170.18",
+    "@tanstack/react-router-devtools": "1.167.0",
+    "@tanstack/react-router-ssr-query": "1.167.1",
+    "@tanstack/react-start": "1.168.32",
+    "@tanstack/router-plugin": "1.168.23",
+    "convex": "^1.42.3",
+    "lucide-react": "^0.545.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.1.18"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.5",
+    "@cloudflare/vite-plugin": "^1.46.0",
+    "@tailwindcss/typography": "^0.5.16",
+    "@tanstack/devtools-vite": "0.8.1",
+    "@tanstack/router-cli": "1.167.21",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.0",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.0.1",
+    "jsdom": "^28.1.0",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.0",
+    "vitest": "^4.1.5",
+    "wrangler": "^4.113.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

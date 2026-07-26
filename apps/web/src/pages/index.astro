@@ -1,0 +1,480 @@
+---
+import SiteLayout from '../layouts/site-layout.astro';
+
+const contactUrl =
+	'mailto:hello@tiecamel.com?subject=TieCamel%20early%20access&body=I%27d%20like%20to%20learn%20more%20about%20TieCamel.';
+
+const pillars = [
+	{
+		number: '01',
+		title: 'Observe',
+		body: 'Bring properties, filings, grants, insurance, loans, licenses, legal matters, and financial reporting into one source-labeled view.',
+		note: 'One shared picture',
+	},
+	{
+		number: '02',
+		title: 'Escalate',
+		body: 'Give every obligation an owner, backup, reviewer, evidence requirement, and escalation path that cannot end with one silent inbox.',
+		note: 'No single point of silence',
+	},
+	{
+		number: '03',
+		title: 'Prove',
+		body: 'Publish privacy-respecting reports with source labels, reviewer attestations, an append-only history, and independently verifiable proof.',
+		note: 'Evidence over assurances',
+	},
+];
+
+const modules = [
+	{
+		tag: 'Control plane',
+		title: 'Assets & obligations',
+		body: 'A living register for property, exemptions, filings, insurance, debt, grants, licenses, contracts, and every deadline that matters.',
+	},
+	{
+		tag: 'Early warning',
+		title: 'Deadlines & escalation',
+		body: 'Risk states, reminders, acknowledgements, backup owners, independent review, and automatic escalation from staff to the full board.',
+	},
+	{
+		tag: 'Governance',
+		title: 'Decisions & follow-through',
+		body: 'Record the question, evidence, advice, conflicts, vote, dissent, rationale, and assigned actions behind every material decision.',
+	},
+	{
+		tag: 'Financial clarity',
+		title: 'Reporting—not bookkeeping',
+		body: 'Turn approved accounting data into budget, cash, debt, restricted-fund, legal-fee, and capital-project summaries for each audience.',
+	},
+	{
+		tag: 'Stakeholder trust',
+		title: 'Member transparency',
+		body: 'Give verified members plain-language reports, material-risk status, board actions, data freshness, and structured ways to ask questions.',
+	},
+	{
+		tag: 'Assurance',
+		title: 'Evidence & review',
+		body: 'Preserve source documents, corrections, attestations, access events, stale-data warnings, and an exportable audit history.',
+	},
+];
+
+const trustStates = [
+	{
+		state: 'Verified',
+		className: 'verified',
+		body: 'Confirmed by an official, connected, or independently reviewed source.',
+	},
+	{
+		state: 'Organization reported',
+		className: 'reported',
+		body: 'Submitted by the organization with its source and reporting date visible.',
+	},
+	{
+		state: 'Unavailable',
+		className: 'unavailable',
+		body: 'A source is missing, disconnected, stale, or not available for verification.',
+	},
+	{
+		state: 'Disputed',
+		className: 'disputed',
+		body: 'A material claim is contested; the evidence and responses remain preserved.',
+	},
+];
+
+const audiences = [
+	['Boards', 'See material risk, decisions, dissent, and unfinished actions before the next meeting.'],
+	['Executives', 'Delegate clearly and show that high-consequence obligations are actually being handled.'],
+	['Finance teams', 'Publish understandable, approved summaries without exposing transactions or donor identities.'],
+	['Reviewers', 'Request scoped evidence and attest only to the checks you actually performed.'],
+	['Members', 'Understand what is current, what is at risk, what is private, and how questions are resolved.'],
+	['Partners', 'Evaluate consented evidence consistently across the organizations you support.'],
+];
+---
+
+<SiteLayout
+	title="TieCamel — Trust, made visible"
+	description="Coming soon: nonprofit governance infrastructure for shared oversight, meaningful transparency, and cryptographically verifiable reporting."
+>
+	<a class="skip-link" href="#main-content">Skip to content</a>
+
+	<div class="announcement">
+		<div class="shell announcement-inner">
+			<span class="announcement-dot" aria-hidden="true"></span>
+			<strong>Coming soon...</strong>
+			<span>Design-partner conversations are now open.</span>
+			<a href="#early-access">Join early access <span aria-hidden="true">↗</span></a>
+		</div>
+	</div>
+
+	<header class="site-header shell">
+		<a class="brand" href="/" aria-label="TieCamel home">
+			<span class="brand-mark" aria-hidden="true"><img src="/tiecamel-logo.png" alt="" /></span>
+			<span class="brand-name">TieCamel</span>
+		</a>
+		<nav class="nav" aria-label="Primary navigation">
+			<a href="#platform">Platform</a>
+			<a href="#trust-model">Trust model</a>
+			<a href="#faq">FAQ</a>
+		</nav>
+		<a class="button button-small button-outline header-cta" href={contactUrl}>Join the pilot</a>
+	</header>
+
+	<main id="main-content">
+		<section class="hero shell">
+			<div class="hero-copy-wrap">
+				<div class="eyebrow"><span></span> Trust infrastructure for nonprofits</div>
+				<h1>Trust should never depend on <em>who happens to know.</em></h1>
+				<p class="hero-copy">
+					TieCamel makes critical obligations, financial signals, board decisions, and
+					unresolved risks visible to the people responsible for acting—before silence
+					becomes a crisis.
+				</p>
+				<div class="hero-actions">
+					<a class="button button-primary" href={contactUrl}>
+						Join early access <span aria-hidden="true">↗</span>
+					</a>
+					<a class="button button-ghost" href="#platform">
+						Explore the vision <span aria-hidden="true">↓</span>
+					</a>
+				</div>
+				<div class="hero-note">
+					<span class="proof-glyph" aria-hidden="true">⌁</span>
+					<span>Publication integrity backed by Solana</span>
+					<span class="note-separator"></span>
+					<span>No wallets. No tokens. No operating funds on-chain.</span>
+				</div>
+			</div>
+
+			<div class="product-stage" aria-label="Illustration of the TieCamel assurance dashboard">
+				<div class="orbit orbit-one"></div>
+				<div class="orbit orbit-two"></div>
+				<div class="product-window">
+					<div class="window-bar">
+						<div class="window-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+						<span>Example organization</span>
+						<span class="window-live"><i></i> Sources live</span>
+					</div>
+					<div class="window-body">
+						<aside class="mini-sidebar" aria-hidden="true">
+							<div class="mini-logo"><img src="/tiecamel-logo.png" alt="" /></div>
+							<div class="mini-nav active"></div>
+							<div class="mini-nav"></div>
+							<div class="mini-nav"></div>
+							<div class="mini-nav"></div>
+							<div class="mini-avatar">SK</div>
+						</aside>
+						<div class="dashboard">
+							<div class="dashboard-heading">
+								<div>
+									<span class="dash-kicker">Assurance pulse</span>
+									<h2>Good afternoon, Sam.</h2>
+								</div>
+								<span class="period">Q3 · 2026</span>
+							</div>
+							<div class="dashboard-grid">
+								<div class="assurance-card">
+									<div class="assurance-ring"><strong>12</strong><span>tracked</span></div>
+									<div>
+										<span class="dash-label">Material obligations</span>
+										<p>10 healthy · 2 need attention</p>
+									</div>
+								</div>
+								<div class="alert-card">
+									<span class="alert-icon">!</span>
+									<div>
+										<span class="dash-label">Escalation active</span>
+										<strong>Insurance renewal</strong>
+										<small>Board review due in 2 days</small>
+									</div>
+								</div>
+							</div>
+							<div class="obligations-card">
+								<div class="card-heading-row">
+									<span>Critical controls</span>
+									<small>Freshness</small>
+								</div>
+								<div class="obligation-row">
+									<span class="row-icon green">P</span>
+									<div><strong>Property tax & exemption</strong><small>Official source checked</small></div>
+									<span class="row-status success">Verified</span>
+								</div>
+								<div class="obligation-row">
+									<span class="row-icon yellow">I</span>
+									<div><strong>Insurance renewal</strong><small>Owner + reviewer assigned</small></div>
+									<span class="row-status warning">12 days</span>
+								</div>
+								<div class="obligation-row">
+									<span class="row-icon green">F</span>
+									<div><strong>Quarterly financial report</strong><small>Reviewer attestation received</small></div>
+									<span class="row-status success">Ready</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="floating-proof">
+					<span class="proof-check">✓</span>
+					<div><strong>Report verified</strong><small>Public fingerprint · Solana</small></div>
+				</div>
+				<div class="floating-alert">
+					<span>Board notified</span>
+					<strong>8 of 8 acknowledged</strong>
+				</div>
+			</div>
+		</section>
+
+		<section class="trust-ribbon" aria-label="TieCamel product promises">
+			<div class="ribbon-track">
+				<span>Shared oversight</span><i>✦</i>
+				<span>Evidence-led decisions</span><i>✦</i>
+				<span>Privacy-respecting disclosure</span><i>✦</i>
+				<span>Append-only corrections</span><i>✦</i>
+				<span>Verifiable publications</span><i>✦</i>
+				<span>No single point of silence</span><i>✦</i>
+			</div>
+		</section>
+
+		<section class="problem section shell">
+			<div class="section-number">01 — Why TieCamel</div>
+			<div class="problem-grid">
+				<div>
+					<p class="eyebrow"><span></span> The trust gap</p>
+					<h2>A small administrative miss can become an existential risk.</h2>
+				</div>
+				<div class="problem-copy">
+					<p class="lead">
+						Accounting tools record transactions. Board portals organize meetings.
+						Compliance calendars remind one person. Public filings arrive months later.
+					</p>
+					<p>
+						The dangerous gap lives between them: when an accountant sees an unpaid bill,
+						an officer receives a notice, counsel knows a deadline, and everyone else
+						assumes the situation is under control.
+					</p>
+					<div class="pull-quote">
+						<span class="quote-mark">“</span>
+						<p>TieCamel turns private awareness into shared, accountable action.</p>
+					</div>
+				</div>
+			</div>
+			<div class="failure-grid">
+				<article><span>01</span><h3>Scattered signals</h3><p>Critical facts live across inboxes, files, vendors, advisors, and disconnected systems.</p></article>
+				<article><span>02</span><h3>Unclear ownership</h3><p>Everyone knows the issue matters. No one can see who must act, review, or escalate it.</p></article>
+				<article><span>03</span><h3>Trust by assertion</h3><p>Members receive reassurance without enough source context, freshness, or durable evidence.</p></article>
+			</div>
+		</section>
+
+		<section class="platform section" id="platform">
+			<div class="shell">
+				<div class="section-number">02 — The platform</div>
+				<div class="center-heading">
+					<p class="eyebrow"><span></span> One control plane</p>
+					<h2>See the risk. Route the work. Prove the response.</h2>
+					<p>TieCamel sits above the tools a nonprofit already uses and connects what they leave apart.</p>
+				</div>
+				<div class="pillar-grid">
+					{pillars.map((pillar) => (
+						<article class="pillar-card">
+							<div class="pillar-top"><span>{pillar.number}</span><small>{pillar.note}</small></div>
+							<div class={`pillar-symbol symbol-${pillar.number}`}>{pillar.number === '01' ? '◉' : pillar.number === '02' ? '↗' : '✓'}</div>
+							<h3>{pillar.title}</h3>
+							<p>{pillar.body}</p>
+						</article>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<section class="system section shell">
+			<div class="split-heading">
+				<div>
+					<p class="eyebrow"><span></span> Built around the real work</p>
+					<h2>From the first warning to the final publication.</h2>
+				</div>
+				<p>
+					Not another accounting system, file cabinet, or public accusation board.
+					TieCamel is the oversight and evidence layer that connects them responsibly.
+				</p>
+			</div>
+			<div class="module-grid">
+				{modules.map((module, index) => (
+					<article class={`module-card module-${index + 1}`}>
+						<div class="module-top"><span>{String(index + 1).padStart(2, '0')}</span><small>{module.tag}</small></div>
+						<h3>{module.title}</h3>
+						<p>{module.body}</p>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section class="transparency section">
+			<div class="shell transparency-grid">
+				<div class="transparency-copy">
+					<p class="eyebrow"><span></span> Transparency without exposure</p>
+					<h2>One truth. The right view for every audience.</h2>
+					<p>
+						Finance staff, directors, reviewers, verified members, and the public do not
+						need the same level of access. They do need the same source-labeled reality.
+					</p>
+					<ul class="check-list">
+						<li><span>✓</span> Approved financial summaries—not individual transactions</li>
+						<li><span>✓</span> Material case milestones—not privileged legal strategy</li>
+						<li><span>✓</span> Aggregate restricted funds and legal fees—not donor identities</li>
+						<li><span>✓</span> Visible freshness, limitations, corrections, and disputes</li>
+					</ul>
+				</div>
+				<div class="portal-panel" aria-label="Example member transparency report">
+					<div class="portal-header">
+						<div><span class="portal-logo"><img src="/tiecamel-logo.png" alt="" /></span><strong>Community trust report</strong></div>
+						<span class="published-pill">Published · Q3</span>
+					</div>
+					<div class="portal-hero">
+						<span class="dash-kicker">Organization health</span>
+						<h3>Your community deserves the full picture.</h3>
+						<div class="portal-stats">
+							<div><strong>Current</strong><span>Financial reporting</span></div>
+							<div><strong>10 / 12</strong><span>Controls healthy</span></div>
+							<div><strong>2</strong><span>Open board actions</span></div>
+						</div>
+					</div>
+					<div class="portal-row"><span>Material obligations</span><strong class="text-green">10 healthy · 2 in review</strong></div>
+					<div class="portal-row"><span>Latest board publication</span><strong>Approved July 12</strong></div>
+					<div class="portal-row"><span>Source freshness</span><strong class="text-green">All critical sources current</strong></div>
+					<div class="portal-proof"><span class="proof-check">✓</span><div><strong>Integrity proof confirmed</strong><small>Report matches its public fingerprint</small></div><span>Verify ↗</span></div>
+				</div>
+			</div>
+		</section>
+
+		<section class="trust-model section shell" id="trust-model">
+			<div class="section-number">03 — The trust model</div>
+			<div class="split-heading">
+				<div>
+					<p class="eyebrow"><span></span> Provenance on every claim</p>
+					<h2>Clear about what is known—and what is not.</h2>
+				</div>
+				<p>
+					Transparency is not a wall of documents. It is a precise explanation of the source,
+					freshness, reviewer, limitations, and history behind each material claim.
+				</p>
+			</div>
+			<div class="trust-state-grid">
+				{trustStates.map((item) => (
+					<article class="trust-state">
+						<span class={`state-dot ${item.className}`}></span>
+						<h3>{item.state}</h3>
+						<p>{item.body}</p>
+					</article>
+				))}
+			</div>
+
+			<div class="verification-card">
+				<div class="verification-visual" aria-hidden="true">
+					<div class="document-sheet sheet-back"></div>
+					<div class="document-sheet sheet-front">
+						<div class="doc-head"><span><img src="/tiecamel-logo.png" alt="" /></span><i></i></div>
+						<div class="doc-line long"></div><div class="doc-line"></div><div class="doc-line short"></div>
+						<div class="doc-seal">✓</div>
+					</div>
+					<div class="chain-line"></div>
+					<div class="chain-node">⌁</div>
+				</div>
+				<div class="verification-copy">
+					<span class="verification-label">Cryptographically verifiable · backed by Solana</span>
+					<h2>A public notary for approved reports.</h2>
+					<p>
+						TieCamel converts each approved publication into a small cryptographic fingerprint.
+						That fingerprint can be publicly timestamped on Solana, allowing anyone to verify
+						that the report they received is complete for its stated scope and has not been silently replaced.
+					</p>
+					<div class="verification-facts">
+						<span>Report fingerprints only</span>
+						<span>No private data on-chain</span>
+						<span>Independent browser verification</span>
+						<span>Corrections remain visible</span>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="audiences section shell">
+			<div class="center-heading narrow">
+				<p class="eyebrow"><span></span> Designed for shared responsibility</p>
+				<h2>Clarity for everyone with a role in the mission.</h2>
+			</div>
+			<div class="audience-grid">
+				{audiences.map(([title, body], index) => (
+					<article><span>{String(index + 1).padStart(2, '0')}</span><h3>{title}</h3><p>{body}</p></article>
+				))}
+			</div>
+			<div class="covenant-strip">
+				<div><span class="covenant-mark">C</span><strong>The Transparency Covenant</strong></div>
+				<p>Every organization defines what must be tracked, who must be informed, what members may see, and what happens when a source disconnects or a deadline is missed.</p>
+				<span class="coming-pill">Planned for every pilot</span>
+			</div>
+		</section>
+
+		<section class="faq section shell" id="faq">
+			<div class="faq-heading">
+				<p class="eyebrow"><span></span> Frequently asked</p>
+				<h2>Good governance starts with good questions.</h2>
+			</div>
+			<div class="faq-list">
+				<details open>
+					<summary>Does TieCamel replace our accounting or board software?<span>+</span></summary>
+					<p>No. Your accounting, banking, legal, and document systems remain authoritative. TieCamel connects their evidence to ownership, board oversight, escalation, and responsible disclosure.</p>
+				</details>
+				<details>
+					<summary>Does transparency mean making everything public?<span>+</span></summary>
+					<p>No. Access is intentionally tiered. Donor identity, individual transactions, bank details, privileged legal strategy, personnel information, and sensitive security data remain private. Members and the public receive approved, useful summaries.</p>
+				</details>
+				<details>
+					<summary>Why use Solana at all?<span>+</span></summary>
+					<p>Solana acts like a public notary. It can timestamp a tiny fingerprint of an approved report so anyone can later detect whether that report changed. No donations, documents, operating funds, or personal data need to go on-chain.</p>
+				</details>
+				<details>
+					<summary>Can one officer close a critical incident?<span>+</span></summary>
+					<p>Not alone. High-risk issues require evidence and independent review, with escalation beyond the original owner when response deadlines are missed.</p>
+				</details>
+				<details>
+					<summary>What happens when information is wrong or disputed?<span>+</span></summary>
+					<p>Corrections are appended, not erased. The original statement, correction, reason, evidence, and approving parties remain visible to authorized audiences.</p>
+				</details>
+			</div>
+		</section>
+
+		<section class="early-access shell" id="early-access">
+			<div class="early-grid"></div>
+			<div class="early-copy">
+				<span class="coming-label"><i></i> Coming soon...</span>
+				<h2>Help build a better standard for nonprofit trust.</h2>
+				<p>
+					We are opening conversations with nonprofits, board leaders, finance professionals,
+					governance advisors, and community members who want accountability to be designed in—not added after a crisis.
+				</p>
+				<div class="hero-actions">
+					<a class="button button-dark" href={contactUrl}>Join early access <span aria-hidden="true">↗</span></a>
+				</div>
+			</div>
+			<div class="early-orbit" aria-hidden="true"><span>Trust</span><i>Evidence</i><em>Action</em></div>
+		</section>
+	</main>
+
+	<footer class="footer shell">
+		<div class="footer-brand">
+			<a class="brand" href="/" aria-label="TieCamel home">
+				<span class="brand-mark" aria-hidden="true"><img src="/tiecamel-logo.png" alt="" /></span>
+				<span class="brand-name">TieCamel</span>
+			</a>
+			<p>Trust, made visible.</p>
+		</div>
+		<div class="footer-links">
+			<div><strong>Explore</strong><a href="#platform">Platform</a><a href="#trust-model">Trust model</a><a href="#faq">FAQ</a></div>
+			<div><strong>Connect</strong><a href={contactUrl}>Early access</a><a href="mailto:hello@tiecamel.com">hello@tiecamel.com</a></div>
+		</div>
+		<div class="footer-bottom">
+			<span>© {new Date().getFullYear()} TieCamel</span>
+			<span>Transparent by design. Private where it matters.</span>
+			<span class="footer-solana">Cryptographic integrity backed by Solana</span>
+		</div>
+	</footer>
+</SiteLayout>
