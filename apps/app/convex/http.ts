@@ -33,6 +33,7 @@ http.route({
 				provider: "azure" | "google-drive" | "one-drive";
 				azureEvidenceRef: string;
 				publicationManifestRef: string;
+				manifestSha256: string;
 				sha256: string;
 				externalFileId?: string;
 				externalVersionId?: string;
@@ -55,6 +56,44 @@ http.route({
 				message: callback.error?.message ?? "Publication failed",
 			});
 		}
+		return Response.json({ ok: true });
+	}),
+});
+
+http.route({
+	path: "/integrations/processing-callback",
+	method: "POST",
+	handler: httpAction(async (ctx, request) => {
+		const body = await request.text();
+		const timestamp = request.headers.get("x-tiecamel-timestamp");
+		const signature = request.headers.get("x-tiecamel-signature");
+		const secret = process.env.AZURE_CALLBACK_SECRET;
+		if (
+			!secret ||
+			!timestamp ||
+			!signature ||
+			Math.abs(Date.now() - Number(timestamp)) > 5 * 60 * 1000 ||
+			!(await validSignature(secret, timestamp, body, signature))
+		) {
+			return Response.json(
+				{ error: "Invalid callback signature" },
+				{ status: 401 },
+			);
+		}
+		const callback = JSON.parse(body) as {
+			uploadSessionId: string;
+			idempotencyKey: string;
+			succeeded: boolean;
+			result?: unknown;
+			error?: { code: string; message: string };
+		};
+		await ctx.runMutation(internal.uploads.recordProcessingResult, {
+			uploadSessionId: callback.uploadSessionId as Id<"uploadSessions">,
+			idempotencyKey: callback.idempotencyKey,
+			succeeded: callback.succeeded,
+			result: callback.result,
+			error: callback.error?.message,
+		});
 		return Response.json({ ok: true });
 	}),
 });
@@ -87,6 +126,56 @@ http.route({
 		};
 		const result = await ctx.runMutation(internal.drift.record, event);
 		return Response.json({ ok: true, ...result });
+	}),
+});
+
+http.route({
+	path: "/integrations/integrity-callback",
+	method: "POST",
+	handler: httpAction(async (ctx, request) => {
+		const body = await request.text();
+		const timestamp = request.headers.get("x-tiecamel-timestamp");
+		const signature = request.headers.get("x-tiecamel-signature");
+		const secret = process.env.AZURE_CALLBACK_SECRET;
+		if (
+			!secret ||
+			!timestamp ||
+			!signature ||
+			Math.abs(Date.now() - Number(timestamp)) > 5 * 60 * 1000 ||
+			!(await validSignature(secret, timestamp, body, signature))
+		) {
+			return Response.json(
+				{ error: "Invalid callback signature" },
+				{ status: 401 },
+			);
+		}
+		const callback = JSON.parse(body) as {
+			integrityAnchorId: string;
+			idempotencyKey: string;
+			succeeded: boolean;
+			result?: {
+				signature: string;
+				slot: number;
+				explorerUrl: string;
+			};
+			error?: { code: string; message: string };
+		};
+		const integrityAnchorId =
+			callback.integrityAnchorId as Id<"integrityAnchors">;
+		if (callback.succeeded && callback.result) {
+			await ctx.runMutation(internal.integrity.finalize, {
+				integrityAnchorId,
+				idempotencyKey: callback.idempotencyKey,
+				...callback.result,
+			});
+		} else {
+			await ctx.runMutation(internal.integrity.recordFailure, {
+				integrityAnchorId,
+				code: callback.error?.code ?? "ANCHOR_FAILED",
+				message: callback.error?.message ?? "Solana anchoring failed",
+			});
+		}
+		return Response.json({ ok: true });
 	}),
 });
 

@@ -213,6 +213,7 @@ export default defineSchema({
 		requireResolvedThreads: v.boolean(),
 		memberIssuesEnabled: v.boolean(),
 		memberCommentsEnabled: v.boolean(),
+		publicIntegrityAnchoring: v.optional(v.boolean()),
 		finalizerRoles: v.array(v.string()),
 		version: v.number(),
 		createdAt: v.number(),
@@ -336,6 +337,7 @@ export default defineSchema({
 		),
 		createdAt: v.number(),
 	})
+		.index("by_organization", ["organizationId"])
 		.index("by_revision", ["revisionId"])
 		.index("by_change_request", ["changeRequestId"])
 		.index("by_sha256", ["sha256"]),
@@ -351,6 +353,7 @@ export default defineSchema({
 		createdAt: v.number(),
 		updatedAt: v.number(),
 	})
+		.index("by_organization", ["organizationId"])
 		.index("by_change_request", ["changeRequestId"])
 		.index("by_change_and_reviewer", [
 			"changeRequestId",
@@ -368,7 +371,9 @@ export default defineSchema({
 		details: v.optional(v.any()),
 		createdAt: v.number(),
 		updatedAt: v.number(),
-	}).index("by_change_request", ["changeRequestId"]),
+	})
+		.index("by_organization", ["organizationId"])
+		.index("by_change_request", ["changeRequestId"]),
 	platformRecords: defineTable({
 		organizationId: v.id("organizations"),
 		repositoryId: v.id("repositories"),
@@ -392,6 +397,7 @@ export default defineSchema({
 		createdBy: v.id("memberships"),
 		summary: v.string(),
 		sha256: v.string(),
+		manifestSha256: v.optional(v.string()),
 		masterProvider: storageProvider,
 		azureEvidenceRef: v.string(),
 		publicationManifestRef: v.string(),
@@ -402,6 +408,7 @@ export default defineSchema({
 		legacyBaseline: v.boolean(),
 		createdAt: v.number(),
 	})
+		.index("by_organization", ["organizationId"])
 		.index("by_record", ["recordId"])
 		.index("by_change_request", ["changeRequestId"]),
 	extractedFields: defineTable({
@@ -414,7 +421,9 @@ export default defineSchema({
 		provenance: v.string(),
 		confidence: v.optional(v.number()),
 		createdAt: v.number(),
-	}).index("by_revision", ["revisionId"]),
+	})
+		.index("by_organization", ["organizationId"])
+		.index("by_revision", ["revisionId"]),
 	documentDiffs: defineTable({
 		organizationId: v.id("organizations"),
 		changeRequestId: v.id("changeRequests"),
@@ -424,7 +433,9 @@ export default defineSchema({
 		text: v.any(),
 		visualManifestKey: v.optional(v.string()),
 		createdAt: v.number(),
-	}).index("by_revision", ["revisionId"]),
+	})
+		.index("by_organization", ["organizationId"])
+		.index("by_revision", ["revisionId"]),
 	diffFindings: defineTable({
 		organizationId: v.id("organizations"),
 		changeRequestId: v.id("changeRequests"),
@@ -440,7 +451,9 @@ export default defineSchema({
 		),
 		source: v.union(v.literal("deterministic"), v.literal("advisory-ai")),
 		createdAt: v.number(),
-	}).index("by_revision", ["revisionId"]),
+	})
+		.index("by_organization", ["organizationId"])
+		.index("by_revision", ["revisionId"]),
 	platformNotifications: defineTable({
 		organizationId: v.id("organizations"),
 		membershipId: v.id("memberships"),
@@ -451,6 +464,7 @@ export default defineSchema({
 			v.literal("review"),
 			v.literal("deadline"),
 			v.literal("merge"),
+			v.literal("integrity"),
 		),
 		title: v.string(),
 		body: v.string(),
@@ -473,6 +487,8 @@ export default defineSchema({
 		version: v.number(),
 		payload: v.any(),
 		sha256: v.string(),
+		recordVersionId: v.optional(v.id("recordVersions")),
+		integrityAnchorId: v.optional(v.id("integrityAnchors")),
 		publishedBy: v.id("memberships"),
 		publishedAt: v.number(),
 	})
@@ -482,12 +498,14 @@ export default defineSchema({
 		organizationId: v.id("organizations"),
 		repositoryId: v.id("repositories"),
 		changeRequestId: v.optional(v.id("changeRequests")),
+		revisionId: v.optional(v.id("changeRevisions")),
 		createdBy: v.id("memberships"),
 		fileName: v.string(),
 		mimeType: v.string(),
 		size: v.number(),
 		objectKey: v.string(),
 		azureBlobRef: v.string(),
+		role: v.optional(v.union(v.literal("primary"), v.literal("evidence"))),
 		sha256: v.optional(v.string()),
 		status: v.union(
 			v.literal("authorized"),
@@ -508,6 +526,8 @@ export default defineSchema({
 		repositoryId: v.id("repositories"),
 		uploadSessionId: v.id("uploadSessions"),
 		workflowInstanceId: v.optional(v.string()),
+		idempotencyKey: v.optional(v.string()),
+		commandId: v.optional(v.string()),
 		status: v.union(
 			v.literal("queued"),
 			v.literal("running"),
@@ -520,6 +540,38 @@ export default defineSchema({
 		createdAt: v.number(),
 		updatedAt: v.number(),
 	}).index("by_upload_session", ["uploadSessionId"]),
+	integrityAnchors: defineTable({
+		organizationId: v.id("organizations"),
+		repositoryId: v.id("repositories"),
+		recordId: v.id("platformRecords"),
+		recordVersionId: v.id("recordVersions"),
+		publicSnapshotId: v.optional(v.id("publicRepositorySnapshots")),
+		idempotencyKey: v.string(),
+		algorithm: v.literal("sha256"),
+		commitment: v.string(),
+		manifestSha256: v.string(),
+		memo: v.string(),
+		network: v.union(v.literal("devnet"), v.literal("mainnet-beta")),
+		status: v.union(
+			v.literal("queued"),
+			v.literal("running"),
+			v.literal("anchored"),
+			v.literal("failed"),
+		),
+		attempts: v.number(),
+		commandId: v.optional(v.string()),
+		signature: v.optional(v.string()),
+		slot: v.optional(v.number()),
+		explorerUrl: v.optional(v.string()),
+		errorCode: v.optional(v.string()),
+		errorMessage: v.optional(v.string()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+		anchoredAt: v.optional(v.number()),
+	})
+		.index("by_record_version", ["recordVersionId"])
+		.index("by_idempotency_key", ["idempotencyKey"])
+		.index("by_repository_and_time", ["repositoryId", "createdAt"]),
 	providerConnections: defineTable({
 		organizationId: v.id("organizations"),
 		provider: v.union(v.literal("google-drive"), v.literal("one-drive")),
@@ -550,7 +602,9 @@ export default defineSchema({
 		createdBy: v.id("memberships"),
 		createdAt: v.number(),
 		updatedAt: v.number(),
-	}).index("by_repository", ["repositoryId"]),
+	})
+		.index("by_organization", ["organizationId"])
+		.index("by_repository", ["repositoryId"]),
 	publicationJobs: defineTable({
 		organizationId: v.id("organizations"),
 		repositoryId: v.id("repositories"),
@@ -571,6 +625,7 @@ export default defineSchema({
 		createdAt: v.number(),
 		updatedAt: v.number(),
 	})
+		.index("by_organization", ["organizationId"])
 		.index("by_change_request", ["changeRequestId"])
 		.index("by_idempotency_key", ["idempotencyKey"])
 		.index("by_repository_and_status", ["repositoryId", "status"]),
@@ -628,6 +683,7 @@ export default defineSchema({
 		createdAt: v.number(),
 		updatedAt: v.number(),
 	})
+		.index("by_organization", ["organizationId"])
 		.index("by_repository", ["repositoryId"])
 		.index("by_connection", ["connectionId"]),
 	assets: defineTable({

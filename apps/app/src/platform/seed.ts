@@ -208,6 +208,7 @@ export const platformSeed: PlatformData = {
 				requireResolvedThreads: true,
 				memberIssuesEnabled: false,
 				memberCommentsEnabled: true,
+				publicIntegrityAnchoring: false,
 				finalizerRoles: ["organization-owner", "organization-admin"],
 			},
 			issueCount: 3,
@@ -235,6 +236,7 @@ export const platformSeed: PlatformData = {
 				requireResolvedThreads: true,
 				memberIssuesEnabled: false,
 				memberCommentsEnabled: false,
+				publicIntegrityAnchoring: false,
 				finalizerRoles: [
 					"organization-owner",
 					"organization-admin",
@@ -266,6 +268,7 @@ export const platformSeed: PlatformData = {
 				requireResolvedThreads: true,
 				memberIssuesEnabled: true,
 				memberCommentsEnabled: true,
+				publicIntegrityAnchoring: false,
 				finalizerRoles: ["organization-owner", "organization-admin"],
 			},
 			issueCount: 4,
@@ -293,6 +296,7 @@ export const platformSeed: PlatformData = {
 				requireResolvedThreads: true,
 				memberIssuesEnabled: true,
 				memberCommentsEnabled: true,
+				publicIntegrityAnchoring: true,
 				finalizerRoles: ["organization-owner", "organization-admin"],
 			},
 			issueCount: 2,
@@ -783,6 +787,15 @@ export const platformSeed: PlatformData = {
 						},
 					],
 					sha256: "8128cf54be4f9e05d20d00b03851a1e8…",
+					integrity: {
+						status: "anchored",
+						commitment:
+							"5fd1fa676c159b424778b459c2933f42a62d19e84a9710275955145769013429",
+						network: "devnet",
+						signature:
+							"4iDemoTieCamelSolanaIntegritySignatureQ12026Transparency",
+						explorerUrl: "https://explorer.solana.com/?cluster=devnet",
+					},
 				},
 			],
 			updatedAt: "2026-04-30T12:00:00.000Z",

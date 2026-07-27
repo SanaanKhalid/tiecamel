@@ -10,42 +10,56 @@ import type {
 } from "./contracts.js";
 import { GoogleDriveAdapter } from "./google-drive.js";
 import { OneDriveBusinessAdapter } from "./one-drive.js";
-import { signCallback } from "./security.js";
+import { canonicalJson, sha256Text } from "./canonical-json.js";
+import { sendSignedCallback } from "./callbacks.js";
 
 export async function processPublication(command: PublicationCommand) {
 	const content = await downloadSource(command);
 	const actualSha256 = await sha256(content);
 	if (actualSha256 !== command.expectedSha256.toLowerCase()) {
-		throw new Error("Approved source checksum does not match Azure Blob content.");
+		throw new Error(
+			"Approved source checksum does not match Azure Blob content.",
+		);
 	}
 	const evidenceRef = await sealEvidence(command, content);
 	const adapter = await adapterFor(command);
 	const result = await adapter.publish(command, content);
+	const manifest = canonicalJson({
+		...command.manifest,
+		content: {
+			fileName: command.fileName,
+			mimeType: command.mimeType,
+			sha256: actualSha256,
+		},
+		destination: {
+			provider: command.provider,
+			storageConfigVersion: command.storageConfigVersion,
+			externalFileId: result.externalFileId,
+			externalVersionId: result.externalVersionId,
+		},
+		publication: {
+			idempotencyKey: command.idempotencyKey,
+			publicationJobId: command.publicationJobId,
+		},
+	});
+	const manifestSha256 = sha256Text(manifest);
+	const publicationManifestRef = await sealManifest(
+		evidenceRef,
+		manifest,
+		manifestSha256,
+		command.idempotencyKey,
+	);
 	return {
 		...result,
 		azureEvidenceRef: evidenceRef,
-		publicationManifestRef: `${evidenceRef}/publication-manifest.json`,
+		publicationManifestRef,
+		manifestSha256,
 		sha256: actualSha256,
 	};
 }
 
 export async function sendCallback(callback: PublicationCallback) {
-	const url = requiredEnv("CONVEX_PUBLICATION_CALLBACK_URL");
-	const secret = requiredEnv("CONVEX_CALLBACK_SECRET");
-	const body = JSON.stringify(callback);
-	const timestamp = String(Date.now());
-	const response = await fetch(url, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			"X-TieCamel-Timestamp": timestamp,
-			"X-TieCamel-Signature": signCallback(secret, timestamp, body),
-		},
-		body,
-	});
-	if (!response.ok) {
-		throw new Error(`Convex callback failed (${response.status}): ${await response.text()}`);
-	}
+	await sendSignedCallback("CONVEX_PUBLICATION_CALLBACK_URL", callback);
 }
 
 async function adapterFor(
@@ -53,13 +67,19 @@ async function adapterFor(
 ): Promise<MasterProviderAdapter> {
 	if (command.provider === "azure") return new AzureMasterAdapter();
 	if (!command.connection) {
-		throw new Error("External publication requires a fixed connection and folder.");
+		throw new Error(
+			"External publication requires a fixed connection and folder.",
+		);
 	}
 	const keyVaultUrl = requiredEnv("AZURE_KEY_VAULT_URL");
 	const vault = new SecretClient(keyVaultUrl, new DefaultAzureCredential());
-	const secretName = command.connection.keyVaultReference.replace(/^kv:\/\//, "");
+	const secretName = command.connection.keyVaultReference.replace(
+		/^kv:\/\//,
+		"",
+	);
 	const secret = await vault.getSecret(secretName);
-	if (!secret.value) throw new Error("Google credential was not found in Key Vault.");
+	if (!secret.value)
+		throw new Error("Google credential was not found in Key Vault.");
 	const credentials = JSON.parse(secret.value) as Record<string, string>;
 	if (command.provider === "one-drive") {
 		if (process.env.ENABLE_ONEDRIVE !== "true") {
@@ -138,6 +158,48 @@ async function sealEvidence(command: PublicationCommand, content: Uint8Array) {
 		}
 	}
 	return ref;
+}
+
+async function sealManifest(
+	evidenceRef: string,
+	manifest: string,
+	manifestSha256: string,
+	publicationId: string,
+) {
+	const service = new BlobServiceClient(
+		requiredEnv("AZURE_STORAGE_BLOB_URL"),
+		new DefaultAzureCredential(),
+	);
+	const path = evidenceRef.replace("azure://evidence/", "");
+	const blob = service
+		.getContainerClient("evidence")
+		.getBlockBlobClient(`${path}/publication-manifest.json`);
+	try {
+		await blob.upload(manifest, Buffer.byteLength(manifest), {
+			blobHTTPHeaders: { blobContentType: "application/json" },
+			conditions: { ifNoneMatch: "*" },
+			metadata: {
+				sha256: manifestSha256,
+				publicationid: publicationId,
+			},
+		});
+	} catch (error) {
+		if (
+			typeof error !== "object" ||
+			error === null ||
+			!("statusCode" in error) ||
+			error.statusCode !== 412
+		) {
+			throw error;
+		}
+		const existing = await blob.getProperties();
+		if (existing.metadata?.sha256 !== manifestSha256) {
+			throw new Error(
+				"An immutable publication manifest already exists with different contents.",
+			);
+		}
+	}
+	return `${evidenceRef}/publication-manifest.json`;
 }
 
 async function sha256(content: Uint8Array) {

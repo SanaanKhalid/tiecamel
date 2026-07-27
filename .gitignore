@@ -16,3 +16,9 @@ dist-ssr/
 coverage/
 playwright-report/
 test-results/
+
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+crash.log

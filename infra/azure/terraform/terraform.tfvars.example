@@ -1,0 +1,22 @@
+environment = "dev"
+location    = "centralus"
+
+convex_publication_callback_url = "https://example.convex.site/integrations/publication-callback"
+convex_processing_callback_url  = "https://example.convex.site/integrations/processing-callback"
+convex_integrity_callback_url   = "https://example.convex.site/integrations/integrity-callback"
+
+# Supply these with TF_VAR_* environment variables or an encrypted CI secret store.
+convex_callback_secret = "replace-me"
+tiecamel_service_token = "replace-me"
+solana_rpc_url         = "https://api.devnet.solana.com"
+solana_network         = "devnet"
+
+# Leave empty and import the signer directly into Key Vault when possible.
+solana_signer_secret = ""
+
+# Set to an approved scanner image before production.
+malware_scanner_image = ""
+
+# Keep unlocked/disabled until legal and records-retention policy is approved.
+evidence_retention_days = 0
+lock_evidence_policy    = false

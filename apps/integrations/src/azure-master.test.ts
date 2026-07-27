@@ -17,6 +17,18 @@ const command: PublicationCommand = {
 	expectedSha256: "a".repeat(64),
 	fileName: "document.pdf",
 	mimeType: "application/pdf",
+	manifest: {
+		format: "tiecamel-publication-manifest/v1",
+		organizationId: "org-1",
+		repositoryId: "repo-1",
+		changeRequestId: "change-1",
+		revisionId: "revision-1",
+		rulesVersion: 1,
+		requestedByMembershipId: "member-1",
+		approvedAt: "2026-07-26T00:00:00.000Z",
+		approvals: [],
+		checks: [],
+	},
 };
 
 describe("AzureMasterAdapter", () => {

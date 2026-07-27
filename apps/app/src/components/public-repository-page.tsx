@@ -2,7 +2,9 @@ import { useQuery } from "convex/react";
 import {
 	ArrowUpRight,
 	CheckCircle2,
+	CircleAlert,
 	CircleDot,
+	Clock3,
 	FileCheck2,
 	FolderGit2,
 	Globe2,
@@ -107,6 +109,7 @@ function LivePublicRepositoryPage({
 										<p className="mt-2 font-mono text-[10px] text-[#8c959f]">
 											SHA-256 {record.sha256}
 										</p>
+										<IntegrityVerification verification={record.integrity} />
 									</div>
 									<span className="text-xs font-semibold text-[#1a7f37]">
 										Version {record.version}
@@ -150,6 +153,51 @@ function LivePublicRepositoryPage({
 				</div>
 			</main>
 		</div>
+	);
+}
+
+function IntegrityVerification({
+	verification,
+}: {
+	verification?:
+		| {
+				status: "queued" | "running" | "anchored" | "failed";
+				commitment: string;
+				network: "devnet" | "mainnet-beta";
+				signature?: string;
+				explorerUrl?: string;
+		  }
+		| undefined;
+}) {
+	if (!verification) return null;
+	if (verification.status === "failed") {
+		return (
+			<p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[#cf222e]">
+				<CircleAlert className="size-3.5" />
+				Independent verification needs attention
+			</p>
+		);
+	}
+	if (verification.status !== "anchored") {
+		return (
+			<p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[#9a6700]">
+				<Clock3 className="size-3.5" />
+				Solana verification pending
+			</p>
+		);
+	}
+	return (
+		<a
+			href={verification.explorerUrl}
+			target="_blank"
+			rel="noreferrer"
+			className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[#1a7f37] hover:underline"
+			title={`Manifest commitment ${verification.commitment}`}
+		>
+			<ShieldCheck className="size-3.5" />
+			Verified on Solana {verification.network}
+			<ArrowUpRight className="size-3" />
+		</a>
 	);
 }
 
@@ -267,6 +315,9 @@ function PreviewPublicRepositoryPage({
 												<p className="mt-2 font-mono text-[10px] text-[#8c959f]">
 													SHA-256 {version?.sha256}
 												</p>
+												<IntegrityVerification
+													verification={version?.integrity}
+												/>
 											</div>
 											<span className="text-xs font-semibold text-[#1a7f37]">
 												Version {version?.version}

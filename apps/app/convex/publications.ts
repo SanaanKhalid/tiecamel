@@ -19,6 +19,7 @@ const publicationResult = v.object({
 	),
 	azureEvidenceRef: v.string(),
 	publicationManifestRef: v.string(),
+	manifestSha256: v.string(),
 	sha256: v.string(),
 	externalFileId: v.optional(v.string()),
 	externalVersionId: v.optional(v.string()),
@@ -195,6 +196,23 @@ export const request = mutation({
 			)
 			.unique();
 		if (existing) {
+			if (existing.status === "failed") {
+				await ctx.db.patch(existing._id, {
+					status: "queued",
+					errorCode: undefined,
+					errorMessage: undefined,
+					updatedAt: Date.now(),
+				});
+				await ctx.scheduler.runAfter(0, internal.publications.dispatch, {
+					publicationJobId: existing._id,
+				});
+				return {
+					ok: true as const,
+					state: "queued" as const,
+					publicationJobId: existing._id,
+					recordId: existing.recordId,
+				};
+			}
 			return {
 				ok: true as const,
 				state: existing.status,
@@ -245,7 +263,7 @@ export const getCommand = internalQuery({
 	handler: async (ctx, args) => {
 		const job = await ctx.db.get(args.publicationJobId);
 		if (!job) return null;
-		const [change, file, config] = await Promise.all([
+		const [change, file, config, rules, reviews, checks] = await Promise.all([
 			ctx.db.get(job.changeRequestId),
 			ctx.db
 				.query("changeFiles")
@@ -253,8 +271,26 @@ export const getCommand = internalQuery({
 				.filter((q) => q.eq(q.field("role"), "primary"))
 				.unique(),
 			ctx.db.get(job.storageConfigId),
+			ctx.db
+				.query("repositoryRules")
+				.withIndex("by_repository", (q) =>
+					q.eq("repositoryId", job.repositoryId),
+				)
+				.unique(),
+			ctx.db
+				.query("changeReviews")
+				.withIndex("by_change_request", (q) =>
+					q.eq("changeRequestId", job.changeRequestId),
+				)
+				.collect(),
+			ctx.db
+				.query("checkRuns")
+				.withIndex("by_change_request", (q) =>
+					q.eq("changeRequestId", job.changeRequestId),
+				)
+				.collect(),
 		]);
-		if (!change || !file || !config) return null;
+		if (!change || !file || !config || !rules) return null;
 		const connection = config.connectionId
 			? await ctx.db.get(config.connectionId)
 			: null;
@@ -282,6 +318,46 @@ export const getCommand = internalQuery({
 			expectedSha256: file.sha256,
 			fileName: file.name,
 			mimeType: file.mimeType,
+			manifest: {
+				format: "tiecamel-publication-manifest/v1" as const,
+				organizationId: String(job.organizationId),
+				repositoryId: String(job.repositoryId),
+				changeRequestId: String(job.changeRequestId),
+				revisionId: String(job.revisionId),
+				rulesVersion: rules.version,
+				requestedByMembershipId: String(job.requestedBy),
+				approvedAt: new Date(job.createdAt).toISOString(),
+				approvals: reviews
+					.filter(
+						(review) =>
+							review.revisionId === job.revisionId &&
+							review.decision === "approve" &&
+							!review.stale,
+					)
+					.sort(
+						(left, right) =>
+							left.createdAt - right.createdAt ||
+							String(left._id).localeCompare(String(right._id)),
+					)
+					.map((review) => ({
+						reviewerMembershipId: String(review.reviewerMembershipId),
+						decision: "approve" as const,
+						revisionId: String(review.revisionId),
+						createdAt: new Date(review.createdAt).toISOString(),
+					})),
+				checks: checks
+					.filter(
+						(check) =>
+							check.revisionId === job.revisionId &&
+							(check.conclusion === "passed" || check.conclusion === "warning"),
+					)
+					.sort((left, right) => left.name.localeCompare(right.name))
+					.map((check) => ({
+						name: check.name,
+						conclusion: check.conclusion as "passed" | "warning",
+						required: check.required,
+					})),
+			},
 			connection:
 				connection && config.driveId && config.folderId
 					? {
@@ -477,6 +553,7 @@ export const finalize = internalMutation({
 			createdBy: job.requestedBy,
 			summary: change.summary,
 			sha256: args.result.sha256,
+			manifestSha256: args.result.manifestSha256,
 			masterProvider: args.result.provider,
 			azureEvidenceRef: args.result.azureEvidenceRef,
 			publicationManifestRef: args.result.publicationManifestRef,
@@ -559,13 +636,14 @@ export const finalize = internalMutation({
 					)
 					.collect(),
 			]);
-			await ctx.db.insert("publicRepositorySnapshots", {
+			const snapshotId = await ctx.db.insert("publicRepositorySnapshots", {
 				organizationId: job.organizationId,
 				repositoryId: repository._id,
 				organizationSlug:
 					organization?.publicSlug ?? organization?.slug ?? "organization",
 				repositorySlug: repository.slug,
 				version: priorSnapshots.length + 1,
+				recordVersionId: versionId,
 				payload: {
 					repository: {
 						name: repository.name,
@@ -590,6 +668,14 @@ export const finalize = internalMutation({
 				publishedBy: job.requestedBy,
 				publishedAt: now,
 			});
+			await ctx.scheduler.runAfter(
+				0,
+				internal.integrity.queueForPublishedVersion,
+				{
+					recordVersionId: versionId,
+					publicSnapshotId: snapshotId,
+				},
+			);
 		}
 		await ctx.db.insert("platformNotifications", {
 			organizationId: job.organizationId,

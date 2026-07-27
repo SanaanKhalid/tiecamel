@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
+import { publicAnchor } from "./integrity";
 
 export const getRepositoryProjection = query({
 	args: { organizationSlug: v.string(), repositorySlug: v.string() },
@@ -26,6 +27,7 @@ export const getRepositoryProjection = query({
 				summary: string;
 				sha256: string;
 				publishedAt: number;
+				integrity?: ReturnType<typeof publicAnchor>;
 			}
 		>();
 		const activity: Array<{
@@ -47,7 +49,15 @@ export const getRepositoryProjection = query({
 				};
 				change?: { number: number; title: string };
 			};
-			if (payload.record) records.set(payload.record.id, payload.record);
+			if (payload.record) {
+				const anchor = snapshot.integrityAnchorId
+					? await ctx.db.get(snapshot.integrityAnchorId)
+					: null;
+				records.set(payload.record.id, {
+					...payload.record,
+					integrity: anchor ? publicAnchor(anchor) : undefined,
+				});
+			}
 			if (payload.change) {
 				activity.unshift({
 					id: String(snapshot._id),

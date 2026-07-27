@@ -961,6 +961,19 @@ function RepositorySettings({ repositoryId }: { repositoryId: string }) {
 								setRules({ ...rules, requireResolvedThreads: checked })
 							}
 						/>
+						{profile.visibility === "public" &&
+							repository.kind === "transparency" && (
+								<RuleToggle
+									label="Anchor approved publication manifests on Solana"
+									checked={rules.publicIntegrityAnchoring}
+									onChange={(checked) =>
+										setRules({
+											...rules,
+											publicIntegrityAnchoring: checked,
+										})
+									}
+								/>
+							)}
 					</div>
 				</section>
 				<div className="mt-4 flex items-center justify-between">

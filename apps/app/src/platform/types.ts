@@ -83,6 +83,7 @@ export type RepositoryRules = {
 	requireResolvedThreads: boolean;
 	memberIssuesEnabled: boolean;
 	memberCommentsEnabled: boolean;
+	publicIntegrityAnchoring: boolean;
 	finalizerRoles: MemberRole[];
 };
 
@@ -226,6 +227,7 @@ export type RecordVersion = {
 	summary: string;
 	files: ChangeFile[];
 	sha256: string;
+	manifestSha256?: string;
 	masterProvider?: StorageProvider;
 	azureEvidenceRef?: string;
 	publicationManifestRef?: string;
@@ -234,6 +236,13 @@ export type RecordVersion = {
 	externalUrl?: string;
 	publishedAt?: string;
 	legacyBaseline?: boolean;
+	integrity?: {
+		status: "queued" | "running" | "anchored" | "failed";
+		commitment: string;
+		network: "devnet" | "mainnet-beta";
+		signature?: string;
+		explorerUrl?: string;
+	};
 };
 
 export type RecordItem = {
@@ -261,7 +270,13 @@ export type ActivityEvent = {
 
 export type Notification = {
 	id: string;
-	type: "assignment" | "mention" | "review" | "deadline" | "merge";
+	type:
+		| "assignment"
+		| "mention"
+		| "review"
+		| "deadline"
+		| "merge"
+		| "integrity";
 	title: string;
 	body: string;
 	repositoryId: string;

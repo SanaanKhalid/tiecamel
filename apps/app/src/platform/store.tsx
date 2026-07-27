@@ -57,7 +57,7 @@ export type UpdateRepositoryInput = {
 	visibility: RepositoryVisibility;
 };
 
-type PlatformStore = PlatformData & {
+export type PlatformStore = PlatformData & {
 	reset: () => void;
 	switchViewer: (memberId: string) => void;
 	createIssue: (input: NewIssueInput) => Promise<Issue>;
@@ -109,7 +109,7 @@ type PlatformStore = PlatformData & {
 	}) => Promise<void>;
 };
 
-const PlatformContext = createContext<PlatformStore | null>(null);
+export const PlatformContext = createContext<PlatformStore | null>(null);
 const DEMO_STORAGE_KEY = "tiecamel.demo-workspace.v4";
 const DEMO_STORAGE_VERSION = 4;
 
@@ -275,6 +275,7 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
 						memberIssuesEnabled: input.visibility !== "restricted",
 						memberCommentsEnabled:
 							input.visibility === "members" || input.visibility === "public",
+						publicIntegrityAnchoring: false,
 						finalizerRoles: ["organization-owner", "organization-admin"],
 					},
 					issueCount: 0,

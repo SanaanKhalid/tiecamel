@@ -3,6 +3,7 @@ import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useMemo } from "react";
 import { clientConfig, runtimeConfig } from "../config/client";
+import { ConvexPlatformProvider } from "../platform/convex-store";
 import { PlatformProvider } from "../platform/store";
 
 export function RuntimeProviders({ children }: { children: React.ReactNode }) {
@@ -18,7 +19,7 @@ export function RuntimeProviders({ children }: { children: React.ReactNode }) {
 		>
 			{clientConfig.convexConfigured ? (
 				<ClerkConvexBridge>
-					<PlatformProvider>{children}</PlatformProvider>
+					<ConvexPlatformProvider>{children}</ConvexPlatformProvider>
 				</ClerkConvexBridge>
 			) : (
 				<PlatformProvider>{children}</PlatformProvider>
