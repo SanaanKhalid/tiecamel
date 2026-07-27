@@ -57,12 +57,20 @@ resource "azurerm_storage_account" "records" {
   tags = local.common_tags
 }
 
+resource "azurerm_role_assignment" "records_blob_deployer" {
+  scope                = azurerm_storage_account.records.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
 resource "azurerm_storage_container" "records" {
   for_each = toset(["quarantine", "processed", "evidence"])
 
   name                  = each.key
   storage_account_id    = azurerm_storage_account.records.id
   container_access_type = "private"
+
+  depends_on = [azurerm_role_assignment.records_blob_deployer]
 }
 
 resource "azurerm_storage_container_immutability_policy" "evidence" {
@@ -227,6 +235,11 @@ resource "azurerm_linux_function_app" "integrations" {
     SOLANA_KEY_VAULT_SECRET_NAME                          = "solana-integrity-signer"
     MALWARE_SCANNER_URL                                   = var.malware_scanner_image != "" ? "https://${azurerm_container_app.malware_scanner[0].ingress[0].fqdn}" : ""
     REQUIRE_MALWARE_SCANNER                               = var.malware_scanner_image != "" ? "true" : "false"
+  }
+
+  lifecycle {
+    # Zip deployment replaces this value with the immutable package URL.
+    ignore_changes = [app_settings["WEBSITE_RUN_FROM_PACKAGE"]]
   }
 
   tags = local.common_tags
