@@ -219,7 +219,7 @@ describe("TieCamel repository platform", () => {
 		expect(screen.getByText("Close to breach")).toBeTruthy();
 	});
 
-	it("shows structured, text, and visual document differences", async () => {
+	it("shows only comparison data produced for the change request", async () => {
 		await renderPlatform(
 			<ChangeDetailPage repositorySlug="compliance" changeNumber={23} />,
 		);
@@ -230,6 +230,24 @@ describe("TieCamel repository platform", () => {
 		expect(screen.getAllByText("$21,860.00").length).toBeGreaterThan(0);
 		expect(screen.getByText("Text comparison")).toBeTruthy();
 		expect(screen.getByText("Visual comparison")).toBeTruthy();
+		expect(
+			screen.getByText(
+				"No rendered page comparison is available for this revision.",
+			),
+		).toBeTruthy();
+		expect(screen.queryByText("Accepted · May notice")).toBeNull();
+	});
+
+	it("explains when a first record has no comparison baseline", async () => {
+		await renderPlatform(
+			<ChangeDetailPage repositorySlug="governance" changeNumber={9} />,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: /Changes/ }));
+		expect(
+			screen.getAllByText("This is the first version of this record.").length,
+		).toBe(2);
+		expect(screen.queryByText("$18,420.00")).toBeNull();
 	});
 
 	it("adds a durable change-request conversation comment", async () => {
@@ -246,6 +264,34 @@ describe("TieCamel repository platform", () => {
 			).toBeTruthy(),
 		);
 		expect(screen.getAllByText("Internal").length).toBeGreaterThan(0);
+	});
+
+	it("creates a change request without linking an issue", async () => {
+		await renderPlatform(
+			<RepositoryPage repositorySlug="compliance" tab="changes" />,
+		);
+		fireEvent.click(screen.getByRole("button", { name: "New change" }));
+		fireEvent.change(screen.getByLabelText("Title"), {
+			target: { value: "Accept unlinked test record" },
+		});
+		fireEvent.change(screen.getByLabelText("Summary"), {
+			target: {
+				value: "A change request may stand on its own without an issue.",
+			},
+		});
+		expect(
+			(screen.getByLabelText("Linked issue (optional)") as HTMLSelectElement)
+				.value,
+		).toBe("");
+		fireEvent.click(
+			screen.getByRole("button", { name: "Open change request" }),
+		);
+		await waitFor(() =>
+			expect(screen.getByText("Accept unlinked test record")).toBeTruthy(),
+		);
+		expect(
+			screen.queryByText("This repository requires a linked issue"),
+		).toBeNull();
 	});
 
 	it("keeps approval separate from idempotent publication and finalizes a record", async () => {

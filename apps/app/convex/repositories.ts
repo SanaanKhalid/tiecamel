@@ -233,7 +233,7 @@ export const create = mutation({
 				requiredTeamIds: [],
 				dismissApprovalsOnRevision: true,
 				prohibitSelfApproval: true,
-				requireIssue: true,
+				requireIssue: false,
 				requireResolvedThreads: true,
 				memberIssuesEnabled: args.visibility !== "restricted",
 				memberCommentsEnabled:

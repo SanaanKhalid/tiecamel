@@ -647,7 +647,7 @@ function syntheticRepository(
 			requiredTeamIds: [],
 			dismissApprovalsOnRevision: true,
 			prohibitSelfApproval: true,
-			requireIssue: true,
+			requireIssue: false,
 			requireResolvedThreads: true,
 			memberIssuesEnabled: input.visibility !== "restricted",
 			memberCommentsEnabled:

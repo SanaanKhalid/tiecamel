@@ -111,9 +111,6 @@ export const create = mutation({
 			"contribute",
 		);
 		const rules = await requiredRules(ctx, args.repositoryId);
-		if (rules.requireIssue && !args.linkedIssueId) {
-			throw new Error("This repository requires a linked issue");
-		}
 		if (args.linkedIssueId) {
 			const issue = await ctx.db.get(args.linkedIssueId);
 			if (!issue || issue.repositoryId !== args.repositoryId) {

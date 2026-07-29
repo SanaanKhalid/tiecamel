@@ -441,7 +441,7 @@ export const ensureSeeded = mutation({
 					),
 				dismissApprovalsOnRevision: true,
 				prohibitSelfApproval: true,
-				requireIssue: true,
+				requireIssue: false,
 				requireResolvedThreads: true,
 				memberIssuesEnabled: ["funding", "transparency"].includes(
 					definition.slug,

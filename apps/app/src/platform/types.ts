@@ -145,6 +145,7 @@ export type ChangeFile = {
 	role?: "primary" | "evidence";
 	objectKey?: string;
 	azureBlobRef?: string;
+	previewUrl?: string;
 	processingStatus: "ready" | "processing" | "failed";
 };
 

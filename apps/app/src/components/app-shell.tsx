@@ -1,5 +1,5 @@
 import { Show, SignInButton, UserButton } from "@clerk/tanstack-react-start";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
 	Bell,
 	BookOpen,
@@ -21,6 +21,7 @@ import { usePlatform } from "../platform/store";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
 	const platform = usePlatform();
+	const navigate = useNavigate();
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
 	});
@@ -29,6 +30,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 	});
 	const [mobileOpen, setMobileOpen] = useState(false);
 	const [createOpen, setCreateOpen] = useState(false);
+	const [globalQuery, setGlobalQuery] = useState("");
 	const unread = platform.notifications.filter(
 		(notification) => !notification.read,
 	).length;
@@ -81,14 +83,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 					<span>{platform.organization.shortName}</span>
 					<ChevronDown className="size-4 text-white/50" />
 				</button>
-				<label className="relative ml-1 hidden min-w-0 max-w-3xl flex-1 md:block">
-					<Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-white/45" />
+				<form
+					className="relative ml-1 hidden min-w-0 max-w-3xl flex-1 md:block"
+					onSubmit={(event) => {
+						event.preventDefault();
+						const q = globalQuery.trim();
+						if (!q) return;
+						void navigate({ to: "/search", search: { q } });
+					}}
+				>
+					<button
+						type="submit"
+						className="absolute top-1/2 left-2 grid size-6 -translate-y-1/2 place-items-center rounded text-white/45 hover:bg-white/10 hover:text-white"
+						aria-label="Search all work"
+					>
+						<Search className="size-4" />
+					</button>
 					<input
 						className="global-search w-full rounded-md border border-white/20 bg-[#0d1117]/45 py-2 pr-3 pl-9 text-sm text-white placeholder:text-white/45 focus:border-[#58a6ff] focus:outline-none"
 						placeholder="Search issues, changes, and records"
 						aria-label="Global search"
+						value={globalQuery}
+						onChange={(event) => setGlobalQuery(event.target.value)}
 					/>
-				</label>
+				</form>
 				<nav className="ml-auto flex items-center gap-1" aria-label="Global">
 					<div className="relative">
 						<button

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as AppInboxRouteImport } from './routes/_app.inbox'
+import { Route as AppSearchRouteImport } from './routes/_app.search'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppWorkRouteImport } from './routes/_app.work'
 import { Route as AppOrganizationIndexRouteImport } from './routes/_app.$organization.index'
@@ -37,6 +38,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppInboxRoute = AppInboxRouteImport.update({
   id: '/inbox',
   path: '/inbox',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSearchRoute = AppSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
@@ -112,6 +118,7 @@ const AppOrganizationRepositoryIssuesIssueNumberRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/inbox': typeof AppInboxRoute
+  '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRoute
   '/work': typeof AppWorkRoute
   '/public/$organization/$repository': typeof PublicOrganizationRepositoryRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/inbox': typeof AppInboxRoute
+  '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRoute
   '/work': typeof AppWorkRoute
   '/': typeof AppIndexRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/_app/inbox': typeof AppInboxRoute
+  '/_app/search': typeof AppSearchRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/work': typeof AppWorkRoute
   '/_app/': typeof AppIndexRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/inbox'
+    | '/search'
     | '/settings'
     | '/work'
     | '/public/$organization/$repository'
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/inbox'
+    | '/search'
     | '/settings'
     | '/work'
     | '/'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_app'
     | '/_app/inbox'
+    | '/_app/search'
     | '/_app/settings'
     | '/_app/work'
     | '/_app/'
@@ -237,6 +249,13 @@ declare module '@tanstack/react-router' {
       path: '/inbox'
       fullPath: '/inbox'
       preLoaderRoute: typeof AppInboxRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/search': {
+      id: '/_app/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof AppSearchRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/settings': {
@@ -328,6 +347,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppInboxRoute: typeof AppInboxRoute
+  AppSearchRoute: typeof AppSearchRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppWorkRoute: typeof AppWorkRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -344,6 +364,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppInboxRoute: AppInboxRoute,
+  AppSearchRoute: AppSearchRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppWorkRoute: AppWorkRoute,
   AppIndexRoute: AppIndexRoute,

@@ -643,12 +643,10 @@ export function NewIssueDialog({
 							id="new-issue-due-date"
 							type="date"
 							value={input.dueDate}
-							onChange={(event) =>
-								setInput((current) => ({
-									...current,
-									dueDate: event.target.value,
-								}))
-							}
+							onInput={(event) => {
+								const dueDate = event.currentTarget.value;
+								setInput((current) => ({ ...current, dueDate }));
+							}}
 							className="input"
 						/>
 					</Field>

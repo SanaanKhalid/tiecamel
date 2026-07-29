@@ -270,7 +270,7 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
 						requiredTeamIds: [],
 						dismissApprovalsOnRevision: true,
 						prohibitSelfApproval: true,
-						requireIssue: true,
+						requireIssue: false,
 						requireResolvedThreads: true,
 						memberIssuesEnabled: input.visibility !== "restricted",
 						memberCommentsEnabled:
@@ -411,12 +411,12 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
 				const repositoryChanges = data.changeRequests.filter(
 					(change) => change.repositoryId === input.repositoryId,
 				);
-				if (repository.rules.requireIssue && !input.linkedIssueId) {
-					throw new Error("This repository requires a linked issue");
-				}
 				if (input.file && input.file.size > 50 * 1024 * 1024) {
 					throw new Error("Files must be 50 MB or smaller");
 				}
+				const previewUrl = input.file
+					? await createLocalFileUrl(input.file)
+					: undefined;
 				const now = new Date().toISOString();
 				const revisionId = crypto.randomUUID();
 				const change: ChangeRequest = {
@@ -451,6 +451,7 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
 											role: "primary",
 											objectKey: `quarantine/${data.organization.id}/${input.repositoryId}/${revisionId}/${input.file.name}`,
 											azureBlobRef: `azure://quarantine/${data.organization.id}/${input.repositoryId}/${revisionId}/${input.file.name}`,
+											previewUrl,
 											processingStatus: "ready",
 										},
 									]
@@ -1090,6 +1091,18 @@ function storageProviderLabel(provider: StorageProvider) {
 		default:
 			return "TieCamel storage on Azure";
 	}
+}
+
+function createLocalFileUrl(file: File) {
+	if (file.size > 1024 * 1024)
+		return Promise.resolve(URL.createObjectURL(file));
+	return new Promise<string>((resolve, reject) => {
+		const reader = new FileReader();
+		reader.onload = () => resolve(String(reader.result));
+		reader.onerror = () =>
+			reject(new Error("Could not prepare the file preview"));
+		reader.readAsDataURL(file);
+	});
 }
 
 function formatFileSize(size: number) {

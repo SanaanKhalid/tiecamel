@@ -948,13 +948,6 @@ function RepositorySettings({ repositoryId }: { repositoryId: string }) {
 							}
 						/>
 						<RuleToggle
-							label="Require every change request to link an issue"
-							checked={rules.requireIssue}
-							onChange={(checked) =>
-								setRules({ ...rules, requireIssue: checked })
-							}
-						/>
-						<RuleToggle
 							label="Require blocking review threads to be resolved"
 							checked={rules.requireResolvedThreads}
 							onChange={(checked) =>
@@ -1207,7 +1200,7 @@ function NewChangeDialog({
 		repositoryId,
 		title: "",
 		summary: "",
-		linkedIssueId: candidateIssues[0]?.id,
+		linkedIssueId: undefined,
 		locationIds: [],
 		labelIds: [],
 		publicAfterMerge: repository?.visibility === "public",
@@ -1279,7 +1272,7 @@ function NewChangeDialog({
 					</label>
 					<div className="grid gap-4 sm:grid-cols-2">
 						<label className="block text-sm font-semibold">
-							Linked issue
+							Linked issue (optional)
 							<select
 								value={input.linkedIssueId ?? ""}
 								onChange={(event) =>
