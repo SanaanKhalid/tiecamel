@@ -111,9 +111,6 @@ export const create = mutation({
 			"contribute",
 		);
 		const rules = await requiredRules(ctx, args.repositoryId);
-		if (rules.requireIssue && !args.linkedIssueId) {
-			throw new Error("This repository requires a linked issue");
-		}
 		if (args.linkedIssueId) {
 			const issue = await ctx.db.get(args.linkedIssueId);
 			if (!issue || issue.repositoryId !== args.repositoryId) {
@@ -125,6 +122,31 @@ export const create = mutation({
 			if (!record || record.repositoryId !== args.repositoryId) {
 				throw new Error("Target record must belong to this repository");
 			}
+		}
+		const [locations, labels] = await Promise.all([
+			Promise.all(args.locationIds.map((locationId) => ctx.db.get(locationId))),
+			Promise.all(args.labelIds.map((labelId) => ctx.db.get(labelId))),
+		]);
+		if (
+			locations.some(
+				(location) =>
+					!location ||
+					location.organizationId !== session.membership.organizationId ||
+					location.status !== "active",
+			)
+		) {
+			throw new Error("Locations must be active scopes in this organization");
+		}
+		if (
+			labels.some(
+				(label) =>
+					!label ||
+					label.organizationId !== session.membership.organizationId ||
+					(label.repositoryId !== undefined &&
+						label.repositoryId !== args.repositoryId),
+			)
+		) {
+			throw new Error("Labels must belong to this repository or organization");
 		}
 		const title = args.title.trim();
 		const summary = args.summary.trim();
@@ -200,7 +222,52 @@ export const create = mutation({
 			`${session.repository.name} #${number}: ${title}`,
 			now,
 		);
-		return changeId;
+		return { changeId, number };
+	},
+});
+
+export const comment = mutation({
+	args: {
+		changeRequestId: v.id("changeRequests"),
+		body: v.string(),
+		visibility: v.union(v.literal("internal"), v.literal("public")),
+	},
+	handler: async (ctx, args) => {
+		const change = await ctx.db.get(args.changeRequestId);
+		if (!change) throw new Error("Change request not found");
+		const session = await requireRepositoryAccess(
+			ctx,
+			change.repositoryId,
+			"contribute",
+		);
+		const body = args.body.trim();
+		if (!body) throw new Error("Comment cannot be empty");
+		if (
+			args.visibility === "public" &&
+			session.repository.visibility !== "public"
+		) {
+			throw new Error("Only public repositories can contain public comments");
+		}
+		if (["merged", "closed"].includes(change.status)) {
+			throw new Error("This change request is no longer open for comments");
+		}
+		const now = Date.now();
+		const commentId = await ctx.db.insert("platformComments", {
+			organizationId: session.membership.organizationId,
+			repositoryId: change.repositoryId,
+			targetType: "change",
+			targetId: String(change._id),
+			authorMembershipId: session.membership._id,
+			body,
+			visibility: args.visibility,
+			moderationStatus:
+				args.visibility === "public" && session.membership.role === "member"
+					? "pending"
+					: "approved",
+			createdAt: now,
+		});
+		await ctx.db.patch(change._id, { updatedAt: now });
+		return commentId;
 	},
 });
 

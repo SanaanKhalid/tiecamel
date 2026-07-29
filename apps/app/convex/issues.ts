@@ -88,6 +88,31 @@ export const create = mutation({
 			session.membership.organizationId,
 			args.assigneeIds,
 		);
+		const [locations, labels] = await Promise.all([
+			Promise.all(args.locationIds.map((locationId) => ctx.db.get(locationId))),
+			Promise.all(args.labelIds.map((labelId) => ctx.db.get(labelId))),
+		]);
+		if (
+			locations.some(
+				(location) =>
+					!location ||
+					location.organizationId !== session.membership.organizationId ||
+					location.status !== "active",
+			)
+		) {
+			throw new Error("Locations must be active scopes in this organization");
+		}
+		if (
+			labels.some(
+				(label) =>
+					!label ||
+					label.organizationId !== session.membership.organizationId ||
+					(label.repositoryId !== undefined &&
+						label.repositoryId !== args.repositoryId),
+			)
+		) {
+			throw new Error("Labels must belong to this repository or organization");
+		}
 		const number = session.repository.nextIssueNumber;
 		const now = Date.now();
 		const issueId = await ctx.db.insert("platformIssues", {
@@ -128,7 +153,7 @@ export const create = mutation({
 			source: "Repository issues",
 			createdAt: now,
 		});
-		return issueId;
+		return { issueId, number };
 	},
 });
 

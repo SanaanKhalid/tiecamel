@@ -9,7 +9,8 @@ records, and selectively publish approved history.
 - `apps/app` — TanStack Start repository platform and public SSR views
 - `apps/web` — public Astro landing page
 - `apps/integrations` — Azure Functions and provider adapters
-- `infra/azure` — Azure Blob, Key Vault, Service Bus, and Container Apps IaC
+- `infra/azure/terraform` — Azure Blob, Key Vault, Service Bus, Functions,
+  Document Intelligence, and Container Apps IaC
 - `apps/app/DEPLOYMENTS.md` — development and production environment map
 - `PRODUCT_PLAN.md` — product, pilot, and technical roadmap
 
@@ -58,6 +59,8 @@ Production services:
 - Azure Blob Storage for quarantine, processed artifacts, and sealed evidence.
 - Azure Key Vault, Service Bus, Functions, and Container Apps for document
   processing and provider publication.
+- Optional Solana manifest anchoring for independently verifiable public
+  Transparency records. No document contents or personal data go on-chain.
 - Optional Google Shared Drive destinations configured per repository.
   OneDrive for Business follows through the same provider contract.
 
@@ -70,9 +73,10 @@ pnpm convex:dev
 The repository domain is split across focused modules in `apps/app/convex`.
 `platform.ts` seeds the isolated ICN tenant, while `repositories.ts`,
 `issues.ts`, `changes.ts`, `uploads.ts`, `integrations.ts`,
-`publications.ts`, and `publicRepositories.ts` enforce server-side access and
-workflow rules. Cloudflare hosts the app; Convex remains the transactional
-control plane, while Azure owns binary storage and background integration work.
+`publications.ts`, `integrity.ts`, and `publicRepositories.ts` enforce
+server-side access and workflow rules. Cloudflare hosts the app; Convex remains
+the transactional control plane, while Azure owns binary storage and
+background integration work.
 
 ## Quality checks
 

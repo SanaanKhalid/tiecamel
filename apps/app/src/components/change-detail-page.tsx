@@ -6,6 +6,8 @@ import {
 	CircleDot,
 	Clock3,
 	CloudUpload,
+	Download,
+	ExternalLink,
 	File,
 	FileCheck2,
 	FileDiff,
@@ -14,11 +16,12 @@ import {
 	LockKeyhole,
 	MessageSquare,
 	ShieldCheck,
+	X,
 	XCircle,
 } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { reviewRequirementsMet, usePlatform } from "../platform/store";
-import type { ReviewDecision } from "../platform/types";
+import type { ChangeFile, ReviewDecision } from "../platform/types";
 import {
 	Avatar,
 	ChangeStatusBadge,
@@ -57,6 +60,7 @@ export function ChangeDetailPage({
 	const [notice, setNotice] = useState("");
 	const [error, setError] = useState("");
 	const [publishing, setPublishing] = useState(false);
+	const [previewFile, setPreviewFile] = useState<ChangeFile | null>(null);
 	if (!repository || !change) {
 		return (
 			<div className="p-8">
@@ -248,10 +252,13 @@ export function ChangeDetailPage({
 								publicRepository={repository.visibility === "public"}
 								onReview={review}
 								onComment={comment}
+								onOpenFile={setPreviewFile}
 							/>
 						)}
 						{tab === "changes" && <Changes changeId={changeId} />}
-						{tab === "files" && <Files changeId={changeId} />}
+						{tab === "files" && (
+							<Files changeId={changeId} onOpenFile={setPreviewFile} />
+						)}
 						{tab === "checks" && <Checks changeId={changeId} />}
 					</div>
 
@@ -428,6 +435,12 @@ export function ChangeDetailPage({
 					</aside>
 				</div>
 			</div>
+			{previewFile && (
+				<FilePreviewDialog
+					file={previewFile}
+					onClose={() => setPreviewFile(null)}
+				/>
+			)}
 		</>
 	);
 }
@@ -443,6 +456,7 @@ function Conversation({
 	onCommentVisibilityChange,
 	onReview,
 	onComment,
+	onOpenFile,
 }: {
 	changeId: string;
 	reviewBody: string;
@@ -454,6 +468,7 @@ function Conversation({
 	onCommentVisibilityChange: (value: "internal" | "public") => void;
 	onReview: (decision: ReviewDecision) => void;
 	onComment: (event: FormEvent) => void;
+	onOpenFile: (file: ChangeFile) => void;
 }) {
 	const platform = usePlatform();
 	const change = platform.changeRequests.find((item) => item.id === changeId);
@@ -469,14 +484,18 @@ function Conversation({
 						{change.revisions.at(-1)?.files.map((file) => (
 							<div key={file.id} className="flex items-center gap-3">
 								<File className="size-5 text-[#0969da]" />
-								<div className="min-w-0 flex-1">
-									<p className="truncate text-sm font-semibold text-[#0969da]">
+								<button
+									type="button"
+									onClick={() => onOpenFile(file)}
+									className="min-w-0 flex-1 text-left"
+								>
+									<p className="truncate text-sm font-semibold text-[#0969da] hover:underline">
 										{file.name}
 									</p>
 									<p className="text-xs text-[#656d76]">
 										{file.sizeLabel} · SHA-256 {file.sha256}
 									</p>
-								</div>
+								</button>
 							</div>
 						))}
 					</div>
@@ -709,60 +728,61 @@ function Changes({ changeId }: { changeId: string }) {
 				<div className="border-b border-[#d8dee4] bg-[#f6f8fa] px-4 py-3">
 					<h2 className="font-semibold">Text comparison</h2>
 				</div>
-				<div className="font-mono text-xs leading-6">
-					{change.textDiff.map((line, index) => (
-						<div
-							key={line.id}
-							className={`grid grid-cols-[3rem_minmax(0,1fr)] border-b border-[#d8dee4] last:border-b-0 ${
-								line.type === "added"
-									? "bg-[#dafbe1]"
-									: line.type === "removed"
-										? "bg-[#ffebe9]"
-										: "bg-white"
-							}`}
-						>
-							<span className="border-r border-[#d8dee4] px-3 py-1 text-right text-[#8c959f]">
-								{index + 1}
-							</span>
-							<span className="px-3 py-1">
-								{line.type === "added"
-									? "+"
-									: line.type === "removed"
-										? "−"
-										: " "}
-								{line.content}
-							</span>
-						</div>
-					))}
-				</div>
+				{change.textDiff.length ? (
+					<div className="font-mono text-xs leading-6">
+						{change.textDiff.map((line, index) => (
+							<div
+								key={line.id}
+								className={`grid grid-cols-[3rem_minmax(0,1fr)] border-b border-[#d8dee4] last:border-b-0 ${
+									line.type === "added"
+										? "bg-[#dafbe1]"
+										: line.type === "removed"
+											? "bg-[#ffebe9]"
+											: "bg-white"
+								}`}
+							>
+								<span className="border-r border-[#d8dee4] px-3 py-1 text-right text-[#8c959f]">
+									{index + 1}
+								</span>
+								<span className="px-3 py-1">
+									{line.type === "added"
+										? "+"
+										: line.type === "removed"
+											? "−"
+											: " "}
+									{line.content}
+								</span>
+							</div>
+						))}
+					</div>
+				) : (
+					<ComparisonEmptyState
+						hasBaseVersion={Boolean(change.baseVersionId)}
+						kind="text"
+					/>
+				)}
 			</section>
 
 			<section className="rounded-md border border-[#d0d7de] bg-white">
 				<div className="border-b border-[#d8dee4] bg-[#f6f8fa] px-4 py-3">
 					<h2 className="font-semibold">Visual comparison</h2>
-					<p className="mt-0.5 text-xs text-[#656d76]">
-						Page 1 of 2 · synchronized view
-					</p>
 				</div>
-				<div className="grid gap-4 p-4 md:grid-cols-2">
-					<DocumentPreview
-						title="Accepted · May notice"
-						amount="$18,420.00"
-						deadline="August 15, 2026"
-					/>
-					<DocumentPreview
-						title="Proposed · Revised notice"
-						amount="$21,860.00"
-						deadline="July 29, 2026"
-						changed
-					/>
-				</div>
+				<ComparisonEmptyState
+					hasBaseVersion={Boolean(change.baseVersionId)}
+					kind="visual"
+				/>
 			</section>
 		</div>
 	);
 }
 
-function Files({ changeId }: { changeId: string }) {
+function Files({
+	changeId,
+	onOpenFile,
+}: {
+	changeId: string;
+	onOpenFile: (file: ChangeFile) => void;
+}) {
 	const platform = usePlatform();
 	const change = platform.changeRequests.find((item) => item.id === changeId);
 	if (!change) return null;
@@ -798,15 +818,21 @@ function Files({ changeId }: { changeId: string }) {
 							{revision.files.map((file) => (
 								<div key={file.id} className="flex items-start gap-3 p-4">
 									<File className="mt-0.5 size-5 text-[#0969da]" />
-									<div className="min-w-0 flex-1">
-										<p className="font-semibold text-[#0969da]">{file.name}</p>
+									<button
+										type="button"
+										onClick={() => onOpenFile(file)}
+										className="min-w-0 flex-1 text-left"
+									>
+										<p className="font-semibold text-[#0969da] hover:underline">
+											{file.name}
+										</p>
 										<p className="mt-1 text-xs text-[#656d76]">
 											{file.mimeType} · {file.sizeLabel}
 										</p>
 										<p className="mt-1 break-all font-mono text-[11px] text-[#8c959f]">
 											SHA-256 {file.sha256}
 										</p>
-									</div>
+									</button>
 									<span className="rounded-full bg-[#dafbe1] px-2 py-0.5 text-xs font-semibold text-[#1a7f37]">
 										Ready
 									</span>
@@ -933,49 +959,122 @@ function SidebarSection({
 	);
 }
 
-function DocumentPreview({
-	title,
-	amount,
-	deadline,
-	changed = false,
+function FilePreviewDialog({
+	file,
+	onClose,
 }: {
-	title: string;
-	amount: string;
-	deadline: string;
-	changed?: boolean;
+	file: ChangeFile;
+	onClose: () => void;
 }) {
+	const isImage = file.mimeType.startsWith("image/");
+	const isPdf = file.mimeType === "application/pdf";
 	return (
-		<div>
-			<p className="mb-2 text-xs font-semibold text-[#656d76]">{title}</p>
-			<div className="aspect-[0.76] rounded-sm border border-[#afb8c1] bg-white p-6 shadow-sm">
-				<div className="h-3 w-2/3 rounded bg-[#afb8c1]" />
-				<div className="mt-2 h-2 w-1/3 rounded bg-[#d8dee4]" />
-				<div className="mt-8 border-t border-[#d8dee4] pt-4">
-					<p className="text-[10px] font-semibold text-[#656d76]">AMOUNT DUE</p>
-					<p
-						className={`mt-1 text-lg font-bold ${changed ? "rounded bg-[#ffebe9] px-1 text-[#cf222e]" : ""}`}
-					>
-						{amount}
+		<div className="fixed inset-0 z-50 flex flex-col bg-[#0d1117]/90 p-3 sm:p-6">
+			<header className="flex items-center gap-3 rounded-t-lg bg-white px-4 py-3 text-[#1f2328]">
+				<File className="size-5 text-[#0969da]" />
+				<div className="min-w-0 flex-1">
+					<h2 className="truncate font-semibold">{file.name}</h2>
+					<p className="text-xs text-[#656d76]">
+						{file.mimeType} · {file.sizeLabel}
 					</p>
 				</div>
-				<div className="mt-8 space-y-2">
-					<div className="h-2 w-full rounded bg-[#eaeef2]" />
-					<div className="h-2 w-11/12 rounded bg-[#eaeef2]" />
-					<div className="h-2 w-4/5 rounded bg-[#eaeef2]" />
-				</div>
-				<div
-					className={`mt-8 rounded border p-3 ${changed ? "border-[#ff8182] bg-[#ffebe9]" : "border-[#d8dee4]"}`}
+				{file.previewUrl ? (
+					<>
+						<a
+							href={file.previewUrl}
+							target="_blank"
+							rel="noreferrer"
+							className="rounded-md border border-[#d0d7de] p-2 hover:bg-[#f6f8fa]"
+							aria-label={`Open ${file.name} in a new tab`}
+						>
+							<ExternalLink className="size-4" />
+						</a>
+						<a
+							href={file.previewUrl}
+							download={file.name}
+							className="rounded-md border border-[#d0d7de] p-2 hover:bg-[#f6f8fa]"
+							aria-label={`Download ${file.name}`}
+						>
+							<Download className="size-4" />
+						</a>
+					</>
+				) : null}
+				<button
+					type="button"
+					onClick={onClose}
+					className="rounded-md border border-[#d0d7de] p-2 hover:bg-[#f6f8fa]"
+					aria-label="Close file preview"
 				>
-					<p className="text-[9px] font-semibold text-[#656d76]">
-						RESPONSE DEADLINE
-					</p>
-					<p
-						className={`mt-1 text-xs font-bold ${changed ? "text-[#cf222e]" : ""}`}
-					>
-						{deadline}
-					</p>
-				</div>
+					<X className="size-4" />
+				</button>
+			</header>
+			<div className="grid min-h-0 flex-1 place-items-center overflow-auto rounded-b-lg bg-[#f6f8fa] p-3">
+				{!file.previewUrl ? (
+					<div className="max-w-md rounded-lg border border-[#d0d7de] bg-white p-8 text-center">
+						<File className="mx-auto size-10 text-[#656d76]" />
+						<p className="mt-4 font-semibold">Preview unavailable</p>
+						<p className="mt-2 text-sm leading-6 text-[#656d76]">
+							This file was added before local previews were enabled. Add it
+							again as a new change request to preview or download it here.
+						</p>
+					</div>
+				) : isImage ? (
+					<img
+						src={file.previewUrl}
+						alt={file.name}
+						className="max-h-full max-w-full rounded shadow-xl"
+					/>
+				) : isPdf ? (
+					<iframe
+						src={file.previewUrl}
+						title={file.name}
+						className="h-full min-h-[70vh] w-full rounded bg-white"
+					/>
+				) : (
+					<div className="max-w-md rounded-lg border border-[#d0d7de] bg-white p-8 text-center">
+						<File className="mx-auto size-10 text-[#656d76]" />
+						<p className="mt-4 font-semibold">
+							This format does not have an in-app preview.
+						</p>
+						<a
+							href={file.previewUrl}
+							download={file.name}
+							className="mt-4 inline-flex items-center gap-2 rounded-md bg-[#1f883d] px-4 py-2 text-sm font-semibold text-white"
+						>
+							<Download className="size-4" /> Download file
+						</a>
+					</div>
+				)}
 			</div>
+		</div>
+	);
+}
+
+function ComparisonEmptyState({
+	hasBaseVersion,
+	kind,
+}: {
+	hasBaseVersion: boolean;
+	kind: "text" | "visual";
+}) {
+	const label =
+		kind === "text" ? "text comparison" : "rendered page comparison";
+	const processingMessage =
+		kind === "text"
+			? "Review the proposed file. Text changes will appear only when document processing produces them."
+			: "Review the extracted changes above and the proposed file. A visual comparison will appear only when document processing produces one.";
+	return (
+		<div className="p-5 text-sm text-[#656d76]">
+			<p className="font-semibold text-[#1f2328]">
+				{hasBaseVersion
+					? `No ${label} is available for this revision.`
+					: "This is the first version of this record."}
+			</p>
+			<p className="mt-1 leading-6">
+				{hasBaseVersion
+					? processingMessage
+					: `There is no previously accepted document to use for a ${label}.`}
+			</p>
 		</div>
 	);
 }

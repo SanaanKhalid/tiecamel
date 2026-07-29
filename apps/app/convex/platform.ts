@@ -64,6 +64,228 @@ export const overview = query({
 	},
 });
 
+export const workspace = query({
+	args: {},
+	handler: async (ctx) => {
+		const session = await requirePlatformSession(ctx);
+		const organizationId = session.membership.organizationId;
+		const organization = await ctx.db.get(organizationId);
+		if (!organization) throw new Error("Organization not found");
+		const [
+			memberships,
+			teams,
+			teamMembers,
+			locations,
+			labels,
+			repositories,
+			issues,
+			comments,
+			changes,
+			revisions,
+			files,
+			reviews,
+			checks,
+			findings,
+			diffs,
+			records,
+			recordVersions,
+			providerConnections,
+			storageConfigs,
+			publicationJobs,
+			baselineImports,
+			activity,
+			notifications,
+		] = await Promise.all([
+			ctx.db
+				.query("memberships")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("teams")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("teamMembers")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("locations")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("labels")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("repositories")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("platformIssues")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("platformComments")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("changeRequests")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("changeRevisions")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("changeFiles")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("changeReviews")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("checkRuns")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("diffFindings")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("documentDiffs")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("platformRecords")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("recordVersions")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("providerConnections")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("repositoryStorageConfigs")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("publicationJobs")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("baselineImports")
+				.withIndex("by_organization", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.collect(),
+			ctx.db
+				.query("auditEvents")
+				.withIndex("by_organization_and_time", (q) =>
+					q.eq("organizationId", organizationId),
+				)
+				.order("desc")
+				.take(200),
+			ctx.db
+				.query("platformNotifications")
+				.withIndex("by_membership_and_time", (q) =>
+					q.eq("membershipId", session.membership._id),
+				)
+				.order("desc")
+				.take(100),
+		]);
+		const memberUsers = await Promise.all(
+			memberships.map(async (membership) => ({
+				membership,
+				user: await ctx.db.get(membership.userId),
+			})),
+		);
+		const rules = await Promise.all(
+			repositories.map((repository) =>
+				ctx.db
+					.query("repositoryRules")
+					.withIndex("by_repository", (q) =>
+						q.eq("repositoryId", repository._id),
+					)
+					.unique(),
+			),
+		);
+		return {
+			organization,
+			viewerMembershipId: session.membership._id,
+			memberUsers,
+			teams,
+			teamMembers,
+			locations,
+			labels,
+			repositories: repositories.map((repository, index) => ({
+				repository,
+				rules: rules[index],
+			})),
+			issues,
+			comments,
+			changes,
+			revisions,
+			files,
+			reviews,
+			checks,
+			findings,
+			diffs,
+			records,
+			recordVersions,
+			providerConnections,
+			storageConfigs,
+			publicationJobs,
+			baselineImports,
+			activity,
+			notifications,
+		};
+	},
+});
+
 export const ensureSeeded = mutation({
 	args: {},
 	handler: async (ctx) => {
@@ -147,6 +369,7 @@ export const ensureSeeded = mutation({
 				color: "#8250df",
 				minimumApprovals: 3,
 				requiredTeamSlugs: ["board"],
+				publicIntegrityAnchoring: false,
 			},
 			{
 				slug: "compliance",
@@ -159,6 +382,7 @@ export const ensureSeeded = mutation({
 				color: "#cf222e",
 				minimumApprovals: 2,
 				requiredTeamSlugs: ["independent-reviewers", "compliance"],
+				publicIntegrityAnchoring: false,
 			},
 			{
 				slug: "funding",
@@ -170,6 +394,7 @@ export const ensureSeeded = mutation({
 				color: "#1a7f37",
 				minimumApprovals: 2,
 				requiredTeamSlugs: ["finance", "board"],
+				publicIntegrityAnchoring: false,
 			},
 			{
 				slug: "transparency",
@@ -182,6 +407,7 @@ export const ensureSeeded = mutation({
 				color: "#0969da",
 				minimumApprovals: 3,
 				requiredTeamSlugs: ["independent-reviewers", "board", "publishers"],
+				publicIntegrityAnchoring: true,
 			},
 		];
 		const repositoryIds = new Map<string, Id<"repositories">>();
@@ -215,12 +441,13 @@ export const ensureSeeded = mutation({
 					),
 				dismissApprovalsOnRevision: true,
 				prohibitSelfApproval: true,
-				requireIssue: true,
+				requireIssue: false,
 				requireResolvedThreads: true,
 				memberIssuesEnabled: ["funding", "transparency"].includes(
 					definition.slug,
 				),
 				memberCommentsEnabled: definition.visibility !== "internal",
+				publicIntegrityAnchoring: definition.publicIntegrityAnchoring,
 				finalizerRoles: [
 					"organization-owner",
 					"organization-admin",

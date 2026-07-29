@@ -55,9 +55,18 @@ bytes, verifies the approved checksum, updates the stable external reference,
 and writes an audit event. A user cannot acknowledge a restoration directly;
 only the signed Azure verification callback can restore healthy state.
 
+## Public integrity
+
+Public Transparency repositories may opt into Solana anchoring. After Azure
+seals the approved bytes and canonical publication manifest, TieCamel submits
+only `tiecamel:v1:<manifest-sha256>` to the Solana Memo program. The Solana
+transaction is advisory public proof; Azure evidence and Convex authorization
+remain the operational source of truth. A failed anchor never rolls back an
+accepted record, but it remains visibly pending/failed until retried.
+
 ## Production setup
 
-1. Deploy `infra/azure/main.bicep`.
+1. Deploy `infra/azure/terraform` with `terraform plan` and `terraform apply`.
 2. Deploy `apps/integrations` with a system-assigned managed identity.
 3. Apply the RBAC grants documented in `infra/azure/README.md`.
 4. Store Google service-account JSON in a dedicated Key Vault secret.
@@ -67,6 +76,8 @@ only the signed Azure verification callback can restore healthy state.
    identity.
 8. Verify the connection in Organization Settings, then select the fixed
    destination in Repository Settings.
+9. Import a funded Solana signer into Key Vault and enable anchoring only on
+   approved public Transparency repositories.
 
 Demo identity switching uses provider simulators only. It never performs live
 connection, import, publication, or restoration operations.

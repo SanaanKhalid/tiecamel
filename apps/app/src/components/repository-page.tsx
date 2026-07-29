@@ -948,19 +948,25 @@ function RepositorySettings({ repositoryId }: { repositoryId: string }) {
 							}
 						/>
 						<RuleToggle
-							label="Require every change request to link an issue"
-							checked={rules.requireIssue}
-							onChange={(checked) =>
-								setRules({ ...rules, requireIssue: checked })
-							}
-						/>
-						<RuleToggle
 							label="Require blocking review threads to be resolved"
 							checked={rules.requireResolvedThreads}
 							onChange={(checked) =>
 								setRules({ ...rules, requireResolvedThreads: checked })
 							}
 						/>
+						{profile.visibility === "public" &&
+							repository.kind === "transparency" && (
+								<RuleToggle
+									label="Anchor approved publication manifests on Solana"
+									checked={rules.publicIntegrityAnchoring}
+									onChange={(checked) =>
+										setRules({
+											...rules,
+											publicIntegrityAnchoring: checked,
+										})
+									}
+								/>
+							)}
 					</div>
 				</section>
 				<div className="mt-4 flex items-center justify-between">
@@ -1194,7 +1200,7 @@ function NewChangeDialog({
 		repositoryId,
 		title: "",
 		summary: "",
-		linkedIssueId: candidateIssues[0]?.id,
+		linkedIssueId: undefined,
 		locationIds: [],
 		labelIds: [],
 		publicAfterMerge: repository?.visibility === "public",
@@ -1266,7 +1272,7 @@ function NewChangeDialog({
 					</label>
 					<div className="grid gap-4 sm:grid-cols-2">
 						<label className="block text-sm font-semibold">
-							Linked issue
+							Linked issue (optional)
 							<select
 								value={input.linkedIssueId ?? ""}
 								onChange={(event) =>

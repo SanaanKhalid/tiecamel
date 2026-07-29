@@ -1,4 +1,9 @@
-import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from "@azure/functions";
+import {
+	app,
+	type HttpRequest,
+	type HttpResponseInit,
+	type InvocationContext,
+} from "@azure/functions";
 import {
 	BlobSASPermissions,
 	BlobServiceClient,
@@ -7,7 +12,17 @@ import {
 } from "@azure/storage-blob";
 import { DefaultAzureCredential } from "@azure/identity";
 import { ServiceBusClient } from "@azure/service-bus";
-import type { PublicationCallback, PublicationCommand } from "./contracts.js";
+import type {
+	DocumentProcessingCallback,
+	DocumentProcessingCommand,
+	IntegrityAnchorCallback,
+	IntegrityAnchorCommand,
+	PublicationCallback,
+	PublicationCommand,
+} from "./contracts.js";
+import { sendSignedCallback } from "./callbacks.js";
+import { processDocument } from "./document-processor.js";
+import { anchorIntegrity } from "./solana-anchor.js";
 import { processPublication, sendCallback } from "./publisher.js";
 import { verifyServiceToken } from "./security.js";
 
@@ -68,9 +83,15 @@ app.http("enqueuePublication", {
 		if (!authorized(request)) return unauthorized();
 		const command = (await request.json()) as PublicationCommand;
 		if (!command.idempotencyKey || !command.publicationJobId) {
-			return { status: 400, jsonBody: { error: "Invalid publication command" } };
+			return {
+				status: 400,
+				jsonBody: { error: "Invalid publication command" },
+			};
 		}
-		const client = new ServiceBusClient(requiredEnv("AZURE_SERVICE_BUS_NAMESPACE"), new DefaultAzureCredential());
+		const client = new ServiceBusClient(
+			requiredEnv("AZURE_SERVICE_BUS_NAMESPACE"),
+			new DefaultAzureCredential(),
+		);
 		const sender = client.createSender("publications");
 		try {
 			await sender.sendMessages({
@@ -83,6 +104,51 @@ app.http("enqueuePublication", {
 			await sender.close();
 			await client.close();
 		}
+		return {
+			status: 202,
+			jsonBody: { commandId: command.commandId, duplicate: false },
+		};
+	},
+});
+
+app.http("enqueueProcessing", {
+	methods: ["POST"],
+	authLevel: "anonymous",
+	route: "processing",
+	handler: async (request) => {
+		if (!authorized(request)) return unauthorized();
+		const command = (await request.json()) as DocumentProcessingCommand;
+		if (!command.idempotencyKey || !command.jobId || !command.uploadSessionId) {
+			return { status: 400, jsonBody: { error: "Invalid processing command" } };
+		}
+		await enqueue("processing", command.idempotencyKey, command.jobId, command);
+		return {
+			status: 202,
+			jsonBody: { commandId: command.jobId, duplicate: false },
+		};
+	},
+});
+
+app.http("enqueueIntegrityAnchor", {
+	methods: ["POST"],
+	authLevel: "anonymous",
+	route: "anchors",
+	handler: async (request) => {
+		if (!authorized(request)) return unauthorized();
+		const command = (await request.json()) as IntegrityAnchorCommand;
+		if (
+			!command.idempotencyKey ||
+			!command.integrityAnchorId ||
+			!command.commitment
+		) {
+			return { status: 400, jsonBody: { error: "Invalid anchor command" } };
+		}
+		await enqueue(
+			"anchors",
+			command.idempotencyKey,
+			command.integrityAnchorId,
+			command,
+		);
 		return {
 			status: 202,
 			jsonBody: { commandId: command.commandId, duplicate: false },
@@ -112,13 +178,88 @@ app.serviceBusQueue("processPublication", {
 				succeeded: false,
 				error: {
 					code: "PUBLICATION_FAILED",
-					message: error instanceof Error ? error.message : "Publication failed",
+					message:
+						error instanceof Error ? error.message : "Publication failed",
 					retryable: true,
 				},
 				completedAt: new Date().toISOString(),
 			};
 		}
 		await sendCallback(callback);
+	},
+});
+
+app.serviceBusQueue("processDocument", {
+	connection: "AZURE_SERVICE_BUS_CONNECTION",
+	queueName: "processing",
+	handler: async (
+		command: DocumentProcessingCommand,
+		context: InvocationContext,
+	) => {
+		let callback: DocumentProcessingCallback;
+		try {
+			const result = await processDocument(command);
+			callback = {
+				uploadSessionId: command.uploadSessionId,
+				idempotencyKey: command.idempotencyKey,
+				succeeded: true,
+				result,
+				completedAt: new Date().toISOString(),
+			};
+		} catch (error) {
+			context.error(error);
+			callback = {
+				uploadSessionId: command.uploadSessionId,
+				idempotencyKey: command.idempotencyKey,
+				succeeded: false,
+				error: {
+					code: "PROCESSING_FAILED",
+					message:
+						error instanceof Error
+							? error.message
+							: "Document processing failed",
+					retryable: true,
+				},
+				completedAt: new Date().toISOString(),
+			};
+		}
+		await sendSignedCallback("CONVEX_PROCESSING_CALLBACK_URL", callback);
+	},
+});
+
+app.serviceBusQueue("anchorIntegrity", {
+	connection: "AZURE_SERVICE_BUS_CONNECTION",
+	queueName: "anchors",
+	handler: async (
+		command: IntegrityAnchorCommand,
+		context: InvocationContext,
+	) => {
+		let callback: IntegrityAnchorCallback;
+		try {
+			const result = await anchorIntegrity(command);
+			callback = {
+				integrityAnchorId: command.integrityAnchorId,
+				idempotencyKey: command.idempotencyKey,
+				succeeded: true,
+				result,
+				completedAt: new Date().toISOString(),
+			};
+		} catch (error) {
+			context.error(error);
+			callback = {
+				integrityAnchorId: command.integrityAnchorId,
+				idempotencyKey: command.idempotencyKey,
+				succeeded: false,
+				error: {
+					code: "ANCHOR_FAILED",
+					message:
+						error instanceof Error ? error.message : "Solana anchoring failed",
+					retryable: true,
+				},
+				completedAt: new Date().toISOString(),
+			};
+		}
+		await sendSignedCallback("CONVEX_INTEGRITY_CALLBACK_URL", callback);
 	},
 });
 
@@ -154,4 +295,27 @@ function requiredEnv(name: string) {
 	const value = process.env[name];
 	if (!value) throw new Error(`${name} is required`);
 	return value;
+}
+
+async function enqueue(
+	queue: string,
+	messageId: string,
+	correlationId: string,
+	body: unknown,
+) {
+	const client = new ServiceBusClient(
+		requiredEnv("AZURE_SERVICE_BUS_NAMESPACE"),
+		new DefaultAzureCredential(),
+	);
+	const sender = client.createSender(queue);
+	try {
+		await sender.sendMessages({
+			messageId,
+			correlationId,
+			body,
+		});
+	} finally {
+		await sender.close();
+		await client.close();
+	}
 }
