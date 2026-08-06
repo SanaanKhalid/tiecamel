@@ -12,9 +12,17 @@ const reviewDecision = v.union(
 );
 
 export const list = query({
-	args: { repositoryId: v.id("repositories") },
+	args: {
+		repositoryId: v.id("repositories"),
+		demoSessionToken: v.optional(v.string()),
+	},
 	handler: async (ctx, args) => {
-		await requireRepositoryAccess(ctx, args.repositoryId);
+		await requireRepositoryAccess(
+			ctx,
+			args.repositoryId,
+			"read",
+			args.demoSessionToken,
+		);
 		return ctx.db
 			.query("changeRequests")
 			.withIndex("by_repository", (q) =>
@@ -26,9 +34,18 @@ export const list = query({
 });
 
 export const getByNumber = query({
-	args: { repositoryId: v.id("repositories"), number: v.number() },
+	args: {
+		repositoryId: v.id("repositories"),
+		number: v.number(),
+		demoSessionToken: v.optional(v.string()),
+	},
 	handler: async (ctx, args) => {
-		await requireRepositoryAccess(ctx, args.repositoryId);
+		await requireRepositoryAccess(
+			ctx,
+			args.repositoryId,
+			"read",
+			args.demoSessionToken,
+		);
 		const change = await ctx.db
 			.query("changeRequests")
 			.withIndex("by_repository_and_number", (q) =>
@@ -95,6 +112,7 @@ export const getByNumber = query({
 
 export const create = mutation({
 	args: {
+		demoSessionToken: v.optional(v.string()),
 		repositoryId: v.id("repositories"),
 		title: v.string(),
 		summary: v.string(),
@@ -109,6 +127,7 @@ export const create = mutation({
 			ctx,
 			args.repositoryId,
 			"contribute",
+			args.demoSessionToken,
 		);
 		const rules = await requiredRules(ctx, args.repositoryId);
 		if (args.linkedIssueId) {
@@ -171,6 +190,7 @@ export const create = mutation({
 			baseVersionId: args.targetRecordId
 				? (await ctx.db.get(args.targetRecordId))?.currentVersionId
 				: undefined,
+			baseCommitId: session.repository.headCommitId,
 			rulesVersion: rules.version,
 			unresolvedThreads: 0,
 			outOfDate: false,
@@ -226,8 +246,82 @@ export const create = mutation({
 	},
 });
 
+export const createRevision = mutation({
+	args: {
+		demoSessionToken: v.optional(v.string()),
+		changeRequestId: v.id("changeRequests"),
+		message: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const change = await ctx.db.get(args.changeRequestId);
+		if (!change) throw new Error("Change request not found");
+		const session = await requireRepositoryAccess(
+			ctx,
+			change.repositoryId,
+			"contribute",
+			args.demoSessionToken,
+		);
+		if (["merged", "closed"].includes(change.status)) {
+			throw new Error(
+				"Accepted or closed changes cannot receive a new revision",
+			);
+		}
+		const revisions = await ctx.db
+			.query("changeRevisions")
+			.withIndex("by_change_request", (q) =>
+				q.eq("changeRequestId", change._id),
+			)
+			.collect();
+		const now = Date.now();
+		const revisionId = await ctx.db.insert("changeRevisions", {
+			organizationId: session.membership.organizationId,
+			repositoryId: change.repositoryId,
+			changeRequestId: change._id,
+			number: Math.max(0, ...revisions.map((revision) => revision.number)) + 1,
+			authorMembershipId: session.membership._id,
+			message: args.message.trim() || "Uploaded a revised document.",
+			createdAt: now,
+		});
+		const target = change.targetRecordId
+			? await ctx.db.get(change.targetRecordId)
+			: null;
+		await ctx.db.patch(change._id, {
+			headRevisionId: revisionId,
+			baseVersionId: target?.currentVersionId,
+			baseCommitId: session.repository.headCommitId,
+			status: "open",
+			outOfDate: false,
+			updatedAt: now,
+		});
+		const reviews = await ctx.db
+			.query("changeReviews")
+			.withIndex("by_change_request", (q) =>
+				q.eq("changeRequestId", change._id),
+			)
+			.collect();
+		await Promise.all(
+			reviews
+				.filter((review) => !review.stale)
+				.map((review) =>
+					ctx.db.patch(review._id, { stale: true, updatedAt: now }),
+				),
+		);
+		await recordAudit(
+			ctx,
+			session,
+			"Change revision created",
+			"change-request",
+			String(change._id),
+			`Revision ${revisions.length + 1} invalidated earlier approvals and will be compared with the accepted base.`,
+			now,
+		);
+		return { revisionId };
+	},
+});
+
 export const comment = mutation({
 	args: {
+		demoSessionToken: v.optional(v.string()),
 		changeRequestId: v.id("changeRequests"),
 		body: v.string(),
 		visibility: v.union(v.literal("internal"), v.literal("public")),
@@ -239,6 +333,7 @@ export const comment = mutation({
 			ctx,
 			change.repositoryId,
 			"contribute",
+			args.demoSessionToken,
 		);
 		const body = args.body.trim();
 		if (!body) throw new Error("Comment cannot be empty");
@@ -273,6 +368,7 @@ export const comment = mutation({
 
 export const submitReview = mutation({
 	args: {
+		demoSessionToken: v.optional(v.string()),
 		changeRequestId: v.id("changeRequests"),
 		decision: reviewDecision,
 		body: v.string(),
@@ -284,6 +380,7 @@ export const submitReview = mutation({
 			ctx,
 			change.repositoryId,
 			"review",
+			args.demoSessionToken,
 		);
 		if (!change.headRevisionId)
 			throw new Error("No revision is ready for review");
@@ -386,224 +483,6 @@ export const submitReview = mutation({
 	},
 });
 
-export const legacyMergeDisabled = mutation({
-	args: { changeRequestId: v.id("changeRequests") },
-	handler: async (ctx, args) => {
-		if (args.changeRequestId) {
-			throw new Error(
-				"Direct merge is disabled. Use the publication workflow.",
-			);
-		}
-		const change = await ctx.db.get(args.changeRequestId);
-		if (!change) throw new Error("Change request not found");
-		const session = await requireRepositoryAccess(
-			ctx,
-			change.repositoryId,
-			"review",
-		);
-		if (!change.headRevisionId) throw new Error("No revision is ready");
-		if (change.status === "merged") return change.targetRecordId;
-		if (change.status === "closed")
-			throw new Error("Closed changes cannot be accepted");
-		const rules = await requiredRules(ctx, change.repositoryId);
-		const effectiveRole =
-			session.membership.role === "administrator"
-				? "organization-admin"
-				: session.membership.role === "owner"
-					? "organization-owner"
-					: session.repositoryRole;
-		if (!effectiveRole || !rules.finalizerRoles.includes(effectiveRole)) {
-			throw new Error("Your role cannot accept changes in this repository");
-		}
-		const [reviews, checks, labels] = await Promise.all([
-			ctx.db
-				.query("changeReviews")
-				.withIndex("by_change_request", (q) =>
-					q.eq("changeRequestId", change._id),
-				)
-				.collect(),
-			ctx.db
-				.query("checkRuns")
-				.withIndex("by_change_request", (q) =>
-					q.eq("changeRequestId", change._id),
-				)
-				.collect(),
-			Promise.all(change.labelIds.map((labelId) => ctx.db.get(labelId))),
-		]);
-		if (!(await approvalsSatisfyRules(ctx, change, reviews, rules))) {
-			throw new Error("Required independent approvals are missing");
-		}
-		if (
-			checks.some((check) => check.required && check.conclusion === "failed")
-		) {
-			throw new Error("A required check is failing");
-		}
-		if (rules.requireResolvedThreads && change.unresolvedThreads > 0) {
-			throw new Error("Resolve blocking review threads before accepting");
-		}
-		if (change.outOfDate) {
-			throw new Error("Update this change against the accepted record first");
-		}
-		if (labels.some((label) => label?.blocksMerge)) {
-			throw new Error("A protected label is blocking this change");
-		}
-		if (change.targetRecordId) {
-			const target = await ctx.db.get(change.targetRecordId);
-			if (!target || target.currentVersionId !== change.baseVersionId) {
-				await ctx.db.patch(change._id, { outOfDate: true });
-				throw new Error(
-					"The accepted record changed; update this request first",
-				);
-			}
-		}
-		const now = Date.now();
-		const revisionFiles = await ctx.db
-			.query("changeFiles")
-			.withIndex("by_revision", (q) =>
-				q.eq("revisionId", change.headRevisionId as Id<"changeRevisions">),
-			)
-			.collect();
-		if (
-			revisionFiles.some(
-				(file) =>
-					file.processingStatus !== "ready" &&
-					file.processingStatus !== "quarantined",
-			)
-		) {
-			throw new Error("Every uploaded document must finish processing");
-		}
-		let record = change.targetRecordId
-			? await ctx.db.get(change.targetRecordId)
-			: null;
-		if (!record) {
-			const recordId = await ctx.db.insert("platformRecords", {
-				organizationId: session.membership.organizationId,
-				repositoryId: change.repositoryId,
-				title: change.title,
-				collection: collectionForKind(session.repository.kind),
-				locationIds: change.locationIds,
-				visibility:
-					change.publicAfterMerge && session.repository.visibility === "public"
-						? "public"
-						: session.repository.visibility,
-				createdAt: now,
-				updatedAt: now,
-			});
-			record = await ctx.db.get(recordId);
-			await ctx.db.patch(change.repositoryId, {
-				recordCount: session.repository.recordCount + 1,
-				updatedAt: now,
-			});
-		}
-		if (!record) throw new Error("Record could not be created");
-		const priorVersions = await ctx.db
-			.query("recordVersions")
-			.withIndex("by_record", (q) => q.eq("recordId", record._id))
-			.collect();
-		const sha256 =
-			revisionFiles[0]?.sha256 ??
-			`structured-${change.headRevisionId}-${change.updatedAt}`;
-		const versionId = await ctx.db.insert("recordVersions", {
-			organizationId: session.membership.organizationId,
-			repositoryId: change.repositoryId,
-			recordId: record._id,
-			changeRequestId: change._id,
-			revisionId: change.headRevisionId,
-			version: priorVersions.length + 1,
-			createdBy: session.membership._id,
-			summary: change.summary,
-			sha256,
-			masterProvider: "azure",
-			azureEvidenceRef: `azure://evidence/${session.membership.organizationId}/${change.repositoryId}/${change._id}/${change.headRevisionId}`,
-			publicationManifestRef: `azure://evidence/${session.membership.organizationId}/${change.repositoryId}/${change._id}/${change.headRevisionId}/publication-manifest.json`,
-			publishedAt: now,
-			legacyBaseline: false,
-			createdAt: now,
-		});
-		await Promise.all([
-			ctx.db.patch(record._id, {
-				currentVersionId: versionId,
-				updatedAt: now,
-			}),
-			ctx.db.patch(change._id, {
-				targetRecordId: record._id,
-				status: "merged",
-				mergedAt: now,
-				mergedBy: session.membership._id,
-				updatedAt: now,
-			}),
-		]);
-		if (change.linkedIssueId) {
-			await ctx.db.patch(change.linkedIssueId, {
-				state: "closed",
-				status: "done",
-				updatedAt: now,
-			});
-		}
-		if (change.publicAfterMerge && session.repository.visibility === "public") {
-			const organization = await ctx.db.get(session.membership.organizationId);
-			const priorSnapshots = await ctx.db
-				.query("publicRepositorySnapshots")
-				.withIndex("by_repository", (q) =>
-					q.eq("repositoryId", change.repositoryId),
-				)
-				.collect();
-			await ctx.db.insert("publicRepositorySnapshots", {
-				organizationId: session.membership.organizationId,
-				repositoryId: change.repositoryId,
-				organizationSlug:
-					organization?.publicSlug ?? organization?.slug ?? "organization",
-				repositorySlug: session.repository.slug,
-				version: priorSnapshots.length + 1,
-				payload: {
-					repository: {
-						name: session.repository.name,
-						description: session.repository.description,
-					},
-					record: {
-						id: String(record._id),
-						title: record.title,
-						collection: record.collection,
-						version: priorVersions.length + 1,
-						summary: change.summary,
-						sha256,
-						publishedAt: now,
-					},
-					change: {
-						number: change.number,
-						title: change.title,
-						summary: change.summary,
-					},
-				},
-				sha256,
-				publishedBy: session.membership._id,
-				publishedAt: now,
-			});
-		}
-		await ctx.db.insert("platformNotifications", {
-			organizationId: session.membership.organizationId,
-			membershipId: change.authorMembershipId,
-			repositoryId: change.repositoryId,
-			type: "merge",
-			title: "Change accepted",
-			body: `${change.title} is now the accepted record.`,
-			targetType: "record",
-			targetId: String(record._id),
-			createdAt: now,
-		});
-		await recordAudit(
-			ctx,
-			session,
-			"Change accepted",
-			"record-version",
-			String(versionId),
-			`Created immutable record version ${priorVersions.length + 1} from change request #${change.number}.`,
-			now,
-		);
-		return record._id;
-	},
-});
-
 async function requiredRules(
 	ctx: MutationCtx,
 	repositoryId: Id<"repositories">,
@@ -651,21 +530,6 @@ async function approvalsSatisfyRules(
 			),
 		),
 	);
-}
-
-function collectionForKind(kind: Doc<"repositories">["kind"]) {
-	switch (kind) {
-		case "governance":
-			return "Board resolutions";
-		case "compliance":
-			return "Compliance records";
-		case "funding":
-			return "Financial records";
-		case "transparency":
-			return "Publications";
-		default:
-			return "Records";
-	}
 }
 
 async function recordAudit(

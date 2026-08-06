@@ -28,7 +28,7 @@ function SignInScreen() {
 						/>
 					</div>
 					<span className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1.5 text-xs font-semibold text-teal-800">
-						<ShieldCheck className="size-3.5" /> Clerk protected
+						<ShieldCheck className="size-3.5" /> Secure access
 					</span>
 				</div>
 				<p className="text-xs font-bold tracking-[0.18em] text-teal-700 uppercase">

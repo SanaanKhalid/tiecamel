@@ -342,6 +342,19 @@ export const platformSeed: PlatformData = {
 			],
 			linkedChangeIds: ["change-tax-notice"],
 			watcherIds: ["member-amina", "member-daniel", "member-maya"],
+			attachments: [
+				{
+					id: "attachment-tax-revised",
+					name: "2026-property-tax-notice-revised.pdf",
+					description: "Revised county notice under review",
+					mimeType: "application/pdf",
+					sizeLabel: "2.7 KB",
+					sha256:
+						"0a41adcd53d3a1e61e3641130b8719a694994db7516aac785022c8691b0461fc",
+					url: "/demo-documents/2026-property-tax-notice-revised.pdf",
+					storageProvider: "demo",
+				},
+			],
 		},
 		{
 			id: "issue-insurance",
@@ -364,6 +377,19 @@ export const platformSeed: PlatformData = {
 			comments: [],
 			linkedChangeIds: [],
 			watcherIds: ["member-daniel", "member-amina"],
+			attachments: [
+				{
+					id: "attachment-insurance-renewal",
+					name: "general-liability-renewal-summary.pdf",
+					description: "Renewal terms and coverage summary",
+					mimeType: "application/pdf",
+					sizeLabel: "2.7 KB",
+					sha256:
+						"2748fb402d8f7641690d10252b2c93cecf3da7efa426b79969756bfeb3d912f6",
+					url: "/demo-documents/general-liability-renewal-summary.pdf",
+					storageProvider: "demo",
+				},
+			],
 			recurrence: "Annual",
 		},
 		{
@@ -386,6 +412,19 @@ export const platformSeed: PlatformData = {
 			comments: [],
 			linkedChangeIds: [],
 			watcherIds: ["member-amina", "member-maya"],
+			attachments: [
+				{
+					id: "attachment-registration-workpaper",
+					name: "2026-charitable-registration-workpaper.pdf",
+					description: "Annual filing preparation workpaper",
+					mimeType: "application/pdf",
+					sizeLabel: "2.7 KB",
+					sha256:
+						"3ec6ae944b0f6439aa12d814ca086b230b9c272956f99dad990d9f4941f4ab39",
+					url: "/demo-documents/2026-charitable-registration-workpaper.pdf",
+					storageProvider: "demo",
+				},
+			],
 			recurrence: "Annual",
 		},
 		{
@@ -409,6 +448,19 @@ export const platformSeed: PlatformData = {
 			comments: [],
 			linkedChangeIds: ["change-resolution"],
 			watcherIds: ["member-amina", "member-maya", "member-samira"],
+			attachments: [
+				{
+					id: "attachment-remediation-plan",
+					name: "property-remediation-plan.pdf",
+					description: "Proposed remediation plan and approval scope",
+					mimeType: "application/pdf",
+					sizeLabel: "2.8 KB",
+					sha256:
+						"bcdc24217ec3923c9b2be7a7564d58fe31686aa02f2923d821a7d03537575330",
+					url: "/demo-documents/property-remediation-plan.pdf",
+					storageProvider: "demo",
+				},
+			],
 		},
 		{
 			id: "issue-youth-grant",
@@ -431,6 +483,19 @@ export const platformSeed: PlatformData = {
 			comments: [],
 			linkedChangeIds: [],
 			watcherIds: ["member-amina", "member-fatima"],
+			attachments: [
+				{
+					id: "attachment-youth-grant",
+					name: "youth-enrichment-grant-allocation-proposal.pdf",
+					description: "Allocation proposal, restrictions, and member feedback",
+					mimeType: "application/pdf",
+					sizeLabel: "2.9 KB",
+					sha256:
+						"366c795f989e9d480d6a32e0399193e4478fe79f0c03b51233b1151f47184a71",
+					url: "/demo-documents/youth-enrichment-grant-allocation-proposal.pdf",
+					storageProvider: "demo",
+				},
+			],
 		},
 		{
 			id: "issue-q2-report",
@@ -453,6 +518,19 @@ export const platformSeed: PlatformData = {
 			comments: [],
 			linkedChangeIds: [],
 			watcherIds: ["member-amina", "member-noor", "member-samira"],
+			attachments: [
+				{
+					id: "attachment-q2-transparency",
+					name: "q2-2026-member-transparency-report.pdf",
+					description: "Draft member report awaiting publication review",
+					mimeType: "application/pdf",
+					sizeLabel: "2.8 KB",
+					sha256:
+						"2fe01a04adce6f1a483f2d1223d8aced2764b0cbce0ea555f63c02367affb5c5",
+					url: "/demo-documents/q2-2026-member-transparency-report.pdf",
+					storageProvider: "demo",
+				},
+			],
 		},
 		{
 			id: "issue-completed",
@@ -473,6 +551,19 @@ export const platformSeed: PlatformData = {
 			comments: [],
 			linkedChangeIds: [],
 			watcherIds: [],
+			attachments: [
+				{
+					id: "attachment-q1-board-minutes",
+					name: "q1-2026-board-minutes.pdf",
+					description: "Approved Q1 board meeting minutes",
+					mimeType: "application/pdf",
+					sizeLabel: "2.7 KB",
+					sha256:
+						"446e45450dd149f6ba93993d5cd0811a51c12b97f6c6c71da10aaeda40f73e74",
+					url: "/demo-documents/q1-2026-board-minutes.pdf",
+					storageProvider: "demo",
+				},
+			],
 		},
 	],
 	changeRequests: [
@@ -503,8 +594,11 @@ export const platformSeed: PlatformData = {
 							id: "file-tax-2",
 							name: "2026-property-tax-notice-revised.pdf",
 							mimeType: "application/pdf",
-							sizeLabel: "384 KB",
-							sha256: "9d18c5739e3b45e61fd31b2e618f3d77…",
+							sizeLabel: "2.7 KB",
+							sha256:
+								"0a41adcd53d3a1e61e3641130b8719a694994db7516aac785022c8691b0461fc",
+							previewUrl:
+								"/demo-documents/2026-property-tax-notice-revised.pdf",
 							processingStatus: "ready",
 						},
 					],
@@ -533,8 +627,9 @@ export const platformSeed: PlatformData = {
 				{
 					id: "check-extraction",
 					name: "Document extraction",
-					description: "8 governed fields extracted with source provenance.",
-					conclusion: "passed",
+					description:
+						"Legacy demo fixture has no processor artifacts. Upload a real revision to generate a content diff.",
+					conclusion: "warning",
 					required: true,
 					updatedAt: "2026-07-24T15:37:00.000Z",
 				},
@@ -556,63 +651,9 @@ export const platformSeed: PlatformData = {
 					createdAt: "2026-07-23T10:00:00.000Z",
 				},
 			],
-			structuredDiff: [
-				{
-					id: "diff-balance",
-					field: "Balance due",
-					before: "$18,420.00",
-					after: "$21,860.00",
-					provenance: "Page 1 · Amount due",
-					severity: "critical",
-				},
-				{
-					id: "diff-penalty",
-					field: "Penalty",
-					before: "$0.00",
-					after: "$1,340.00",
-					provenance: "Page 1 · Penalties and interest",
-					severity: "critical",
-				},
-				{
-					id: "diff-deadline",
-					field: "Response deadline",
-					before: "August 15, 2026",
-					after: "July 29, 2026",
-					provenance: "Page 2 · Response rights",
-					severity: "critical",
-				},
-				{
-					id: "diff-status",
-					field: "Exemption status",
-					before: "Application pending",
-					after: "Not reflected",
-					provenance: "Page 1 · Property status",
-					severity: "warning",
-				},
-			],
-			textDiff: [
-				{
-					id: "text-1",
-					type: "unchanged",
-					content: "Property account 14-22-301-008 · Main Campus",
-				},
-				{
-					id: "text-2",
-					type: "removed",
-					content: "Payment due August 15, 2026.",
-				},
-				{
-					id: "text-3",
-					type: "added",
-					content:
-						"Payment or written response must be received by July 29, 2026.",
-				},
-				{
-					id: "text-4",
-					type: "added",
-					content: "Penalties and interest assessed: $1,340.00.",
-				},
-			],
+			structuredDiff: [],
+			textDiff: [],
+			artifacts: [],
 			unresolvedThreads: 0,
 			baseVersionId: "record-tax-v1",
 			outOfDate: false,
@@ -644,8 +685,10 @@ export const platformSeed: PlatformData = {
 							id: "file-resolution",
 							name: "property-remediation-plan.pdf",
 							mimeType: "application/pdf",
-							sizeLabel: "1.2 MB",
-							sha256: "e28b4fc59a770bd3438ef8f1a32fcb7a…",
+							sizeLabel: "2.8 KB",
+							sha256:
+								"bcdc24217ec3923c9b2be7a7564d58fe31686aa02f2923d821a7d03537575330",
+							previewUrl: "/demo-documents/property-remediation-plan.pdf",
 							processingStatus: "ready",
 						},
 					],
@@ -692,6 +735,7 @@ export const platformSeed: PlatformData = {
 			comments: [],
 			structuredDiff: [],
 			textDiff: [],
+			artifacts: [],
 			unresolvedThreads: 0,
 			outOfDate: false,
 			publicAfterMerge: false,
@@ -719,12 +763,15 @@ export const platformSeed: PlatformData = {
 							id: "file-tax-1",
 							name: "2026-property-tax-notice.pdf",
 							mimeType: "application/pdf",
-							sizeLabel: "342 KB",
-							sha256: "08ad2430e6258f8f87515c7530bb0f29…",
+							sizeLabel: "2.7 KB",
+							sha256:
+								"c5e8b00924973685f375b55fddf54b5e91c793cf73170aae1e03bdeb0efdf39c",
+							previewUrl: "/demo-documents/2026-property-tax-notice.pdf",
 							processingStatus: "ready",
 						},
 					],
-					sha256: "08ad2430e6258f8f87515c7530bb0f29…",
+					sha256:
+						"c5e8b00924973685f375b55fddf54b5e91c793cf73170aae1e03bdeb0efdf39c",
 				},
 			],
 			updatedAt: "2026-05-10T12:00:00.000Z",
@@ -750,12 +797,15 @@ export const platformSeed: PlatformData = {
 							id: "file-bylaws",
 							name: "icn-bylaws-2026.pdf",
 							mimeType: "application/pdf",
-							sizeLabel: "624 KB",
-							sha256: "2aa67f98d823c88e091cdfccf2afe63d…",
+							sizeLabel: "2.7 KB",
+							sha256:
+								"c2d107d44df81236f87a699abb1452bc7e9c9f851c2755b0f92ef618508b5f6b",
+							previewUrl: "/demo-documents/icn-bylaws-2026.pdf",
 							processingStatus: "ready",
 						},
 					],
-					sha256: "2aa67f98d823c88e091cdfccf2afe63d…",
+					sha256:
+						"c2d107d44df81236f87a699abb1452bc7e9c9f851c2755b0f92ef618508b5f6b",
 				},
 			],
 			updatedAt: "2026-03-18T12:00:00.000Z",
@@ -781,12 +831,15 @@ export const platformSeed: PlatformData = {
 							id: "file-q1",
 							name: "icn-q1-2026-transparency-report.pdf",
 							mimeType: "application/pdf",
-							sizeLabel: "1.8 MB",
-							sha256: "8128cf54be4f9e05d20d00b03851a1e8…",
+							sizeLabel: "2.7 KB",
+							sha256:
+								"6d2a94185bc5b442e9330a76742070832e8d19b886948443cb21125a1bb803fa",
+							previewUrl: "/demo-documents/icn-q1-2026-transparency-report.pdf",
 							processingStatus: "ready",
 						},
 					],
-					sha256: "8128cf54be4f9e05d20d00b03851a1e8…",
+					sha256:
+						"6d2a94185bc5b442e9330a76742070832e8d19b886948443cb21125a1bb803fa",
 					integrity: {
 						status: "anchored",
 						commitment:
@@ -801,6 +854,7 @@ export const platformSeed: PlatformData = {
 			updatedAt: "2026-04-30T12:00:00.000Z",
 		},
 	],
+	repositoryCommits: [],
 	providerConnections: [
 		{
 			id: "connection-google-demo",

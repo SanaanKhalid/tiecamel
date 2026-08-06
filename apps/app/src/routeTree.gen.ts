@@ -15,14 +15,17 @@ import { Route as AppInboxRouteImport } from './routes/_app.inbox'
 import { Route as AppSearchRouteImport } from './routes/_app.search'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppWorkRouteImport } from './routes/_app.work'
+import { Route as VerifyCommitHashRouteImport } from './routes/verify.$commitHash'
 import { Route as AppOrganizationIndexRouteImport } from './routes/_app.$organization.index'
 import { Route as PublicOrganizationRepositoryRouteImport } from './routes/public.$organization.$repository'
 import { Route as AppOrganizationRepositoryIndexRouteImport } from './routes/_app.$organization.$repository.index'
 import { Route as AppOrganizationRepositoryActivityRouteImport } from './routes/_app.$organization.$repository.activity'
+import { Route as AppOrganizationRepositoryHistoryRouteImport } from './routes/_app.$organization.$repository.history'
 import { Route as AppOrganizationRepositoryRecordsRouteImport } from './routes/_app.$organization.$repository.records'
 import { Route as AppOrganizationRepositorySettingsRouteImport } from './routes/_app.$organization.$repository.settings'
 import { Route as AppOrganizationRepositoryChangesIndexRouteImport } from './routes/_app.$organization.$repository.changes.index'
 import { Route as AppOrganizationRepositoryChangesChangeNumberRouteImport } from './routes/_app.$organization.$repository.changes.$changeNumber'
+import { Route as AppOrganizationRepositoryCommitsCommitHashRouteImport } from './routes/_app.$organization.$repository.commits.$commitHash'
 import { Route as AppOrganizationRepositoryIssuesIndexRouteImport } from './routes/_app.$organization.$repository.issues.index'
 import { Route as AppOrganizationRepositoryIssuesIssueNumberRouteImport } from './routes/_app.$organization.$repository.issues.$issueNumber'
 
@@ -55,6 +58,11 @@ const AppWorkRoute = AppWorkRouteImport.update({
   path: '/work',
   getParentRoute: () => AppRoute,
 } as any)
+const VerifyCommitHashRoute = VerifyCommitHashRouteImport.update({
+  id: '/verify/$commitHash',
+  path: '/verify/$commitHash',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppOrganizationIndexRoute = AppOrganizationIndexRouteImport.update({
   id: '/$organization/',
   path: '/$organization/',
@@ -76,6 +84,12 @@ const AppOrganizationRepositoryActivityRoute =
   AppOrganizationRepositoryActivityRouteImport.update({
     id: '/$organization/$repository/activity',
     path: '/$organization/$repository/activity',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppOrganizationRepositoryHistoryRoute =
+  AppOrganizationRepositoryHistoryRouteImport.update({
+    id: '/$organization/$repository/history',
+    path: '/$organization/$repository/history',
     getParentRoute: () => AppRoute,
   } as any)
 const AppOrganizationRepositoryRecordsRoute =
@@ -102,6 +116,12 @@ const AppOrganizationRepositoryChangesChangeNumberRoute =
     path: '/$organization/$repository/changes/$changeNumber',
     getParentRoute: () => AppRoute,
   } as any)
+const AppOrganizationRepositoryCommitsCommitHashRoute =
+  AppOrganizationRepositoryCommitsCommitHashRouteImport.update({
+    id: '/$organization/$repository/commits/$commitHash',
+    path: '/$organization/$repository/commits/$commitHash',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppOrganizationRepositoryIssuesIndexRoute =
   AppOrganizationRepositoryIssuesIndexRouteImport.update({
     id: '/$organization/$repository/issues/',
@@ -121,13 +141,16 @@ export interface FileRoutesByFullPath {
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRoute
   '/work': typeof AppWorkRoute
+  '/verify/$commitHash': typeof VerifyCommitHashRoute
   '/public/$organization/$repository': typeof PublicOrganizationRepositoryRoute
   '/$organization/': typeof AppOrganizationIndexRoute
   '/$organization/$repository/activity': typeof AppOrganizationRepositoryActivityRoute
+  '/$organization/$repository/history': typeof AppOrganizationRepositoryHistoryRoute
   '/$organization/$repository/records': typeof AppOrganizationRepositoryRecordsRoute
   '/$organization/$repository/settings': typeof AppOrganizationRepositorySettingsRoute
   '/$organization/$repository/': typeof AppOrganizationRepositoryIndexRoute
   '/$organization/$repository/changes/$changeNumber': typeof AppOrganizationRepositoryChangesChangeNumberRoute
+  '/$organization/$repository/commits/$commitHash': typeof AppOrganizationRepositoryCommitsCommitHashRoute
   '/$organization/$repository/issues/$issueNumber': typeof AppOrganizationRepositoryIssuesIssueNumberRoute
   '/$organization/$repository/changes/': typeof AppOrganizationRepositoryChangesIndexRoute
   '/$organization/$repository/issues/': typeof AppOrganizationRepositoryIssuesIndexRoute
@@ -137,14 +160,17 @@ export interface FileRoutesByTo {
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRoute
   '/work': typeof AppWorkRoute
+  '/verify/$commitHash': typeof VerifyCommitHashRoute
   '/': typeof AppIndexRoute
   '/public/$organization/$repository': typeof PublicOrganizationRepositoryRoute
   '/$organization': typeof AppOrganizationIndexRoute
   '/$organization/$repository/activity': typeof AppOrganizationRepositoryActivityRoute
+  '/$organization/$repository/history': typeof AppOrganizationRepositoryHistoryRoute
   '/$organization/$repository/records': typeof AppOrganizationRepositoryRecordsRoute
   '/$organization/$repository/settings': typeof AppOrganizationRepositorySettingsRoute
   '/$organization/$repository': typeof AppOrganizationRepositoryIndexRoute
   '/$organization/$repository/changes/$changeNumber': typeof AppOrganizationRepositoryChangesChangeNumberRoute
+  '/$organization/$repository/commits/$commitHash': typeof AppOrganizationRepositoryCommitsCommitHashRoute
   '/$organization/$repository/issues/$issueNumber': typeof AppOrganizationRepositoryIssuesIssueNumberRoute
   '/$organization/$repository/changes': typeof AppOrganizationRepositoryChangesIndexRoute
   '/$organization/$repository/issues': typeof AppOrganizationRepositoryIssuesIndexRoute
@@ -156,14 +182,17 @@ export interface FileRoutesById {
   '/_app/search': typeof AppSearchRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/work': typeof AppWorkRoute
+  '/verify/$commitHash': typeof VerifyCommitHashRoute
   '/_app/': typeof AppIndexRoute
   '/public/$organization/$repository': typeof PublicOrganizationRepositoryRoute
   '/_app/$organization/': typeof AppOrganizationIndexRoute
   '/_app/$organization/$repository/activity': typeof AppOrganizationRepositoryActivityRoute
+  '/_app/$organization/$repository/history': typeof AppOrganizationRepositoryHistoryRoute
   '/_app/$organization/$repository/records': typeof AppOrganizationRepositoryRecordsRoute
   '/_app/$organization/$repository/settings': typeof AppOrganizationRepositorySettingsRoute
   '/_app/$organization/$repository/': typeof AppOrganizationRepositoryIndexRoute
   '/_app/$organization/$repository/changes/$changeNumber': typeof AppOrganizationRepositoryChangesChangeNumberRoute
+  '/_app/$organization/$repository/commits/$commitHash': typeof AppOrganizationRepositoryCommitsCommitHashRoute
   '/_app/$organization/$repository/issues/$issueNumber': typeof AppOrganizationRepositoryIssuesIssueNumberRoute
   '/_app/$organization/$repository/changes/': typeof AppOrganizationRepositoryChangesIndexRoute
   '/_app/$organization/$repository/issues/': typeof AppOrganizationRepositoryIssuesIndexRoute
@@ -176,13 +205,16 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/work'
+    | '/verify/$commitHash'
     | '/public/$organization/$repository'
     | '/$organization/'
     | '/$organization/$repository/activity'
+    | '/$organization/$repository/history'
     | '/$organization/$repository/records'
     | '/$organization/$repository/settings'
     | '/$organization/$repository/'
     | '/$organization/$repository/changes/$changeNumber'
+    | '/$organization/$repository/commits/$commitHash'
     | '/$organization/$repository/issues/$issueNumber'
     | '/$organization/$repository/changes/'
     | '/$organization/$repository/issues/'
@@ -192,14 +224,17 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/work'
+    | '/verify/$commitHash'
     | '/'
     | '/public/$organization/$repository'
     | '/$organization'
     | '/$organization/$repository/activity'
+    | '/$organization/$repository/history'
     | '/$organization/$repository/records'
     | '/$organization/$repository/settings'
     | '/$organization/$repository'
     | '/$organization/$repository/changes/$changeNumber'
+    | '/$organization/$repository/commits/$commitHash'
     | '/$organization/$repository/issues/$issueNumber'
     | '/$organization/$repository/changes'
     | '/$organization/$repository/issues'
@@ -210,14 +245,17 @@ export interface FileRouteTypes {
     | '/_app/search'
     | '/_app/settings'
     | '/_app/work'
+    | '/verify/$commitHash'
     | '/_app/'
     | '/public/$organization/$repository'
     | '/_app/$organization/'
     | '/_app/$organization/$repository/activity'
+    | '/_app/$organization/$repository/history'
     | '/_app/$organization/$repository/records'
     | '/_app/$organization/$repository/settings'
     | '/_app/$organization/$repository/'
     | '/_app/$organization/$repository/changes/$changeNumber'
+    | '/_app/$organization/$repository/commits/$commitHash'
     | '/_app/$organization/$repository/issues/$issueNumber'
     | '/_app/$organization/$repository/changes/'
     | '/_app/$organization/$repository/issues/'
@@ -225,6 +263,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  VerifyCommitHashRoute: typeof VerifyCommitHashRoute
   PublicOrganizationRepositoryRoute: typeof PublicOrganizationRepositoryRoute
 }
 
@@ -272,6 +311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWorkRouteImport
       parentRoute: typeof AppRoute
     }
+    '/verify/$commitHash': {
+      id: '/verify/$commitHash'
+      path: '/verify/$commitHash'
+      fullPath: '/verify/$commitHash'
+      preLoaderRoute: typeof VerifyCommitHashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/$organization/': {
       id: '/_app/$organization/'
       path: '/$organization'
@@ -298,6 +344,13 @@ declare module '@tanstack/react-router' {
       path: '/$organization/$repository/activity'
       fullPath: '/$organization/$repository/activity'
       preLoaderRoute: typeof AppOrganizationRepositoryActivityRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/$organization/$repository/history': {
+      id: '/_app/$organization/$repository/history'
+      path: '/$organization/$repository/history'
+      fullPath: '/$organization/$repository/history'
+      preLoaderRoute: typeof AppOrganizationRepositoryHistoryRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/$organization/$repository/records': {
@@ -328,6 +381,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOrganizationRepositoryChangesChangeNumberRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/$organization/$repository/commits/$commitHash': {
+      id: '/_app/$organization/$repository/commits/$commitHash'
+      path: '/$organization/$repository/commits/$commitHash'
+      fullPath: '/$organization/$repository/commits/$commitHash'
+      preLoaderRoute: typeof AppOrganizationRepositoryCommitsCommitHashRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/$organization/$repository/issues/': {
       id: '/_app/$organization/$repository/issues/'
       path: '/$organization/$repository/issues'
@@ -353,10 +413,12 @@ interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppOrganizationIndexRoute: typeof AppOrganizationIndexRoute
   AppOrganizationRepositoryActivityRoute: typeof AppOrganizationRepositoryActivityRoute
+  AppOrganizationRepositoryHistoryRoute: typeof AppOrganizationRepositoryHistoryRoute
   AppOrganizationRepositoryRecordsRoute: typeof AppOrganizationRepositoryRecordsRoute
   AppOrganizationRepositorySettingsRoute: typeof AppOrganizationRepositorySettingsRoute
   AppOrganizationRepositoryIndexRoute: typeof AppOrganizationRepositoryIndexRoute
   AppOrganizationRepositoryChangesChangeNumberRoute: typeof AppOrganizationRepositoryChangesChangeNumberRoute
+  AppOrganizationRepositoryCommitsCommitHashRoute: typeof AppOrganizationRepositoryCommitsCommitHashRoute
   AppOrganizationRepositoryIssuesIssueNumberRoute: typeof AppOrganizationRepositoryIssuesIssueNumberRoute
   AppOrganizationRepositoryChangesIndexRoute: typeof AppOrganizationRepositoryChangesIndexRoute
   AppOrganizationRepositoryIssuesIndexRoute: typeof AppOrganizationRepositoryIssuesIndexRoute
@@ -371,12 +433,15 @@ const AppRouteChildren: AppRouteChildren = {
   AppOrganizationIndexRoute: AppOrganizationIndexRoute,
   AppOrganizationRepositoryActivityRoute:
     AppOrganizationRepositoryActivityRoute,
+  AppOrganizationRepositoryHistoryRoute: AppOrganizationRepositoryHistoryRoute,
   AppOrganizationRepositoryRecordsRoute: AppOrganizationRepositoryRecordsRoute,
   AppOrganizationRepositorySettingsRoute:
     AppOrganizationRepositorySettingsRoute,
   AppOrganizationRepositoryIndexRoute: AppOrganizationRepositoryIndexRoute,
   AppOrganizationRepositoryChangesChangeNumberRoute:
     AppOrganizationRepositoryChangesChangeNumberRoute,
+  AppOrganizationRepositoryCommitsCommitHashRoute:
+    AppOrganizationRepositoryCommitsCommitHashRoute,
   AppOrganizationRepositoryIssuesIssueNumberRoute:
     AppOrganizationRepositoryIssuesIssueNumberRoute,
   AppOrganizationRepositoryChangesIndexRoute:
@@ -389,6 +454,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  VerifyCommitHashRoute: VerifyCommitHashRoute,
   PublicOrganizationRepositoryRoute: PublicOrganizationRepositoryRoute,
 }
 export const routeTree = rootRouteImport

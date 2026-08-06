@@ -25,3 +25,11 @@ output "document_intelligence_endpoint" {
 output "solana_network" {
   value = var.solana_network
 }
+
+output "document_processor_registry" {
+  value = azurerm_container_registry.processor.login_server
+}
+
+output "document_processor_job_name" {
+  value = var.enable_document_processor_job ? azurerm_container_app_job.document_processor[0].name : null
+}

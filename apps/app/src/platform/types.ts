@@ -101,6 +101,7 @@ export type Repository = {
 	issueCount: number;
 	changeCount: number;
 	recordCount: number;
+	headCommitId?: string;
 	updatedAt: string;
 };
 
@@ -111,6 +112,17 @@ export type IssueComment = {
 	visibility: "internal" | "public";
 	createdAt: string;
 	editedAt?: string;
+};
+
+export type IssueAttachment = {
+	id: string;
+	name: string;
+	description: string;
+	mimeType: string;
+	sizeLabel: string;
+	sha256: string;
+	url: string;
+	storageProvider: "demo" | "azure";
 };
 
 export type Issue = {
@@ -133,6 +145,7 @@ export type Issue = {
 	comments: IssueComment[];
 	linkedChangeIds: string[];
 	watcherIds: string[];
+	attachments?: IssueAttachment[];
 	recurrence?: string;
 };
 
@@ -192,6 +205,15 @@ export type TextDiff = {
 	content: string;
 };
 
+export type DocumentArtifact = {
+	id: string;
+	kind: "normalized-content" | "page-render" | "text" | "table" | "thumbnail";
+	objectRef: string;
+	sha256: string;
+	processorVersion: string;
+	metadata?: Record<string, unknown>;
+};
+
 export type ChangeRequest = {
 	id: string;
 	repositoryId: string;
@@ -212,8 +234,10 @@ export type ChangeRequest = {
 	comments: IssueComment[];
 	structuredDiff: DiffField[];
 	textDiff: TextDiff[];
+	artifacts: DocumentArtifact[];
 	unresolvedThreads: number;
 	baseVersionId?: string;
+	baseCommitId?: string;
 	outOfDate: boolean;
 	publicAfterMerge: boolean;
 	publicationJobId?: string;
@@ -228,6 +252,11 @@ export type RecordVersion = {
 	summary: string;
 	files: ChangeFile[];
 	sha256: string;
+	contentSha256?: string;
+	normalizedSha256?: string;
+	parentVersionId?: string;
+	commitId?: string;
+	exactBlobRef?: string;
 	manifestSha256?: string;
 	masterProvider?: StorageProvider;
 	azureEvidenceRef?: string;
@@ -240,6 +269,28 @@ export type RecordVersion = {
 	integrity?: {
 		status: "queued" | "running" | "anchored" | "failed";
 		commitment: string;
+		network: "devnet" | "mainnet-beta";
+		signature?: string;
+		explorerUrl?: string;
+	};
+};
+
+export type RepositoryCommit = {
+	id: string;
+	repositoryId: string;
+	sequence: number;
+	parentCommitId?: string;
+	parentCommitSha256?: string;
+	treeSha256: string;
+	commitSha256: string;
+	treeManifest?: string;
+	commitManifest?: string;
+	changeRequestId: string;
+	recordVersionId: string;
+	createdBy: string;
+	createdAt: string;
+	anchor?: {
+		status: "queued" | "running" | "anchored" | "failed";
 		network: "devnet" | "mainnet-beta";
 		signature?: string;
 		explorerUrl?: string;
@@ -367,6 +418,7 @@ export type PlatformData = {
 	issues: Issue[];
 	changeRequests: ChangeRequest[];
 	records: RecordItem[];
+	repositoryCommits: RepositoryCommit[];
 	providerConnections: ProviderConnection[];
 	repositoryStorageConfigs: RepositoryStorageConfig[];
 	publicationJobs: PublicationJob[];

@@ -1,10 +1,38 @@
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { requireMembership } from "./authz";
+import { sha256Hex } from "./canonical";
 
 type Ctx = QueryCtx | MutationCtx;
 
-export async function requirePlatformSession(ctx: Ctx) {
+export async function requirePlatformSession(
+	ctx: Ctx,
+	demoSessionToken?: string,
+) {
+	if (demoSessionToken) {
+		if (process.env.TIECAMEL_DEMO_SESSIONS_ENABLED !== "true") {
+			throw new Error("Development demo sessions are disabled");
+		}
+		const tokenSha256 = await sha256Hex(demoSessionToken);
+		const demo = await ctx.db
+			.query("demoSessions")
+			.withIndex("by_token_sha256", (q) => q.eq("tokenSha256", tokenSha256))
+			.unique();
+		if (!demo || demo.expiresAt <= Date.now()) {
+			throw new Error("Demo session is invalid or expired");
+		}
+		const membership = await ctx.db.get(demo.activeMembershipId);
+		const user = membership ? await ctx.db.get(membership.userId) : null;
+		if (
+			!membership ||
+			!user ||
+			membership.organizationId !== demo.organizationId ||
+			membership.status !== "active"
+		) {
+			throw new Error("Demo membership is unavailable");
+		}
+		return { identity: null, user, membership, demoSessionId: demo._id };
+	}
 	const session = await requireMembership(ctx);
 	if (!session) throw new Error("Active organization membership required");
 	return session;
@@ -14,8 +42,9 @@ export async function requireRepositoryAccess(
 	ctx: Ctx,
 	repositoryId: Id<"repositories">,
 	mode: "read" | "contribute" | "review" | "admin" = "read",
+	demoSessionToken?: string,
 ) {
-	const session = await requirePlatformSession(ctx);
+	const session = await requirePlatformSession(ctx, demoSessionToken);
 	const repository = await ctx.db.get(repositoryId);
 	if (
 		!repository ||

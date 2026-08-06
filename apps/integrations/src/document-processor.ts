@@ -8,7 +8,7 @@ import type {
 	ExtractedField,
 } from "./contracts.js";
 
-const PROCESSOR_VERSION = "tiecamel-document-processor/1";
+const PROCESSOR_VERSION = "tiecamel-document-processor/2";
 
 export async function processDocument(
 	command: DocumentProcessingCommand,
@@ -31,6 +31,22 @@ export async function processDocument(
 	}
 	await assertMalwareFree(content, command.fileName, detectedMimeType);
 	const text = await extractText(content, detectedMimeType);
+	const normalized = normalizeExtractedContent(text);
+	const normalizedSha256 = sha256(new TextEncoder().encode(normalized));
+	const artifacts = await storeNormalizedArtifacts(command, normalized);
+	let baseText = "";
+	let baseContentSha256: string | undefined;
+	let baseNormalizedSha256: string | undefined;
+	if (command.baseVersionRef) {
+		const baseContent = await downloadReference(command.baseVersionRef);
+		baseContentSha256 = sha256(baseContent);
+		const baseMimeType = detectMimeType(baseContent, command.mimeType);
+		baseText = normalizeExtractedContent(
+			await extractText(baseContent, baseMimeType),
+		);
+		baseNormalizedSha256 = sha256(new TextEncoder().encode(baseText));
+	}
+	const textDiff = diffLines(baseText, normalized);
 	const extracted = extractTaxNoticeFields(text);
 	const findings = compareTaxNoticeFields(
 		command.baseFields ?? [],
@@ -43,11 +59,73 @@ export async function processDocument(
 		malwareScan: "clean",
 		extracted,
 		findings,
-		textDiff: text.trim()
-			? [{ type: "added", content: text.trim().slice(0, 100_000) }]
-			: [],
+		normalizedSha256,
+		textDiff,
+		artifacts,
+		diff: {
+			format: "tiecamel-document-diff/v2",
+			baseContentSha256,
+			proposedContentSha256: actualSha256,
+			baseNormalizedSha256,
+			proposedNormalizedSha256: normalizedSha256,
+			stats: {
+				additions: textDiff.filter((line) => line.type === "added").length,
+				deletions: textDiff.filter((line) => line.type === "removed").length,
+				changes: findings.length,
+			},
+		},
 		processorVersion: PROCESSOR_VERSION,
 	};
+}
+
+export function normalizeExtractedContent(text: string) {
+	return text
+		.normalize("NFKC")
+		.replaceAll("\r\n", "\n")
+		.replaceAll("\r", "\n")
+		.split("\n")
+		.map((line) => line.replace(/[\t ]+/g, " ").trimEnd())
+		.join("\n")
+		.trim();
+}
+
+export function diffLines(before: string, after: string) {
+	const left = before ? before.split("\n") : [];
+	const right = after ? after.split("\n") : [];
+	const table = Array.from({ length: left.length + 1 }, () =>
+		new Uint32Array(right.length + 1),
+	);
+	for (let row = left.length - 1; row >= 0; row -= 1) {
+		for (let column = right.length - 1; column >= 0; column -= 1) {
+			table[row][column] =
+				left[row] === right[column]
+					? table[row + 1][column + 1] + 1
+					: Math.max(table[row + 1][column], table[row][column + 1]);
+		}
+	}
+	const result: Array<{
+		type: "added" | "removed" | "unchanged";
+		content: string;
+	}> = [];
+	let row = 0;
+	let column = 0;
+	while (row < left.length || column < right.length) {
+		if (row < left.length && column < right.length && left[row] === right[column]) {
+			result.push({ type: "unchanged", content: left[row] });
+			row += 1;
+			column += 1;
+		} else if (
+			column < right.length &&
+			(row === left.length || table[row][column + 1] >= table[row + 1][column])
+		) {
+			result.push({ type: "added", content: right[column] });
+			column += 1;
+		} else {
+			result.push({ type: "removed", content: left[row] });
+			row += 1;
+		}
+	}
+	return result.slice(0, 20_000);
 }
 
 export function extractTaxNoticeFields(text: string): ExtractedField[] {
@@ -182,6 +260,55 @@ async function downloadSource(objectKey: string) {
 		chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
 	}
 	return new Uint8Array(Buffer.concat(chunks));
+}
+
+async function downloadReference(reference: string) {
+	const objectKey = reference.replace(/^azure:\/\//, "");
+	return downloadSource(objectKey);
+}
+
+async function storeNormalizedArtifacts(
+	command: DocumentProcessingCommand,
+	normalized: string,
+) {
+	const service = new BlobServiceClient(
+		requiredEnv("AZURE_STORAGE_BLOB_URL"),
+		new DefaultAzureCredential(),
+	);
+	const bytes = new TextEncoder().encode(normalized);
+	const hash = sha256(bytes);
+	const objectRef = `azure://processed/document-artifacts/${command.organizationId}/${command.repositoryId}/${command.uploadSessionId}/${hash}/normalized.txt`;
+	const blob = service
+		.getContainerClient("processed")
+		.getBlockBlobClient(objectRef.replace("azure://processed/", ""));
+	try {
+		await blob.uploadData(bytes, {
+			conditions: { ifNoneMatch: "*" },
+			blobHTTPHeaders: { blobContentType: "text/plain; charset=utf-8" },
+			metadata: {
+				sha256: hash,
+				processorversion: PROCESSOR_VERSION.replaceAll(/[^a-zA-Z0-9]/g, "-"),
+			},
+		});
+	} catch (error) {
+		if (
+			typeof error !== "object" ||
+			error === null ||
+			!("statusCode" in error) ||
+			error.statusCode !== 412
+		) {
+			throw error;
+		}
+	}
+	return [
+		{
+			kind: "normalized-content" as const,
+			objectRef,
+			sha256: hash,
+			processorVersion: PROCESSOR_VERSION,
+			metadata: { encoding: "utf-8", characters: normalized.length },
+		},
+	];
 }
 
 async function assertMalwareFree(

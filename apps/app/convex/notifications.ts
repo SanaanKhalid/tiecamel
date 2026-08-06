@@ -3,9 +3,12 @@ import { mutation } from "./_generated/server";
 import { requirePlatformSession } from "./lib/platformAuth";
 
 export const markRead = mutation({
-	args: { notificationId: v.id("platformNotifications") },
+	args: {
+		notificationId: v.id("platformNotifications"),
+		demoSessionToken: v.optional(v.string()),
+	},
 	handler: async (ctx, args) => {
-		const session = await requirePlatformSession(ctx);
+		const session = await requirePlatformSession(ctx, args.demoSessionToken);
 		const notification = await ctx.db.get(args.notificationId);
 		if (
 			!notification ||

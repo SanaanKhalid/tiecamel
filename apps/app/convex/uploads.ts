@@ -23,6 +23,7 @@ const allowedMimeTypes = new Set([
 
 export const authorize = mutation({
 	args: {
+		demoSessionToken: v.optional(v.string()),
 		repositoryId: v.id("repositories"),
 		changeRequestId: v.optional(v.id("changeRequests")),
 		fileName: v.string(),
@@ -35,6 +36,7 @@ export const authorize = mutation({
 			ctx,
 			args.repositoryId,
 			"contribute",
+			args.demoSessionToken,
 		);
 		if (!allowedMimeTypes.has(args.mimeType)) {
 			throw new Error("This file type is not supported");
@@ -115,11 +117,19 @@ export const authorize = mutation({
 });
 
 export const getSession = query({
-	args: { uploadSessionId: v.id("uploadSessions") },
+	args: {
+		uploadSessionId: v.id("uploadSessions"),
+		demoSessionToken: v.optional(v.string()),
+	},
 	handler: async (ctx, args) => {
 		const upload = await ctx.db.get(args.uploadSessionId);
 		if (!upload) return null;
-		const session = await requireRepositoryAccess(ctx, upload.repositoryId);
+		const session = await requireRepositoryAccess(
+			ctx,
+			upload.repositoryId,
+			"read",
+			args.demoSessionToken,
+		);
 		if (
 			upload.createdBy !== session.membership._id &&
 			!["administrator", "owner"].includes(session.membership.role)
@@ -131,7 +141,10 @@ export const getSession = query({
 });
 
 export const requestUploadUrl = action({
-	args: { uploadSessionId: v.id("uploadSessions") },
+	args: {
+		uploadSessionId: v.id("uploadSessions"),
+		demoSessionToken: v.optional(v.string()),
+	},
 	handler: async (
 		ctx,
 		args,
@@ -149,7 +162,7 @@ export const requestUploadUrl = action({
 		const baseUrl = process.env.AZURE_INTEGRATION_URL;
 		const token = process.env.AZURE_INTEGRATION_TOKEN;
 		if (!baseUrl || !token) {
-			throw new Error("Azure document storage is not configured");
+			throw new Error("Managed document storage is not configured");
 		}
 		const response = await fetch(`${baseUrl.replace(/\/$/, "")}/uploads`, {
 			method: "POST",
@@ -170,20 +183,117 @@ export const requestUploadUrl = action({
 		});
 		if (!response.ok) {
 			throw new Error(
-				`Azure could not authorize the upload (${response.status}): ${await response.text()}`,
+				`The document service could not authorize the upload (${response.status}).`,
 			);
 		}
-		return response.json() as Promise<{
+		const result = (await response.json()) as {
 			url: string;
 			method: "PUT";
 			headers: Record<string, string>;
 			expiresAt: string;
-		}>;
+		};
+		return {
+			...result,
+			url: normalizeAzureBlobUrl(result.url),
+		};
 	},
 });
 
+export const getDownloadTarget = query({
+	args: {
+		objectRef: v.string(),
+		demoSessionToken: v.optional(v.string()),
+	},
+	handler: async (ctx, args) => {
+		if (!args.objectRef.startsWith("azure://")) {
+			throw new Error("Only managed documents can be requested");
+		}
+		const artifact = await ctx.db
+			.query("documentArtifacts")
+			.withIndex("by_object_ref", (q) => q.eq("objectRef", args.objectRef))
+			.unique();
+		if (artifact) {
+			await requireRepositoryAccess(
+				ctx,
+				artifact.repositoryId,
+				"read",
+				args.demoSessionToken,
+			);
+			return { objectRef: artifact.objectRef };
+		}
+		const file = (await ctx.db.query("changeFiles").collect()).find(
+			(item) => item.azureBlobRef === args.objectRef,
+		);
+		if (file) {
+			await requireRepositoryAccess(
+				ctx,
+				file.repositoryId,
+				"read",
+				args.demoSessionToken,
+			);
+			return { objectRef: file.azureBlobRef };
+		}
+		const version = (await ctx.db.query("recordVersions").collect()).find(
+			(item) =>
+				item.exactBlobRef === args.objectRef ||
+				item.azureEvidenceRef === args.objectRef,
+		);
+		if (version) {
+			await requireRepositoryAccess(
+				ctx,
+				version.repositoryId,
+				"read",
+				args.demoSessionToken,
+			);
+			return { objectRef: args.objectRef };
+		}
+		throw new Error("Document not found or access denied");
+	},
+});
+
+export const requestDownloadUrl = action({
+	args: {
+		objectRef: v.string(),
+		demoSessionToken: v.optional(v.string()),
+	},
+	handler: async (ctx, args): Promise<{ url: string; expiresAt: string }> => {
+		const target = await ctx.runQuery(api.uploads.getDownloadTarget, args);
+		const baseUrl = process.env.AZURE_INTEGRATION_URL;
+		const token = process.env.AZURE_INTEGRATION_TOKEN;
+		if (!baseUrl || !token) {
+			throw new Error("Managed document storage is not configured");
+		}
+		const response = await fetch(
+			`${baseUrl.replace(/\/$/, "")}/documents/read`,
+			{
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${token}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(target),
+			},
+		);
+		if (!response.ok) {
+			throw new Error(
+				`The document service could not authorize this file (${response.status}).`,
+			);
+		}
+		const result = (await response.json()) as {
+			url: string;
+			expiresAt: string;
+		};
+		return { ...result, url: normalizeAzureBlobUrl(result.url) };
+	},
+});
+
+function normalizeAzureBlobUrl(url: string) {
+	return url.replace(/(\.blob\.core\.windows\.net)\/{2,}/, "$1/");
+}
+
 export const finalize = mutation({
 	args: {
+		demoSessionToken: v.optional(v.string()),
 		uploadSessionId: v.id("uploadSessions"),
 		sha256: v.string(),
 	},
@@ -194,6 +304,7 @@ export const finalize = mutation({
 			ctx,
 			upload.repositoryId,
 			"contribute",
+			args.demoSessionToken,
 		);
 		if (upload.createdBy !== session.membership._id) {
 			throw new Error("Only the uploader can finalize this session");
@@ -247,7 +358,10 @@ export const finalize = mutation({
 });
 
 export const retry = mutation({
-	args: { uploadSessionId: v.id("uploadSessions") },
+	args: {
+		uploadSessionId: v.id("uploadSessions"),
+		demoSessionToken: v.optional(v.string()),
+	},
 	handler: async (ctx, args) => {
 		const upload = await ctx.db.get(args.uploadSessionId);
 		if (!upload?.sha256) throw new Error("Upload is not ready to retry");
@@ -255,6 +369,7 @@ export const retry = mutation({
 			ctx,
 			upload.repositoryId,
 			"contribute",
+			args.demoSessionToken,
 		);
 		if (
 			upload.createdBy !== session.membership._id &&
@@ -335,7 +450,8 @@ export const getProcessingCommand = internalQuery({
 			const change = await ctx.db.get(upload.changeRequestId);
 			if (change?.baseVersionId) {
 				const baseVersion = await ctx.db.get(change.baseVersionId);
-				baseVersionRef = baseVersion?.azureEvidenceRef;
+				baseVersionRef =
+					baseVersion?.exactBlobRef ?? baseVersion?.azureEvidenceRef;
 				if (baseVersion) {
 					const fields = await ctx.db
 						.query("extractedFields")
@@ -394,7 +510,7 @@ export const dispatchProcessing = internalAction({
 		if (!baseUrl || !token) {
 			await ctx.runMutation(internal.uploads.recordDispatchFailure, {
 				processingJobId: args.processingJobId,
-				error: "Azure document processing is not configured.",
+				error: "Document processing is not configured.",
 			});
 			return;
 		}
@@ -412,7 +528,7 @@ export const dispatchProcessing = internalAction({
 			});
 			if (!response.ok) {
 				throw new Error(
-					`Azure processing intake returned ${response.status}: ${await response.text()}`,
+					`Document processing could not be started (${response.status}).`,
 				);
 			}
 			const accepted = (await response.json()) as { commandId?: string };
@@ -426,7 +542,7 @@ export const dispatchProcessing = internalAction({
 				error:
 					error instanceof Error
 						? error.message
-						: "Azure processing intake failed.",
+						: "Document processing could not be started.",
 			});
 		}
 	},
@@ -535,14 +651,17 @@ export const recordProcessingResult = internalMutation({
 			)
 			.unique();
 		if (!job) throw new Error("Processing job not found");
-		if (job.idempotencyKey !== args.idempotencyKey) {
-			throw new Error("Processing callback does not match this upload");
-		}
+		// A delivery from an earlier attempt can finish after a retry has issued
+		// a new idempotency key. It is authenticated, but it must not overwrite
+		// the active attempt. Acknowledge it as a safe no-op so Azure does not
+		// retry the stale message indefinitely.
+		if (job.idempotencyKey !== args.idempotencyKey) return;
 		if (job.status === "succeeded") return;
 		const now = Date.now();
 		const result = args.result as
 			| {
 					sha256?: string;
+					normalizedSha256?: string;
 					detectedMimeType?: string;
 					malwareScan?: string;
 					extracted?: Array<{
@@ -564,6 +683,26 @@ export const recordProcessingResult = internalMutation({
 						content: string;
 					}>;
 					visualManifestKey?: string;
+					artifacts?: Array<{
+						kind:
+							| "normalized-content"
+							| "page-render"
+							| "text"
+							| "table"
+							| "thumbnail";
+						objectRef: string;
+						sha256: string;
+						processorVersion: string;
+						metadata?: Record<string, unknown>;
+					}>;
+					diff?: {
+						format: "tiecamel-document-diff/v2";
+						baseContentSha256?: string;
+						proposedContentSha256: string;
+						baseNormalizedSha256?: string;
+						proposedNormalizedSha256: string;
+						stats: Record<string, number>;
+					};
 					processorVersion?: string;
 			  }
 			| undefined;
@@ -582,7 +721,7 @@ export const recordProcessingResult = internalMutation({
 				? result?.malwareScan === "clean"
 					? undefined
 					: "The document did not pass malware scanning."
-				: "Azure returned a checksum that does not match the uploaded file.");
+				: "The stored checksum does not match the uploaded file.");
 		await Promise.all([
 			ctx.db.patch(upload._id, {
 				status: succeeded ? "ready" : "failed",
@@ -658,6 +797,21 @@ export const recordProcessingResult = internalMutation({
 				createdAt: now,
 			});
 		}
+		for (const artifact of result.artifacts ?? []) {
+			await ctx.db.insert("documentArtifacts", {
+				organizationId: upload.organizationId,
+				repositoryId: upload.repositoryId,
+				changeRequestId: upload.changeRequestId,
+				fileId,
+				revisionId: upload.revisionId,
+				kind: artifact.kind,
+				objectRef: artifact.objectRef,
+				sha256: artifact.sha256,
+				processorVersion: artifact.processorVersion,
+				metadata: artifact.metadata,
+				createdAt: now,
+			});
+		}
 		await ctx.db.insert("documentDiffs", {
 			organizationId: upload.organizationId,
 			changeRequestId: upload.changeRequestId,
@@ -666,6 +820,18 @@ export const recordProcessingResult = internalMutation({
 			structured: result.findings ?? [],
 			text: result.textDiff ?? [],
 			visualManifestKey: result.visualManifestKey,
+			format: result.diff?.format,
+			baseContentSha256: result.diff?.baseContentSha256,
+			proposedContentSha256:
+				result.diff?.proposedContentSha256 ?? result.sha256,
+			baseNormalizedSha256: result.diff?.baseNormalizedSha256,
+			proposedNormalizedSha256:
+				result.diff?.proposedNormalizedSha256 ?? result.normalizedSha256,
+			artifactRefs: (result.artifacts ?? []).map(
+				(artifact) => artifact.objectRef,
+			),
+			summary: result.diff?.stats,
+			processorVersion: result.processorVersion,
 			createdAt: now,
 		});
 		for (const finding of result.findings ?? []) {

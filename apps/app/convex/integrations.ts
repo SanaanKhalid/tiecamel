@@ -9,9 +9,9 @@ import {
 const provider = v.union(v.literal("google-drive"), v.literal("one-drive"));
 
 export const listConnections = query({
-	args: {},
-	handler: async (ctx) => {
-		const session = await requirePlatformSession(ctx);
+	args: { demoSessionToken: v.optional(v.string()) },
+	handler: async (ctx, args) => {
+		const session = await requirePlatformSession(ctx, args.demoSessionToken);
 		return ctx.db
 			.query("providerConnections")
 			.withIndex("by_organization", (q) =>
@@ -22,9 +22,17 @@ export const listConnections = query({
 });
 
 export const getRepositoryStorage = query({
-	args: { repositoryId: v.id("repositories") },
+	args: {
+		repositoryId: v.id("repositories"),
+		demoSessionToken: v.optional(v.string()),
+	},
 	handler: async (ctx, args) => {
-		await requireRepositoryAccess(ctx, args.repositoryId);
+		await requireRepositoryAccess(
+			ctx,
+			args.repositoryId,
+			"read",
+			args.demoSessionToken,
+		);
 		return ctx.db
 			.query("repositoryStorageConfigs")
 			.withIndex("by_repository", (q) =>
@@ -36,6 +44,7 @@ export const getRepositoryStorage = query({
 
 export const registerConnection = mutation({
 	args: {
+		demoSessionToken: v.optional(v.string()),
 		provider,
 		displayName: v.string(),
 		externalTenant: v.string(),
@@ -44,7 +53,7 @@ export const registerConnection = mutation({
 		capabilities: v.array(v.string()),
 	},
 	handler: async (ctx, args) => {
-		const session = await requirePlatformSession(ctx);
+		const session = await requirePlatformSession(ctx, args.demoSessionToken);
 		requireOrganizationAdministrator(session.membership.role);
 		if (args.provider === "one-drive") {
 			return {
@@ -57,8 +66,7 @@ export const registerConnection = mutation({
 			return {
 				ok: false as const,
 				code: "INVALID_SECRET_REFERENCE",
-				message:
-					"Credentials must be represented by an Azure Key Vault reference.",
+				message: "The credential reference is invalid.",
 			};
 		}
 		const now = Date.now();
@@ -103,12 +111,13 @@ export const registerConnection = mutation({
 
 export const recordVerification = mutation({
 	args: {
+		demoSessionToken: v.optional(v.string()),
 		connectionId: v.id("providerConnections"),
 		succeeded: v.boolean(),
 		message: v.string(),
 	},
 	handler: async (ctx, args) => {
-		const session = await requirePlatformSession(ctx);
+		const session = await requirePlatformSession(ctx, args.demoSessionToken);
 		requireOrganizationAdministrator(session.membership.role);
 		const connection = await ctx.db.get(args.connectionId);
 		if (
@@ -130,6 +139,7 @@ export const recordVerification = mutation({
 
 export const configureRepositoryStorage = mutation({
 	args: {
+		demoSessionToken: v.optional(v.string()),
 		repositoryId: v.id("repositories"),
 		provider: v.union(v.literal("azure"), v.literal("google-drive")),
 		connectionId: v.optional(v.id("providerConnections")),
@@ -142,6 +152,7 @@ export const configureRepositoryStorage = mutation({
 			ctx,
 			args.repositoryId,
 			"admin",
+			args.demoSessionToken,
 		);
 		let connection = null;
 		if (args.provider === "google-drive") {
@@ -212,9 +223,12 @@ export const configureRepositoryStorage = mutation({
 });
 
 export const disconnect = mutation({
-	args: { connectionId: v.id("providerConnections") },
+	args: {
+		connectionId: v.id("providerConnections"),
+		demoSessionToken: v.optional(v.string()),
+	},
 	handler: async (ctx, args) => {
-		const session = await requirePlatformSession(ctx);
+		const session = await requirePlatformSession(ctx, args.demoSessionToken);
 		requireOrganizationAdministrator(session.membership.role);
 		const connection = await ctx.db.get(args.connectionId);
 		if (

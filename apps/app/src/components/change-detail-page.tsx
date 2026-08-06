@@ -19,7 +19,7 @@ import {
 	X,
 	XCircle,
 } from "lucide-react";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { reviewRequirementsMet, usePlatform } from "../platform/store";
 import type { ChangeFile, ReviewDecision } from "../platform/types";
 import {
@@ -61,6 +61,10 @@ export function ChangeDetailPage({
 	const [error, setError] = useState("");
 	const [publishing, setPublishing] = useState(false);
 	const [previewFile, setPreviewFile] = useState<ChangeFile | null>(null);
+	const [revisionOpen, setRevisionOpen] = useState(false);
+	const [revisionMessage, setRevisionMessage] = useState("");
+	const [revisionFile, setRevisionFile] = useState<File | null>(null);
+	const [revising, setRevising] = useState(false);
 	if (!repository || !change) {
 		return (
 			<div className="p-8">
@@ -155,6 +159,48 @@ export function ChangeDetailPage({
 		setCommentBody("");
 	}
 
+	async function openFile(file: ChangeFile) {
+		if (file.previewUrl || !file.azureBlobRef) {
+			setPreviewFile(file);
+			return;
+		}
+		setError("");
+		try {
+			const previewUrl = await platform.requestDocumentUrl(file.azureBlobRef);
+			setPreviewFile({ ...file, previewUrl });
+		} catch (caught) {
+			setError(
+				caught instanceof Error
+					? caught.message
+					: "The document could not be opened.",
+			);
+		}
+	}
+
+	async function addRevision(event: FormEvent) {
+		event.preventDefault();
+		if (!revisionFile) return;
+		setRevising(true);
+		setError("");
+		try {
+			await platform.addChangeRevision(changeId, revisionMessage, revisionFile);
+			setRevisionOpen(false);
+			setRevisionFile(null);
+			setRevisionMessage("");
+			setNotice(
+				"New revision uploaded. Earlier approvals are stale while document processing reruns against the accepted base.",
+			);
+		} catch (caught) {
+			setError(
+				caught instanceof Error
+					? caught.message
+					: "The revision could not be uploaded.",
+			);
+		} finally {
+			setRevising(false);
+		}
+	}
+
 	const tabs: Array<{ id: ChangeTab; label: string; count?: number }> = [
 		{
 			id: "conversation",
@@ -225,6 +271,17 @@ export function ChangeDetailPage({
 						</button>
 					))}
 				</nav>
+				{tab === "files" && !["merged", "closed"].includes(change.status) && (
+					<div className="mt-4 flex justify-end">
+						<button
+							type="button"
+							onClick={() => setRevisionOpen(true)}
+							className="inline-flex items-center gap-2 rounded-md border border-[#d0d7de] bg-white px-3 py-2 text-sm font-semibold hover:bg-[#f6f8fa]"
+						>
+							<CloudUpload className="size-4" /> Upload new revision
+						</button>
+					</div>
+				)}
 
 				{(notice || error) && (
 					<div
@@ -252,12 +309,12 @@ export function ChangeDetailPage({
 								publicRepository={repository.visibility === "public"}
 								onReview={review}
 								onComment={comment}
-								onOpenFile={setPreviewFile}
+								onOpenFile={openFile}
 							/>
 						)}
 						{tab === "changes" && <Changes changeId={changeId} />}
 						{tab === "files" && (
-							<Files changeId={changeId} onOpenFile={setPreviewFile} />
+							<Files changeId={changeId} onOpenFile={openFile} />
 						)}
 						{tab === "checks" && <Checks changeId={changeId} />}
 					</div>
@@ -304,11 +361,11 @@ export function ChangeDetailPage({
 									<p className="mt-1 font-semibold">
 										{storageConfig?.provider === "google-drive"
 											? `Google Drive · ${storageConfig.displayPath}`
-											: "TieCamel storage · Azure"}
+											: "TieCamel managed storage"}
 									</p>
 									<p className="mt-1 text-xs leading-5 text-[#656d76]">
-										The exact approved bytes and manifest are sealed in Azure
-										regardless of the master destination.
+										The exact approved file and verification manifest are
+										retained regardless of the selected destination.
 									</p>
 								</div>
 								{publicationJob && (
@@ -440,6 +497,57 @@ export function ChangeDetailPage({
 					file={previewFile}
 					onClose={() => setPreviewFile(null)}
 				/>
+			)}
+			{revisionOpen && (
+				<div className="fixed inset-0 z-50 grid place-items-center bg-[#0d1117]/55 p-4">
+					<form
+						onSubmit={addRevision}
+						className="w-full max-w-lg rounded-lg border border-[#d0d7de] bg-white p-5 shadow-2xl"
+					>
+						<h2 className="text-lg font-semibold">Upload a new revision</h2>
+						<p className="mt-1 text-sm text-[#656d76]">
+							The file will be compared with the exact current accepted version.
+							All earlier approvals become stale.
+						</p>
+						<label className="mt-4 block text-sm font-semibold">
+							Revision note
+							<input
+								value={revisionMessage}
+								onChange={(event) => setRevisionMessage(event.target.value)}
+								className="input mt-1.5"
+								placeholder="What changed?"
+							/>
+						</label>
+						<label className="mt-4 block text-sm font-semibold">
+							Replacement document
+							<input
+								type="file"
+								accept=".pdf,.docx,.xlsx,.csv,.png,.jpg,.jpeg,.tif,.tiff"
+								required
+								onChange={(event) =>
+									setRevisionFile(event.target.files?.[0] ?? null)
+								}
+								className="mt-1.5 block w-full text-sm"
+							/>
+						</label>
+						<div className="mt-5 flex justify-end gap-2">
+							<button
+								type="button"
+								onClick={() => setRevisionOpen(false)}
+								className="rounded-md border border-[#d0d7de] px-4 py-2 text-sm font-semibold"
+							>
+								Cancel
+							</button>
+							<button
+								type="submit"
+								disabled={!revisionFile || revising}
+								className="rounded-md bg-[#0f766e] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+							>
+								{revising ? "Uploading…" : "Upload revision"}
+							</button>
+						</div>
+					</form>
+				</div>
 			)}
 		</>
 	);
@@ -767,11 +875,83 @@ function Changes({ changeId }: { changeId: string }) {
 				<div className="border-b border-[#d8dee4] bg-[#f6f8fa] px-4 py-3">
 					<h2 className="font-semibold">Visual comparison</h2>
 				</div>
-				<ComparisonEmptyState
-					hasBaseVersion={Boolean(change.baseVersionId)}
-					kind="visual"
-				/>
+				<VisualComparison changeId={changeId} />
 			</section>
+		</div>
+	);
+}
+
+function VisualComparison({ changeId }: { changeId: string }) {
+	const platform = usePlatform();
+	const change = platform.changeRequests.find((item) => item.id === changeId);
+	const [urls, setUrls] = useState<Record<string, string>>({});
+	const [error, setError] = useState("");
+	const renders = useMemo(
+		() =>
+			(change?.artifacts ?? []).filter(
+				(artifact) => artifact.kind === "page-render",
+			),
+		[change?.artifacts],
+	);
+	useEffect(() => {
+		let active = true;
+		if (!renders.length) return;
+		void Promise.all(
+			renders.map(
+				async (artifact) =>
+					[
+						artifact.id,
+						await platform.requestDocumentUrl(artifact.objectRef),
+					] as const,
+			),
+		)
+			.then((entries) => {
+				if (active) setUrls(Object.fromEntries(entries));
+			})
+			.catch((caught) => {
+				if (active)
+					setError(
+						caught instanceof Error
+							? caught.message
+							: "Rendered pages could not be opened.",
+					);
+			});
+		return () => {
+			active = false;
+		};
+	}, [platform, renders]);
+	if (!change) return null;
+	if (!renders.length) {
+		return (
+			<ComparisonEmptyState
+				hasBaseVersion={Boolean(change.baseVersionId)}
+				kind="visual"
+			/>
+		);
+	}
+	if (error) return <p className="p-5 text-sm text-[#cf222e]">{error}</p>;
+	return (
+		<div className="grid gap-4 p-4 md:grid-cols-2 xl:grid-cols-3">
+			{renders.map((artifact) => (
+				<figure
+					key={artifact.id}
+					className="overflow-hidden rounded-md border border-[#d8dee4] bg-[#f6f8fa]"
+				>
+					{urls[artifact.id] ? (
+						<img
+							src={urls[artifact.id]}
+							alt={`${String(artifact.metadata?.side ?? "document")} page ${String(artifact.metadata?.page ?? "")}`}
+							className="aspect-[3/4] w-full object-contain"
+						/>
+					) : (
+						<div className="aspect-[3/4] w-full animate-pulse bg-slate-100" />
+					)}
+					<figcaption className="border-t border-[#d8dee4] bg-white px-3 py-2 text-xs font-semibold capitalize text-[#656d76]">
+						{String(artifact.metadata?.side ?? "rendered")} · page{" "}
+						{String(artifact.metadata?.page ?? "—")}
+					</figcaption>
+				</figure>
+			))}
 		</div>
 	);
 }

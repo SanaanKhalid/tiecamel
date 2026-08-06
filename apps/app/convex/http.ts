@@ -157,6 +157,7 @@ http.route({
 				signature: string;
 				slot: number;
 				explorerUrl: string;
+				observedMemo?: string;
 			};
 			error?: { code: string; message: string };
 		};

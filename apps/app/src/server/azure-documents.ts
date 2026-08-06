@@ -74,6 +74,5 @@ function stripTrailingSlash(value: string) {
 
 async function actionableAzureError(response: Response, action: string) {
 	const requestId = response.headers.get("x-ms-request-id");
-	const body = await response.text();
-	return `Azure could not ${action} (${response.status})${requestId ? ` · request ${requestId}` : ""}${body ? `: ${body.slice(0, 300)}` : ""}`;
+	return `The document service could not ${action} (${response.status})${requestId ? ` · request ${requestId}` : ""}`;
 }

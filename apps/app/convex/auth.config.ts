@@ -3,7 +3,7 @@ const issuerDomain =
 
 if (!issuerDomain) {
 	throw new Error(
-		"CLERK_FRONTEND_API_URL is required before starting a Convex deployment.",
+		"CLERK_FRONTEND_API_URL is required. Use the reserved disabled issuer for a schema-only deployment.",
 	);
 }
 

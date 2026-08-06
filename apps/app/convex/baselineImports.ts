@@ -3,9 +3,17 @@ import { mutation, query } from "./_generated/server";
 import { requireRepositoryAccess } from "./lib/platformAuth";
 
 export const list = query({
-	args: { repositoryId: v.id("repositories") },
+	args: {
+		repositoryId: v.id("repositories"),
+		demoSessionToken: v.optional(v.string()),
+	},
 	handler: async (ctx, args) => {
-		await requireRepositoryAccess(ctx, args.repositoryId, "admin");
+		await requireRepositoryAccess(
+			ctx,
+			args.repositoryId,
+			"admin",
+			args.demoSessionToken,
+		);
 		return ctx.db
 			.query("baselineImports")
 			.withIndex("by_repository", (q) =>
@@ -18,6 +26,7 @@ export const list = query({
 
 export const request = mutation({
 	args: {
+		demoSessionToken: v.optional(v.string()),
 		repositoryId: v.id("repositories"),
 		connectionId: v.id("providerConnections"),
 		externalFileId: v.string(),
@@ -29,6 +38,7 @@ export const request = mutation({
 			ctx,
 			args.repositoryId,
 			"admin",
+			args.demoSessionToken,
 		);
 		const connection = await ctx.db.get(args.connectionId);
 		if (

@@ -1,6 +1,6 @@
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import {
@@ -21,17 +21,76 @@ import type {
 
 type Workspace = FunctionReturnType<typeof api.platform.workspace>;
 
-export function ConvexPlatformProvider({ children }: { children: ReactNode }) {
-	const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+export function ConvexPlatformProvider({
+	children,
+	demoSessionToken,
+	onSwitchDemoMember,
+}: ConvexPlatformProviderProps) {
+	if (demoSessionToken) {
+		return (
+			<ConvexPlatformProviderInner
+				demoSessionToken={demoSessionToken}
+				onSwitchDemoMember={onSwitchDemoMember}
+				isAuthenticated
+				authLoading={false}
+			>
+				{children}
+			</ConvexPlatformProviderInner>
+		);
+	}
+	return (
+		<AuthenticatedConvexPlatformProvider
+			onSwitchDemoMember={onSwitchDemoMember}
+		>
+			{children}
+		</AuthenticatedConvexPlatformProvider>
+	);
+}
+
+type ConvexPlatformProviderProps = {
+	children: ReactNode;
+	demoSessionToken?: string;
+	onSwitchDemoMember?: (membershipId: string) => Promise<void>;
+};
+
+function AuthenticatedConvexPlatformProvider({
+	children,
+	onSwitchDemoMember,
+}: ConvexPlatformProviderProps) {
+	const convexAuth = useConvexAuth();
+	return (
+		<ConvexPlatformProviderInner
+			onSwitchDemoMember={onSwitchDemoMember}
+			isAuthenticated={convexAuth.isAuthenticated}
+			authLoading={convexAuth.isLoading}
+		>
+			{children}
+		</ConvexPlatformProviderInner>
+	);
+}
+
+function ConvexPlatformProviderInner({
+	children,
+	demoSessionToken,
+	onSwitchDemoMember,
+	isAuthenticated,
+	authLoading,
+}: ConvexPlatformProviderProps & {
+	isAuthenticated: boolean;
+	authLoading: boolean;
+}) {
 	const workspace = useQuery(
 		api.platform.workspace,
-		isAuthenticated ? {} : "skip",
+		isAuthenticated ? { demoSessionToken } : "skip",
 	);
 	const ensureSeeded = useMutation(api.platform.ensureSeeded);
+	const ensureGitFixtures = useMutation(api.platform.ensureGitFixtures);
+	const fixtureRequested = useRef(false);
 	const createIssueMutation = useMutation(api.issues.create);
 	const transitionIssue = useMutation(api.issues.transition);
 	const commentIssue = useMutation(api.issues.comment);
 	const createChangeMutation = useMutation(api.changes.create);
+	const createRevisionMutation = useMutation(api.changes.createRevision);
 	const commentChange = useMutation(api.changes.comment);
 	const submitReview = useMutation(api.changes.submitReview);
 	const mergeChangeMutation = useMutation(api.changes.merge);
@@ -45,13 +104,19 @@ export function ConvexPlatformProvider({ children }: { children: ReactNode }) {
 	const markRead = useMutation(api.notifications.markRead);
 	const authorizeUpload = useMutation(api.uploads.authorize);
 	const requestUploadUrl = useAction(api.uploads.requestUploadUrl);
+	const requestDownloadUrl = useAction(api.uploads.requestDownloadUrl);
 	const finalizeUpload = useMutation(api.uploads.finalize);
 
 	useEffect(() => {
 		if (isAuthenticated && workspace && workspace.repositories.length === 0) {
-			void ensureSeeded({});
+			void ensureSeeded({ demoSessionToken });
 		}
-	}, [ensureSeeded, isAuthenticated, workspace]);
+	}, [demoSessionToken, ensureSeeded, isAuthenticated, workspace]);
+	useEffect(() => {
+		if (!demoSessionToken || !workspace || fixtureRequested.current) return;
+		fixtureRequested.current = true;
+		void ensureGitFixtures({ demoSessionToken });
+	}, [demoSessionToken, ensureGitFixtures, workspace]);
 
 	if (authLoading || (isAuthenticated && workspace === undefined)) {
 		return (
@@ -67,15 +132,21 @@ export function ConvexPlatformProvider({ children }: { children: ReactNode }) {
 			</div>
 		);
 	}
-	if (!isAuthenticated || !workspace) {
+	// Let AuthGate render the development sign-in experience. None of the
+	// application routes mount while signed out, so they cannot consume the
+	// platform context until Convex has an authenticated workspace.
+	if (!isAuthenticated) return <>{children}</>;
+
+	if (!workspace) {
 		return (
 			<main className="grid min-h-screen place-items-center bg-[#f7faf9] px-6 text-center">
 				<div>
 					<h1 className="text-xl font-semibold text-slate-900">
-						Sign in to TieCamel
+						Workspace access required
 					</h1>
 					<p className="mt-2 text-sm text-slate-600">
-						This workspace uses verified organization access.
+						Your development account does not have an active organization
+						membership yet.
 					</p>
 				</div>
 			</main>
@@ -86,15 +157,21 @@ export function ConvexPlatformProvider({ children }: { children: ReactNode }) {
 	const store: PlatformStore = {
 		...data,
 		reset: () => {
-			void ensureSeeded({});
+			void ensureSeeded({ demoSessionToken });
 		},
-		switchViewer: () => {
-			throw new Error(
-				"Identity switching is available only in simulated demo mode.",
-			);
+		switchViewer: (membershipId) => {
+			if (!onSwitchDemoMember) {
+				throw new Error(
+					"Identity switching is available only in development demo mode.",
+				);
+			}
+			void onSwitchDemoMember(membershipId);
 		},
 		createIssue: async (input) => {
-			const created = await createIssueMutation(issueArgs(input));
+			const created = await createIssueMutation({
+				...issueArgs(input),
+				demoSessionToken,
+			});
 			return syntheticIssue(
 				input,
 				String(created.issueId),
@@ -105,23 +182,27 @@ export function ConvexPlatformProvider({ children }: { children: ReactNode }) {
 		createRepository: async (input) => {
 			const repositoryId = await createRepositoryMutation({
 				...input,
+				demoSessionToken,
 			});
 			return syntheticRepository(input, String(repositoryId));
 		},
 		updateRepository: async (repositoryId, input) => {
 			await updateRepositoryMutation({
+				demoSessionToken,
 				repositoryId: repositoryId as Id<"repositories">,
 				...input,
 			});
 		},
 		moveIssue: async (id, status) => {
 			await transitionIssue({
+				demoSessionToken,
 				issueId: id as Id<"platformIssues">,
 				status,
 			});
 		},
 		addIssueComment: async (id, body, visibility) => {
 			await commentIssue({
+				demoSessionToken,
 				issueId: id as Id<"platformIssues">,
 				body,
 				visibility,
@@ -129,11 +210,15 @@ export function ConvexPlatformProvider({ children }: { children: ReactNode }) {
 		},
 		createChangeRequest: async (input) => {
 			const created = await createChangeMutation({
+				demoSessionToken,
 				repositoryId: input.repositoryId as Id<"repositories">,
 				title: input.title,
 				summary: input.summary,
 				linkedIssueId: input.linkedIssueId
 					? (input.linkedIssueId as Id<"platformIssues">)
+					: undefined,
+				targetRecordId: input.targetRecordId
+					? (input.targetRecordId as Id<"platformRecords">)
 					: undefined,
 				locationIds: input.locationIds as Array<Id<"locations">>,
 				labelIds: input.labelIds as Array<Id<"labels">>,
@@ -147,6 +232,7 @@ export function ConvexPlatformProvider({ children }: { children: ReactNode }) {
 					authorizeUpload,
 					requestUploadUrl,
 					finalizeUpload,
+					demoSessionToken,
 				);
 			}
 			return syntheticChange(
@@ -158,6 +244,7 @@ export function ConvexPlatformProvider({ children }: { children: ReactNode }) {
 		},
 		addChangeComment: async (id, body, visibility) => {
 			await commentChange({
+				demoSessionToken,
 				changeRequestId: id as Id<"changeRequests">,
 				body,
 				visibility,
@@ -165,6 +252,7 @@ export function ConvexPlatformProvider({ children }: { children: ReactNode }) {
 		},
 		reviewChange: async (id, decision, body) => {
 			await submitReview({
+				demoSessionToken,
 				changeRequestId: id as Id<"changeRequests">,
 				decision,
 				body,
@@ -172,17 +260,44 @@ export function ConvexPlatformProvider({ children }: { children: ReactNode }) {
 		},
 		mergeChange: async (id) => {
 			const result = await mergeChangeMutation({
+				demoSessionToken,
 				changeRequestId: id as Id<"changeRequests">,
 			});
 			if (!result.ok) throw new Error(result.message);
 		},
+		addChangeRevision: async (id, message, file) => {
+			await createRevisionMutation({
+				demoSessionToken,
+				changeRequestId: id as Id<"changeRequests">,
+				message,
+			});
+			await uploadPrimaryDocument(
+				data.changeRequests.find((change) => change.id === id)?.repositoryId ??
+					"",
+				id,
+				file,
+				authorizeUpload,
+				requestUploadUrl,
+				finalizeUpload,
+				demoSessionToken,
+			);
+		},
+		requestDocumentUrl: async (objectRef) => {
+			const result = await requestDownloadUrl({
+				demoSessionToken,
+				objectRef,
+			});
+			return result.url;
+		},
 		markNotificationRead: (id) => {
 			void markRead({
+				demoSessionToken,
 				notificationId: id as Id<"platformNotifications">,
 			});
 		},
 		updateRepositoryRules: async (repositoryId, rules) => {
 			await updateRulesMutation({
+				demoSessionToken,
 				repositoryId: repositoryId as Id<"repositories">,
 				...rules,
 				requiredTeamIds: rules.requiredTeamIds as Array<Id<"teams">>,
@@ -193,6 +308,7 @@ export function ConvexPlatformProvider({ children }: { children: ReactNode }) {
 				throw new Error("OneDrive for Business is not enabled yet.");
 			}
 			const result = await configureStorageMutation({
+				demoSessionToken,
 				repositoryId: repositoryId as Id<"repositories">,
 				provider,
 				connectionId: options?.connectionId
@@ -210,11 +326,12 @@ export function ConvexPlatformProvider({ children }: { children: ReactNode }) {
 		},
 		verifyProviderConnection: async (connectionId) => {
 			throw new Error(
-				`Provider verification for ${connectionId} requires the deployed Azure integration worker.`,
+				`Provider verification for ${connectionId} is not available in this environment.`,
 			);
 		},
 		requestBaselineImport: async (input) => {
 			const result = await requestBaseline({
+				demoSessionToken,
 				repositoryId: input.repositoryId as Id<"repositories">,
 				connectionId: input.connectionId as Id<"providerConnections">,
 				externalFileId: input.externalFileId,
@@ -232,6 +349,12 @@ export function ConvexPlatformProvider({ children }: { children: ReactNode }) {
 }
 
 function mapWorkspace(workspace: Workspace): PlatformData {
+	const membershipIdByUserId = new Map(
+		workspace.memberUsers.map(({ membership }) => [
+			String(membership.userId),
+			String(membership._id),
+		]),
+	);
 	const members = workspace.memberUsers
 		.filter(
 			(
@@ -288,6 +411,9 @@ function mapWorkspace(workspace: Workspace): PlatformData {
 			issueCount: repository.issueCount,
 			changeCount: repository.changeCount,
 			recordCount: repository.recordCount,
+			headCommitId: repository.headCommitId
+				? String(repository.headCommitId)
+				: undefined,
 			updatedAt: iso(repository.updatedAt),
 		}));
 	const issues: Issue[] = workspace.issues.map((issue) => ({
@@ -340,6 +466,9 @@ function mapWorkspace(workspace: Workspace): PlatformData {
 						role: file.role,
 						objectKey: file.objectKey,
 						azureBlobRef: file.azureBlobRef,
+						previewUrl: file.azureBlobRef.startsWith("demo://")
+							? file.azureBlobRef.replace("demo://", "")
+							: undefined,
 						processingStatus:
 							file.processingStatus === "quarantined"
 								? ("processing" as const)
@@ -410,9 +539,22 @@ function mapWorkspace(workspace: Workspace): PlatformData {
 					severity: finding.severity,
 				})),
 			textDiff: asTextDiff(documentDiff?.text),
+			artifacts: workspace.documentArtifacts
+				.filter((artifact) => artifact.revisionId === change.headRevisionId)
+				.map((artifact) => ({
+					id: String(artifact._id),
+					kind: artifact.kind,
+					objectRef: artifact.objectRef,
+					sha256: artifact.sha256,
+					processorVersion: artifact.processorVersion,
+					metadata: artifact.metadata as Record<string, unknown> | undefined,
+				})),
 			unresolvedThreads: change.unresolvedThreads,
 			baseVersionId: change.baseVersionId
 				? String(change.baseVersionId)
+				: undefined,
+			baseCommitId: change.baseCommitId
+				? String(change.baseCommitId)
 				: undefined,
 			outOfDate: change.outOfDate,
 			publicAfterMerge: change.publicAfterMerge,
@@ -477,6 +619,13 @@ function mapWorkspace(workspace: Workspace): PlatformData {
 								(revision) => revision.id === String(version.revisionId),
 							)?.files ?? [],
 					sha256: version.sha256,
+					contentSha256: version.contentSha256,
+					normalizedSha256: version.normalizedSha256,
+					parentVersionId: version.parentVersionId
+						? String(version.parentVersionId)
+						: undefined,
+					commitId: version.commitId ? String(version.commitId) : undefined,
+					exactBlobRef: version.exactBlobRef,
 					manifestSha256: version.manifestSha256,
 					masterProvider: version.masterProvider,
 					azureEvidenceRef: version.azureEvidenceRef,
@@ -489,6 +638,36 @@ function mapWorkspace(workspace: Workspace): PlatformData {
 				})),
 			updatedAt: iso(record.updatedAt),
 		})),
+		repositoryCommits: workspace.repositoryCommits.map((commit) => {
+			const anchor = workspace.integrityAnchors.find(
+				(item) => item.repositoryCommitId === commit._id,
+			);
+			return {
+				id: String(commit._id),
+				repositoryId: String(commit.repositoryId),
+				sequence: commit.sequence,
+				parentCommitId: commit.parentCommitId
+					? String(commit.parentCommitId)
+					: undefined,
+				parentCommitSha256: commit.parentCommitSha256,
+				treeSha256: commit.treeSha256,
+				commitSha256: commit.commitSha256,
+				treeManifest: commit.treeManifest,
+				commitManifest: commit.commitManifest,
+				changeRequestId: String(commit.changeRequestId),
+				recordVersionId: String(commit.recordVersionId),
+				createdBy: String(commit.createdBy),
+				createdAt: iso(commit.createdAt),
+				anchor: anchor
+					? {
+							status: anchor.status,
+							network: anchor.network,
+							signature: anchor.signature,
+							explorerUrl: anchor.explorerUrl,
+						}
+					: undefined,
+			};
+		}),
 		providerConnections: workspace.providerConnections.map((connection) => ({
 			id: String(connection._id),
 			organizationId: String(connection.organizationId),
@@ -563,7 +742,9 @@ function mapWorkspace(workspace: Workspace): PlatformData {
 		activity: workspace.activity.map(
 			(event): ActivityEvent => ({
 				id: String(event._id),
-				actorId: event.actorUserId ? String(event.actorUserId) : undefined,
+				actorId: event.actorUserId
+					? membershipIdByUserId.get(String(event.actorUserId))
+					: undefined,
 				action: event.action,
 				target: event.targetId,
 				detail: event.reason,
@@ -680,6 +861,7 @@ function syntheticChange(
 		locationIds: input.locationIds,
 		labelIds: input.labelIds,
 		linkedIssueId: input.linkedIssueId,
+		targetRecordId: input.targetRecordId,
 		createdAt: now,
 		updatedAt: now,
 		revisions: [],
@@ -688,6 +870,7 @@ function syntheticChange(
 		comments: [],
 		structuredDiff: [],
 		textDiff: [],
+		artifacts: [],
 		unresolvedThreads: 0,
 		outOfDate: false,
 		publicAfterMerge: input.publicAfterMerge,
@@ -701,6 +884,7 @@ async function uploadPrimaryDocument(
 	authorize: ReturnType<typeof useMutation<typeof api.uploads.authorize>>,
 	requestUrl: ReturnType<typeof useAction<typeof api.uploads.requestUploadUrl>>,
 	finalize: ReturnType<typeof useMutation<typeof api.uploads.finalize>>,
+	demoSessionToken?: string,
 ) {
 	const bytes = await file.arrayBuffer();
 	const digest = await crypto.subtle.digest("SHA-256", bytes);
@@ -708,6 +892,7 @@ async function uploadPrimaryDocument(
 		.map((byte) => byte.toString(16).padStart(2, "0"))
 		.join("");
 	const session = await authorize({
+		demoSessionToken,
 		repositoryId: repositoryId as Id<"repositories">,
 		changeRequestId: changeRequestId as Id<"changeRequests">,
 		fileName: file.name,
@@ -716,6 +901,7 @@ async function uploadPrimaryDocument(
 		role: "primary",
 	});
 	const upload = await requestUrl({
+		demoSessionToken,
 		uploadSessionId: session.uploadSessionId,
 	});
 	const response = await fetch(upload.url, {
@@ -724,9 +910,10 @@ async function uploadPrimaryDocument(
 		body: file,
 	});
 	if (!response.ok) {
-		throw new Error(`Azure upload failed (${response.status}).`);
+		throw new Error(`Document upload failed (${response.status}).`);
 	}
 	await finalize({
+		demoSessionToken,
 		uploadSessionId: session.uploadSessionId,
 		sha256,
 	});

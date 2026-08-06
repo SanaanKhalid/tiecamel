@@ -6,9 +6,9 @@ import {
 } from "./lib/platformAuth";
 
 export const list = query({
-	args: {},
-	handler: async (ctx) => {
-		const session = await requirePlatformSession(ctx);
+	args: { demoSessionToken: v.optional(v.string()) },
+	handler: async (ctx, args) => {
+		const session = await requirePlatformSession(ctx, args.demoSessionToken);
 		const repositories = await ctx.db
 			.query("repositories")
 			.withIndex("by_organization", (q) =>
@@ -48,9 +48,13 @@ export const list = query({
 });
 
 export const getBySlug = query({
-	args: { organizationSlug: v.string(), repositorySlug: v.string() },
+	args: {
+		organizationSlug: v.string(),
+		repositorySlug: v.string(),
+		demoSessionToken: v.optional(v.string()),
+	},
 	handler: async (ctx, args) => {
-		const session = await requirePlatformSession(ctx);
+		const session = await requirePlatformSession(ctx, args.demoSessionToken);
 		const organization = await ctx.db
 			.query("organizations")
 			.withIndex("by_slug", (q) => q.eq("slug", args.organizationSlug))
@@ -70,7 +74,12 @@ export const getBySlug = query({
 			)
 			.unique();
 		if (!repository) return null;
-		await requireRepositoryAccess(ctx, repository._id);
+		await requireRepositoryAccess(
+			ctx,
+			repository._id,
+			"read",
+			args.demoSessionToken,
+		);
 		const rules = await ctx.db
 			.query("repositoryRules")
 			.withIndex("by_repository", (q) => q.eq("repositoryId", repository._id))
@@ -81,6 +90,7 @@ export const getBySlug = query({
 
 export const updateRules = mutation({
 	args: {
+		demoSessionToken: v.optional(v.string()),
 		repositoryId: v.id("repositories"),
 		minimumApprovals: v.number(),
 		requiredTeamIds: v.array(v.id("teams")),
@@ -98,6 +108,7 @@ export const updateRules = mutation({
 			ctx,
 			args.repositoryId,
 			"admin",
+			args.demoSessionToken,
 		);
 		if (args.minimumApprovals < 1 || args.minimumApprovals > 12) {
 			throw new Error("Minimum approvals must be between 1 and 12");
@@ -158,6 +169,7 @@ export const updateRules = mutation({
 
 export const create = mutation({
 	args: {
+		demoSessionToken: v.optional(v.string()),
 		name: v.string(),
 		slug: v.string(),
 		prefix: v.string(),
@@ -171,7 +183,7 @@ export const create = mutation({
 		minimumApprovals: v.number(),
 	},
 	handler: async (ctx, args) => {
-		const session = await requirePlatformSession(ctx);
+		const session = await requirePlatformSession(ctx, args.demoSessionToken);
 		if (!["administrator", "owner"].includes(session.membership.role)) {
 			throw new Error("Organization administration is required");
 		}
@@ -284,6 +296,7 @@ export const create = mutation({
 
 export const update = mutation({
 	args: {
+		demoSessionToken: v.optional(v.string()),
 		repositoryId: v.id("repositories"),
 		name: v.string(),
 		description: v.string(),
@@ -299,6 +312,7 @@ export const update = mutation({
 			ctx,
 			args.repositoryId,
 			"admin",
+			args.demoSessionToken,
 		);
 		const name = args.name.trim();
 		const description = args.description.trim();

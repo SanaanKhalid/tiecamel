@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { canonicalJson, sha256Text } from "./canonical-json.js";
 import {
 	compareTaxNoticeFields,
+	diffLines,
 	extractTaxNoticeFields,
+	normalizeExtractedContent,
 } from "./document-processor.js";
 import { integrityMemo } from "./solana-anchor.js";
 
@@ -20,14 +22,26 @@ describe("publication integrity", () => {
 		expect(sha256Text(left)).toMatch(/^[a-f0-9]{64}$/);
 	});
 
-	it("places only the manifest commitment in the Solana memo", () => {
+	it("places only the repository commit hash in the Solana v2 memo", () => {
 		const commitment = "a".repeat(64);
-		expect(integrityMemo(commitment)).toBe(`tiecamel:v1:${commitment}`);
+		expect(integrityMemo(commitment)).toBe(
+			`tiecamel:commit:v2:${commitment}`,
+		);
 		expect(() => integrityMemo("not-a-hash")).toThrow(/SHA-256/);
 	});
 });
 
 describe("tax notice processing", () => {
+	it("normalizes and compares actual extracted lines deterministically", () => {
+		const before = normalizeExtractedContent("Amount: 10\r\nDue: Friday  ");
+		const after = normalizeExtractedContent("Amount: 12\nDue: Friday");
+		expect(diffLines(before, after)).toEqual([
+			{ type: "added", content: "Amount: 12" },
+			{ type: "removed", content: "Amount: 10" },
+			{ type: "unchanged", content: "Due: Friday" },
+		]);
+	});
+
 	it("extracts authoritative fields and warns about a shortened deadline", () => {
 		const fields = extractTaxNoticeFields(`
 Notice Date: July 1, 2026

@@ -65,6 +65,7 @@ export function OrganizationPage() {
 					</button>
 					<Link
 						to="/work"
+						search={{ new: undefined }}
 						preload="intent"
 						className="secondary-button inline-flex items-center gap-2 rounded-md border border-[#d0d7de] bg-white px-3 py-2 text-sm font-semibold shadow-sm hover:bg-[#f6f8fa]"
 					>
@@ -174,6 +175,7 @@ export function OrganizationPage() {
 						<h2 className="text-lg font-semibold">Needs attention</h2>
 						<Link
 							to="/work"
+							search={{ new: undefined }}
 							preload="intent"
 							className="text-sm font-semibold text-[#0969da] hover:underline"
 						>

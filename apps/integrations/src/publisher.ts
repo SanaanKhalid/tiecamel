@@ -52,6 +52,7 @@ export async function processPublication(command: PublicationCommand) {
 	return {
 		...result,
 		azureEvidenceRef: evidenceRef,
+		exactBlobRef: `${evidenceRef}/${command.fileName}`,
 		publicationManifestRef,
 		manifestSha256,
 		sha256: actualSha256,

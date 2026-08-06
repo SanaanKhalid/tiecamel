@@ -121,6 +121,17 @@ export default defineSchema({
 		email: v.string(),
 		createdAt: v.number(),
 	}).index("by_clerk_user", ["clerkUserId"]),
+	demoSessions: defineTable({
+		organizationId: v.id("organizations"),
+		tokenSha256: v.string(),
+		activeMembershipId: v.id("memberships"),
+		allowedMembershipIds: v.array(v.id("memberships")),
+		expiresAt: v.number(),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_token_sha256", ["tokenSha256"])
+		.index("by_organization", ["organizationId"]),
 	memberships: defineTable({
 		organizationId: v.id("organizations"),
 		userId: v.id("users"),
@@ -188,6 +199,7 @@ export default defineSchema({
 		issueCount: v.number(),
 		changeCount: v.number(),
 		recordCount: v.number(),
+		headCommitId: v.optional(v.id("repositoryCommits")),
 		createdAt: v.number(),
 		updatedAt: v.number(),
 	})
@@ -200,6 +212,7 @@ export default defineSchema({
 		role: repositoryRole,
 		createdAt: v.number(),
 	})
+		.index("by_organization", ["organizationId"])
 		.index("by_repository", ["repositoryId"])
 		.index("by_repository_and_member", ["repositoryId", "membershipId"]),
 	repositoryRules: defineTable({
@@ -294,6 +307,7 @@ export default defineSchema({
 		targetRecordId: v.optional(v.id("platformRecords")),
 		headRevisionId: v.optional(v.id("changeRevisions")),
 		baseVersionId: v.optional(v.id("recordVersions")),
+		baseCommitId: v.optional(v.id("repositoryCommits")),
 		rulesVersion: v.number(),
 		unresolvedThreads: v.number(),
 		outOfDate: v.boolean(),
@@ -397,6 +411,11 @@ export default defineSchema({
 		createdBy: v.id("memberships"),
 		summary: v.string(),
 		sha256: v.string(),
+		contentSha256: v.optional(v.string()),
+		normalizedSha256: v.optional(v.string()),
+		parentVersionId: v.optional(v.id("recordVersions")),
+		commitId: v.optional(v.id("repositoryCommits")),
+		exactBlobRef: v.optional(v.string()),
 		manifestSha256: v.optional(v.string()),
 		masterProvider: storageProvider,
 		azureEvidenceRef: v.string(),
@@ -411,6 +430,52 @@ export default defineSchema({
 		.index("by_organization", ["organizationId"])
 		.index("by_record", ["recordId"])
 		.index("by_change_request", ["changeRequestId"]),
+	repositoryCommits: defineTable({
+		organizationId: v.id("organizations"),
+		repositoryId: v.id("repositories"),
+		sequence: v.number(),
+		parentCommitId: v.optional(v.id("repositoryCommits")),
+		parentCommitSha256: v.optional(v.string()),
+		treeSha256: v.string(),
+		commitSha256: v.string(),
+		treeManifest: v.string(),
+		commitManifest: v.string(),
+		treeManifestRef: v.string(),
+		commitManifestRef: v.string(),
+		changeRequestId: v.id("changeRequests"),
+		recordVersionId: v.id("recordVersions"),
+		createdBy: v.id("memberships"),
+		createdAt: v.number(),
+	})
+		.index("by_organization", ["organizationId"])
+		.index("by_repository", ["repositoryId"])
+		.index("by_repository_and_sequence", ["repositoryId", "sequence"])
+		.index("by_commit_sha256", ["commitSha256"])
+		.index("by_change_request", ["changeRequestId"]),
+	documentArtifacts: defineTable({
+		organizationId: v.id("organizations"),
+		repositoryId: v.id("repositories"),
+		changeRequestId: v.id("changeRequests"),
+		fileId: v.id("changeFiles"),
+		revisionId: v.id("changeRevisions"),
+		kind: v.union(
+			v.literal("normalized-content"),
+			v.literal("page-render"),
+			v.literal("text"),
+			v.literal("table"),
+			v.literal("thumbnail"),
+		),
+		objectRef: v.string(),
+		sha256: v.string(),
+		processorVersion: v.string(),
+		metadata: v.optional(v.any()),
+		createdAt: v.number(),
+	})
+		.index("by_organization", ["organizationId"])
+		.index("by_revision", ["revisionId"])
+		.index("by_file", ["fileId"])
+		.index("by_change_request", ["changeRequestId"])
+		.index("by_object_ref", ["objectRef"]),
 	extractedFields: defineTable({
 		organizationId: v.id("organizations"),
 		changeRequestId: v.id("changeRequests"),
@@ -432,6 +497,14 @@ export default defineSchema({
 		structured: v.any(),
 		text: v.any(),
 		visualManifestKey: v.optional(v.string()),
+		format: v.optional(v.literal("tiecamel-document-diff/v2")),
+		baseContentSha256: v.optional(v.string()),
+		proposedContentSha256: v.optional(v.string()),
+		baseNormalizedSha256: v.optional(v.string()),
+		proposedNormalizedSha256: v.optional(v.string()),
+		artifactRefs: v.optional(v.array(v.string())),
+		summary: v.optional(v.any()),
+		processorVersion: v.optional(v.string()),
 		createdAt: v.number(),
 	})
 		.index("by_organization", ["organizationId"])
@@ -545,11 +618,18 @@ export default defineSchema({
 		repositoryId: v.id("repositories"),
 		recordId: v.id("platformRecords"),
 		recordVersionId: v.id("recordVersions"),
+		repositoryCommitId: v.optional(v.id("repositoryCommits")),
 		publicSnapshotId: v.optional(v.id("publicRepositorySnapshots")),
 		idempotencyKey: v.string(),
 		algorithm: v.literal("sha256"),
 		commitment: v.string(),
 		manifestSha256: v.string(),
+		proofFormat: v.optional(
+			v.union(
+				v.literal("tiecamel-publication-manifest/v1"),
+				v.literal("tiecamel-repository-commit/v2"),
+			),
+		),
 		memo: v.string(),
 		network: v.union(v.literal("devnet"), v.literal("mainnet-beta")),
 		status: v.union(
@@ -563,13 +643,16 @@ export default defineSchema({
 		signature: v.optional(v.string()),
 		slot: v.optional(v.number()),
 		explorerUrl: v.optional(v.string()),
+		observedMemo: v.optional(v.string()),
 		errorCode: v.optional(v.string()),
 		errorMessage: v.optional(v.string()),
 		createdAt: v.number(),
 		updatedAt: v.number(),
 		anchoredAt: v.optional(v.number()),
 	})
+		.index("by_organization", ["organizationId"])
 		.index("by_record_version", ["recordVersionId"])
+		.index("by_repository_commit", ["repositoryCommitId"])
 		.index("by_idempotency_key", ["idempotencyKey"])
 		.index("by_repository_and_time", ["repositoryId", "createdAt"]),
 	providerConnections: defineTable({

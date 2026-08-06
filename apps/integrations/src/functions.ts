@@ -13,7 +13,6 @@ import {
 import { DefaultAzureCredential } from "@azure/identity";
 import { ServiceBusClient } from "@azure/service-bus";
 import type {
-	DocumentProcessingCallback,
 	DocumentProcessingCommand,
 	IntegrityAnchorCallback,
 	IntegrityAnchorCommand,
@@ -21,7 +20,6 @@ import type {
 	PublicationCommand,
 } from "./contracts.js";
 import { sendSignedCallback } from "./callbacks.js";
-import { processDocument } from "./document-processor.js";
 import { anchorIntegrity } from "./solana-anchor.js";
 import { processPublication, sendCallback } from "./publisher.js";
 import { verifyServiceToken } from "./security.js";
@@ -63,12 +61,59 @@ app.http("authorizeUpload", {
 		return {
 			status: 200,
 			jsonBody: {
-				url: `${service.url}/${container}/${path.join("/")}?${sas}`,
+				url: `${service.url.replace(/\/$/, "")}/${container}/${path.join("/")}?${sas}`,
 				method: "PUT",
 				headers: {
 					"x-ms-blob-type": "BlockBlob",
 					"Content-Type": body.mimeType,
 				},
+				expiresAt: expires.toISOString(),
+			},
+		};
+	},
+});
+
+app.http("authorizeDocumentRead", {
+	methods: ["POST"],
+	authLevel: "anonymous",
+	route: "documents/read",
+	handler: async (request) => {
+		if (!authorized(request)) return unauthorized();
+		const body = (await request.json()) as { objectRef?: string };
+		const match = /^azure:\/\/(quarantine|processed|evidence)\/(.+)$/.exec(
+			body.objectRef ?? "",
+		);
+		if (!match || match[2].includes("..")) {
+			return { status: 400, jsonBody: { error: "Invalid document reference" } };
+		}
+		const [, container, blobName] = match;
+		const service = blobService();
+		const blob = service.getContainerClient(container).getBlobClient(blobName);
+		if (!(await blob.exists())) {
+			return { status: 404, jsonBody: { error: "Document not found" } };
+		}
+		const now = new Date();
+		const expires = new Date(now.getTime() + 10 * 60 * 1000);
+		const delegation = await service.getUserDelegationKey(
+			new Date(now.getTime() - 60_000),
+			expires,
+		);
+		const sas = generateBlobSASQueryParameters(
+			{
+				containerName: container,
+				blobName,
+				permissions: BlobSASPermissions.parse("r"),
+				startsOn: now,
+				expiresOn: expires,
+				protocol: SASProtocol.Https,
+			},
+			delegation,
+			service.accountName,
+		).toString();
+		return {
+			status: 200,
+			jsonBody: {
+				url: `${service.url.replace(/\/$/, "")}/${container}/${blobName}?${sas}`,
 				expiresAt: expires.toISOString(),
 			},
 		};
@@ -186,44 +231,6 @@ app.serviceBusQueue("processPublication", {
 			};
 		}
 		await sendCallback(callback);
-	},
-});
-
-app.serviceBusQueue("processDocument", {
-	connection: "AZURE_SERVICE_BUS_CONNECTION",
-	queueName: "processing",
-	handler: async (
-		command: DocumentProcessingCommand,
-		context: InvocationContext,
-	) => {
-		let callback: DocumentProcessingCallback;
-		try {
-			const result = await processDocument(command);
-			callback = {
-				uploadSessionId: command.uploadSessionId,
-				idempotencyKey: command.idempotencyKey,
-				succeeded: true,
-				result,
-				completedAt: new Date().toISOString(),
-			};
-		} catch (error) {
-			context.error(error);
-			callback = {
-				uploadSessionId: command.uploadSessionId,
-				idempotencyKey: command.idempotencyKey,
-				succeeded: false,
-				error: {
-					code: "PROCESSING_FAILED",
-					message:
-						error instanceof Error
-							? error.message
-							: "Document processing failed",
-					retryable: true,
-				},
-				completedAt: new Date().toISOString(),
-			};
-		}
-		await sendSignedCallback("CONVEX_PROCESSING_CALLBACK_URL", callback);
 	},
 });
 

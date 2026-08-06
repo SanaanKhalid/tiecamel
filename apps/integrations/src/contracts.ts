@@ -48,6 +48,7 @@ export type PublicationCommand = {
 export type PublishedObject = {
 	provider: StorageProvider;
 	azureEvidenceRef: string;
+	exactBlobRef?: string;
 	publicationManifestRef: string;
 	manifestSha256?: string;
 	sha256: string;
@@ -127,6 +128,7 @@ export type DocumentProcessingCommand = {
 
 export type DocumentProcessingResult = {
 	sha256: string;
+	normalizedSha256: string;
 	detectedMimeType: string;
 	malwareScan: "clean";
 	extracted: ExtractedField[];
@@ -136,6 +138,25 @@ export type DocumentProcessingResult = {
 		content: string;
 	}>;
 	visualManifestKey?: string;
+	artifacts: Array<{
+		kind: "normalized-content" | "page-render" | "text" | "table" | "thumbnail";
+		objectRef: string;
+		sha256: string;
+		processorVersion: string;
+		metadata?: Record<string, unknown>;
+	}>;
+	diff: {
+		format: "tiecamel-document-diff/v2";
+		baseContentSha256?: string;
+		proposedContentSha256: string;
+		baseNormalizedSha256?: string;
+		proposedNormalizedSha256: string;
+		stats: {
+			additions: number;
+			deletions: number;
+			changes: number;
+		};
+	};
 	processorVersion: string;
 };
 
@@ -156,6 +177,12 @@ export type IntegrityAnchorCommand = {
 	commitment: string;
 	manifestSha256: string;
 	memo: string;
+	proofFormat?:
+		| "tiecamel-publication-manifest/v1"
+		| "tiecamel-repository-commit/v2";
+	repositoryCommitId?: string;
+	commitManifest?: string;
+	treeManifest?: string;
 };
 
 export type IntegrityAnchorCallback = {
@@ -166,6 +193,7 @@ export type IntegrityAnchorCallback = {
 		signature: string;
 		slot: number;
 		explorerUrl: string;
+		observedMemo: string;
 	};
 	error?: { code: string; message: string; retryable: boolean };
 	completedAt: string;

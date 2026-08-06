@@ -80,7 +80,7 @@ export function OrganizationSettingsPage() {
 						href="#services"
 						className="flex items-center gap-2 rounded-md px-3 py-2 text-[#656d76] hover:bg-[#f6f8fa]"
 					>
-						<Database className="size-4" /> Platform services
+						<Database className="size-4" /> System status
 					</a>
 				</nav>
 
@@ -198,8 +198,8 @@ export function OrganizationSettingsPage() {
 							<h2 className="font-semibold">Accepted-record integrations</h2>
 							<p className="mt-1 text-xs leading-5 text-[#656d76]">
 								Optional connections let a repository publish its approved
-								document into a fixed client-owned folder. Azure evidence and
-								the TieCamel audit history are always retained.
+								document into a fixed client-owned folder. TieCamel always
+								retains the approved version and its audit history.
 							</p>
 						</div>
 						<div className="space-y-3 p-4">
@@ -295,36 +295,39 @@ export function OrganizationSettingsPage() {
 						className="rounded-md border border-[#d0d7de] bg-white"
 					>
 						<div className="border-b border-[#d8dee4] p-4">
-							<h2 className="font-semibold">Platform services</h2>
+							<h2 className="font-semibold">System status</h2>
+							<p className="mt-1 text-xs text-[#656d76]">
+								Core services supporting this workspace.
+							</p>
 						</div>
 						<div className="grid gap-3 p-4 sm:grid-cols-2">
 							<Service
-								title="Clerk identity"
+								title="Secure access"
 								ready={clientConfig.authConfigured}
 								detail={
 									clientConfig.authConfigured
 										? "Verified sign-in enabled"
-										: "Demo identity"
+										: "Preview access enabled"
 								}
 							/>
 							<Service
-								title="Convex metadata"
+								title="Workspace data"
 								ready={clientConfig.convexConfigured}
 								detail={
 									clientConfig.convexConfigured
-										? "Reactive backend connected"
+										? "Connected and up to date"
 										: "Seeded preview data"
 								}
 							/>
 							<Service
-								title="Azure record storage"
+								title="Managed record storage"
 								ready
-								detail="Blob quarantine, processing, and sealed evidence"
+								detail="Private uploads and immutable accepted records"
 							/>
 							<Service
-								title="Azure processing workflow"
+								title="Document processing"
 								ready={false}
-								detail="Service Bus, Functions, and Container Apps"
+								detail="Scanning, extraction, comparison, and verification"
 							/>
 						</div>
 					</section>

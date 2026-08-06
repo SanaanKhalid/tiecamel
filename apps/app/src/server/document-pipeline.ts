@@ -49,7 +49,7 @@ export function validateDocumentJob(job: DocumentJobMessage) {
 		throw new Error("Document jobs must start from the quarantine prefix");
 	}
 	if (!job.azureBlobRef.startsWith("azure://quarantine/")) {
-		throw new Error("Document jobs require a quarantined Azure Blob reference");
+		throw new Error("Document jobs require a managed quarantine reference");
 	}
 	if (!/^[a-f0-9]{64}$/i.test(job.expectedSha256)) {
 		throw new Error("Document job requires a SHA-256 checksum");

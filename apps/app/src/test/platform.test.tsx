@@ -219,15 +219,35 @@ describe("TieCamel repository platform", () => {
 		expect(screen.getByText("Close to breach")).toBeTruthy();
 	});
 
+	it("shows a real PDF fixture on seeded issue examples", async () => {
+		await renderPlatform(
+			<IssueDetailPage repositorySlug="funding" issueNumber={12} />,
+		);
+
+		const documentLink = screen.getByRole("link", {
+			name: /youth-enrichment-grant-allocation-proposal\.pdf/i,
+		});
+		expect(documentLink.getAttribute("href")).toBe(
+			"/demo-documents/youth-enrichment-grant-allocation-proposal.pdf",
+		);
+		expect(screen.getByText(/Allocation proposal, restrictions/)).toBeTruthy();
+	});
+
 	it("shows only comparison data produced for the change request", async () => {
 		await renderPlatform(
 			<ChangeDetailPage repositorySlug="compliance" changeNumber={23} />,
 		);
 
 		fireEvent.click(screen.getByRole("button", { name: /Changes/ }));
-		expect(screen.getByText("Balance due")).toBeTruthy();
-		expect(screen.getAllByText("$18,420.00").length).toBeGreaterThan(0);
-		expect(screen.getAllByText("$21,860.00").length).toBeGreaterThan(0);
+		expect(
+			screen.getByText("No structured field changes were detected."),
+		).toBeTruthy();
+		expect(
+			screen.getByText("No text comparison is available for this revision."),
+		).toBeTruthy();
+		expect(screen.queryByText("Balance due")).toBeNull();
+		expect(screen.queryByText("$18,420.00")).toBeNull();
+		expect(screen.queryByText("$21,860.00")).toBeNull();
 		expect(screen.getByText("Text comparison")).toBeTruthy();
 		expect(screen.getByText("Visual comparison")).toBeTruthy();
 		expect(

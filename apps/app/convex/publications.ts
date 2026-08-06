@@ -9,6 +9,11 @@ import {
 	mutation,
 	query,
 } from "./_generated/server";
+import {
+	repositoryCommitManifest,
+	repositoryTreeManifest,
+	sha256Hex,
+} from "./lib/canonical";
 import { requireRepositoryAccess } from "./lib/platformAuth";
 
 const publicationResult = v.object({
@@ -18,6 +23,7 @@ const publicationResult = v.object({
 		v.literal("one-drive"),
 	),
 	azureEvidenceRef: v.string(),
+	exactBlobRef: v.optional(v.string()),
 	publicationManifestRef: v.string(),
 	manifestSha256: v.string(),
 	sha256: v.string(),
@@ -28,11 +34,19 @@ const publicationResult = v.object({
 });
 
 export const getForChange = query({
-	args: { changeRequestId: v.id("changeRequests") },
+	args: {
+		changeRequestId: v.id("changeRequests"),
+		demoSessionToken: v.optional(v.string()),
+	},
 	handler: async (ctx, args) => {
 		const change = await ctx.db.get(args.changeRequestId);
 		if (!change) return null;
-		await requireRepositoryAccess(ctx, change.repositoryId);
+		await requireRepositoryAccess(
+			ctx,
+			change.repositoryId,
+			"read",
+			args.demoSessionToken,
+		);
 		return ctx.db
 			.query("publicationJobs")
 			.withIndex("by_change_request", (q) =>
@@ -44,7 +58,10 @@ export const getForChange = query({
 });
 
 export const request = mutation({
-	args: { changeRequestId: v.id("changeRequests") },
+	args: {
+		changeRequestId: v.id("changeRequests"),
+		demoSessionToken: v.optional(v.string()),
+	},
 	handler: async (ctx, args) => {
 		const change = await ctx.db.get(args.changeRequestId);
 		if (!change) {
@@ -54,6 +71,7 @@ export const request = mutation({
 			ctx,
 			change.repositoryId,
 			"review",
+			args.demoSessionToken,
 		);
 		if (!change.headRevisionId) {
 			return failure("NO_REVISION", "No revision is ready to publish");
@@ -388,8 +406,8 @@ export const dispatch = internalAction({
 		if (!baseUrl || !token) {
 			await ctx.runMutation(internal.publications.recordFailure, {
 				publicationJobId: args.publicationJobId,
-				code: "AZURE_NOT_CONFIGURED",
-				message: "Azure integration endpoint is not configured.",
+				code: "PUBLICATION_SERVICE_NOT_CONFIGURED",
+				message: "The publication service is not configured.",
 			});
 			return;
 		}
@@ -410,7 +428,7 @@ export const dispatch = internalAction({
 			);
 			if (!response.ok) {
 				throw new Error(
-					`Azure command intake returned ${response.status}: ${await response.text()}`,
+					`Publication could not be started (${response.status}).`,
 				);
 			}
 			const accepted = (await response.json()) as { commandId?: string };
@@ -425,7 +443,7 @@ export const dispatch = internalAction({
 				message:
 					error instanceof Error
 						? error.message
-						: "Azure command intake failed",
+						: "Publication could not be started",
 			});
 		}
 	},
@@ -491,16 +509,27 @@ export const finalize = internalMutation({
 			throw new Error("Publication job not found");
 		}
 		if (job.status === "succeeded") return job.recordId;
-		const [change, revision, repository, config, requester] = await Promise.all(
-			[
+		const [change, revision, repository, config, requester, primaryFile] =
+			await Promise.all([
 				ctx.db.get(job.changeRequestId),
 				ctx.db.get(job.revisionId),
 				ctx.db.get(job.repositoryId),
 				ctx.db.get(job.storageConfigId),
 				ctx.db.get(job.requestedBy),
-			],
-		);
-		if (!change || !revision || !repository || !config || !requester) {
+				ctx.db
+					.query("changeFiles")
+					.withIndex("by_revision", (q) => q.eq("revisionId", job.revisionId))
+					.filter((q) => q.eq(q.field("role"), "primary"))
+					.unique(),
+			]);
+		if (
+			!change ||
+			!revision ||
+			!repository ||
+			!config ||
+			!requester ||
+			!primaryFile
+		) {
 			throw new Error("Publication inputs are unavailable");
 		}
 		if (
@@ -518,6 +547,23 @@ export const finalize = internalMutation({
 		}
 		const now = Date.now();
 		let record = job.recordId ? await ctx.db.get(job.recordId) : null;
+		if (
+			record &&
+			(record.currentVersionId ?? undefined) !==
+				(change.baseVersionId ?? undefined)
+		) {
+			await Promise.all([
+				ctx.db.patch(change._id, { outOfDate: true, updatedAt: now }),
+				ctx.db.patch(job._id, {
+					status: "failed",
+					errorCode: "TARGET_RECORD_CHANGED",
+					errorMessage:
+						"The accepted record changed while publication was running. Reprocess this change against the new version.",
+					updatedAt: now,
+				}),
+			]);
+			throw new Error("The target record changed during publication");
+		}
 		if (!record) {
 			const recordId = await ctx.db.insert("platformRecords", {
 				organizationId: job.organizationId,
@@ -539,10 +585,16 @@ export const finalize = internalMutation({
 			});
 		}
 		if (!record) throw new Error("Record could not be created");
+		const parentVersionId = record.currentVersionId;
 		const priorVersions = await ctx.db
 			.query("recordVersions")
 			.withIndex("by_record", (q) => q.eq("recordId", record._id))
 			.collect();
+		const normalizedSha256 = await normalizedHashForFile(
+			ctx,
+			primaryFile.objectKey,
+			args.result.sha256,
+		);
 		const versionId = await ctx.db.insert("recordVersions", {
 			organizationId: job.organizationId,
 			repositoryId: job.repositoryId,
@@ -553,6 +605,12 @@ export const finalize = internalMutation({
 			createdBy: job.requestedBy,
 			summary: change.summary,
 			sha256: args.result.sha256,
+			contentSha256: args.result.sha256,
+			normalizedSha256,
+			parentVersionId,
+			exactBlobRef:
+				args.result.exactBlobRef ??
+				`${args.result.azureEvidenceRef}/${primaryFile.name}`,
 			manifestSha256: args.result.manifestSha256,
 			masterProvider: args.result.provider,
 			azureEvidenceRef: args.result.azureEvidenceRef,
@@ -564,6 +622,17 @@ export const finalize = internalMutation({
 			legacyBaseline: false,
 			createdAt: now,
 		});
+		const commit = await createRepositoryCommit(ctx, {
+			organizationId: job.organizationId,
+			repository,
+			recordId: record._id,
+			versionId,
+			contentSha256: args.result.sha256,
+			changeRequestId: change._id,
+			publicationManifestSha256: args.result.manifestSha256,
+			createdBy: job.requestedBy,
+			createdAt: now,
+		});
 		await Promise.all([
 			ctx.db.patch(record._id, {
 				currentVersionId: versionId,
@@ -571,6 +640,7 @@ export const finalize = internalMutation({
 			}),
 			ctx.db.patch(change._id, {
 				targetRecordId: record._id,
+				baseCommitId: commit.parentCommitId,
 				status: "merged",
 				mergedAt: now,
 				mergedBy: job.requestedBy,
@@ -580,6 +650,11 @@ export const finalize = internalMutation({
 				recordId: record._id,
 				status: "succeeded",
 				remoteResult: args.result,
+				updatedAt: now,
+			}),
+			ctx.db.patch(versionId, { commitId: commit.commitId }),
+			ctx.db.patch(repository._id, {
+				headCommitId: commit.commitId,
 				updatedAt: now,
 			}),
 		]);
@@ -626,6 +701,7 @@ export const finalize = internalMutation({
 				});
 			}
 		}
+		let publicSnapshotId: Id<"publicRepositorySnapshots"> | undefined;
 		if (change.publicAfterMerge && repository.visibility === "public") {
 			const [organization, priorSnapshots] = await Promise.all([
 				ctx.db.get(job.organizationId),
@@ -636,7 +712,7 @@ export const finalize = internalMutation({
 					)
 					.collect(),
 			]);
-			const snapshotId = await ctx.db.insert("publicRepositorySnapshots", {
+			publicSnapshotId = await ctx.db.insert("publicRepositorySnapshots", {
 				organizationId: job.organizationId,
 				repositoryId: repository._id,
 				organizationSlug:
@@ -668,15 +744,11 @@ export const finalize = internalMutation({
 				publishedBy: job.requestedBy,
 				publishedAt: now,
 			});
-			await ctx.scheduler.runAfter(
-				0,
-				internal.integrity.queueForPublishedVersion,
-				{
-					recordVersionId: versionId,
-					publicSnapshotId: snapshotId,
-				},
-			);
 		}
+		await ctx.scheduler.runAfter(0, internal.integrity.queueForCommit, {
+			repositoryCommitId: commit.commitId,
+			publicSnapshotId,
+		});
 		await ctx.db.insert("platformNotifications", {
 			organizationId: job.organizationId,
 			membershipId: change.authorMembershipId,
@@ -695,12 +767,113 @@ export const finalize = internalMutation({
 			"Change published",
 			"record-version",
 			String(versionId),
-			`Published immutable version ${priorVersions.length + 1} through ${args.result.provider}.`,
+			`Published immutable version ${priorVersions.length + 1} as repository commit ${commit.commitSha256} through ${args.result.provider}.`,
 			now,
 		);
 		return record._id;
 	},
 });
+
+async function normalizedHashForFile(
+	ctx: MutationCtx,
+	objectKey: string,
+	fallback: string,
+) {
+	const upload = await ctx.db
+		.query("uploadSessions")
+		.withIndex("by_object_key", (q) => q.eq("objectKey", objectKey))
+		.unique();
+	if (!upload) return fallback;
+	const processing = await ctx.db
+		.query("processingJobs")
+		.withIndex("by_upload_session", (q) => q.eq("uploadSessionId", upload._id))
+		.unique();
+	const result = processing?.result as
+		| { normalizedSha256?: string }
+		| undefined;
+	return result?.normalizedSha256 ?? fallback;
+}
+
+async function createRepositoryCommit(
+	ctx: MutationCtx,
+	input: {
+		organizationId: Id<"organizations">;
+		repository: Doc<"repositories">;
+		recordId: Id<"platformRecords">;
+		versionId: Id<"recordVersions">;
+		contentSha256: string;
+		changeRequestId: Id<"changeRequests">;
+		publicationManifestSha256: string;
+		createdBy: Id<"memberships">;
+		createdAt: number;
+	},
+) {
+	const parent = input.repository.headCommitId
+		? await ctx.db.get(input.repository.headCommitId)
+		: null;
+	const records = await ctx.db
+		.query("platformRecords")
+		.withIndex("by_repository", (q) =>
+			q.eq("repositoryId", input.repository._id),
+		)
+		.collect();
+	const entries = await Promise.all(
+		records.map(async (record) => {
+			if (record._id === input.recordId) {
+				return {
+					recordId: String(record._id),
+					recordVersionId: String(input.versionId),
+					contentSha256: input.contentSha256,
+				};
+			}
+			if (!record.currentVersionId) return null;
+			const version = await ctx.db.get(record.currentVersionId);
+			if (!version) return null;
+			return {
+				recordId: String(record._id),
+				recordVersionId: String(version._id),
+				contentSha256: version.contentSha256 ?? version.sha256,
+			};
+		}),
+	);
+	const treeManifest = repositoryTreeManifest(
+		String(input.repository._id),
+		entries.filter((entry): entry is NonNullable<typeof entry> => !!entry),
+	);
+	const treeSha256 = await sha256Hex(treeManifest);
+	const sequence = (parent?.sequence ?? 0) + 1;
+	const commitManifest = repositoryCommitManifest({
+		repositoryId: String(input.repository._id),
+		sequence,
+		parentCommitSha256: parent?.commitSha256,
+		treeSha256,
+		changeRequestId: String(input.changeRequestId),
+		recordVersionId: String(input.versionId),
+		publicationManifestSha256: input.publicationManifestSha256,
+		createdBy: String(input.createdBy),
+		createdAt: input.createdAt,
+	});
+	const commitSha256 = await sha256Hex(commitManifest);
+	const baseRef = `azure://evidence/repository-commits/${commitSha256}`;
+	const commitId = await ctx.db.insert("repositoryCommits", {
+		organizationId: input.organizationId,
+		repositoryId: input.repository._id,
+		sequence,
+		parentCommitId: parent?._id,
+		parentCommitSha256: parent?.commitSha256,
+		treeSha256,
+		commitSha256,
+		treeManifest,
+		commitManifest,
+		treeManifestRef: `${baseRef}/tree.json`,
+		commitManifestRef: `${baseRef}/commit.json`,
+		changeRequestId: input.changeRequestId,
+		recordVersionId: input.versionId,
+		createdBy: input.createdBy,
+		createdAt: input.createdAt,
+	});
+	return { commitId, commitSha256, parentCommitId: parent?._id };
+}
 
 async function approvalsSatisfyRules(
 	ctx: MutationCtx,

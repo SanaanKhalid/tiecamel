@@ -65,6 +65,12 @@ variable "solana_rpc_url" {
   description = "RPC endpoint for the selected Solana network."
 }
 
+variable "solana_minimum_signer_balance_lamports" {
+  type        = number
+  default     = 10000000
+  description = "Fail and alert before anchoring when the signer falls below this balance (0.01 SOL by default)."
+}
+
 variable "solana_signer_secret" {
   type        = string
   sensitive   = true
@@ -82,6 +88,18 @@ variable "malware_scanner_image" {
   type        = string
   default     = ""
   description = "Optional private/container image exposing POST /scan on port 8080."
+}
+
+variable "enable_document_processor_job" {
+  type        = bool
+  default     = false
+  description = "Provision the Service Bus-scaled Container Apps document processor job. Enable after publishing the processor image to ACR."
+}
+
+variable "document_processor_image" {
+  type        = string
+  default     = ""
+  description = "Optional fully qualified processor image. Empty uses this stack's ACR tiecamel-document-processor:latest tag."
 }
 
 variable "evidence_retention_days" {

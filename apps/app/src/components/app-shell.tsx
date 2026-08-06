@@ -67,11 +67,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 					preload="intent"
 					className="flex shrink-0 items-center gap-2 font-semibold"
 				>
-					<span className="app-logo grid size-9 place-items-center overflow-hidden rounded-md bg-white">
+					<span className="grid size-9 place-items-center">
 						<img
 							src="/tiecamel-logo.png"
 							alt=""
-							className="size-9 scale-125 object-cover"
+							className="size-9 object-contain drop-shadow-[0_2px_5px_rgba(0,0,0,0.28)]"
 						/>
 					</span>
 					<span className="hidden sm:inline">TieCamel</span>

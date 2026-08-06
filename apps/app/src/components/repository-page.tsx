@@ -9,6 +9,7 @@ import {
 	FileCheck2,
 	FileDiff,
 	FolderOpen,
+	GitCommitHorizontal,
 	HardDrive,
 	MessageSquare,
 	Plus,
@@ -38,6 +39,7 @@ export type RepositoryTab =
 	| "issues"
 	| "changes"
 	| "records"
+	| "history"
 	| "activity"
 	| "settings";
 
@@ -77,6 +79,9 @@ export function RepositoryPage({
 				{tab === "records" && (
 					<RepositoryRecords repositoryId={repository.id} />
 				)}
+				{tab === "history" && (
+					<RepositoryHistory repositoryId={repository.id} />
+				)}
 				{tab === "activity" && (
 					<RepositoryActivity repositoryId={repository.id} />
 				)}
@@ -85,6 +90,71 @@ export function RepositoryPage({
 				)}
 			</div>
 		</>
+	);
+}
+
+function RepositoryHistory({ repositoryId }: { repositoryId: string }) {
+	const platform = usePlatform();
+	const repository = platform.repositories.find(
+		(item) => item.id === repositoryId,
+	);
+	if (!repository) return null;
+	const commits = platform.repositoryCommits
+		.filter((commit) => commit.repositoryId === repositoryId)
+		.sort((left, right) => right.sequence - left.sequence);
+	return (
+		<section className="overflow-hidden rounded-lg border border-[#d0d7de] bg-white">
+			<header className="border-b border-[#d8dee4] bg-[#f6f8fa] px-4 py-3">
+				<h2 className="font-semibold">Repository history</h2>
+				<p className="text-xs text-[#656d76]">
+					Every accepted record update advances one immutable repository commit.
+				</p>
+			</header>
+			{commits.length === 0 ? (
+				<EmptyState
+					title="No Git-native commits yet"
+					detail="The first newly accepted document will create this repository’s canonical tree and Solana-anchored head. Existing legacy versions remain available under Records."
+				/>
+			) : (
+				<ul className="divide-y divide-[#d8dee4]">
+					{commits.map((commit) => {
+						const change = platform.changeRequests.find(
+							(item) => item.id === commit.changeRequestId,
+						);
+						const record = platform.records.find((item) =>
+							item.versions.some(
+								(version) => version.id === commit.recordVersionId,
+							),
+						);
+						return (
+							<li key={commit.id} className="flex items-start gap-3 px-4 py-4">
+								<GitCommitHorizontal className="mt-0.5 size-5 text-[#0f766e]" />
+								<div className="min-w-0 flex-1">
+									<Link
+										to="/$organization/$repository/commits/$commitHash"
+										params={{
+											organization: platform.organization.slug,
+											repository: repository.slug,
+											commitHash: commit.commitSha256,
+										}}
+										className="font-semibold text-[#0969da] hover:underline"
+									>
+										{change?.title ?? record?.title ?? "Accepted record update"}
+									</Link>
+									<p className="mt-1 text-xs text-[#656d76]">
+										Commit {commit.commitSha256.slice(0, 12)} · sequence{" "}
+										{commit.sequence} · {relativeDate(commit.createdAt)}
+									</p>
+								</div>
+								<span className="rounded-full bg-[#eaeef2] px-2 py-1 text-[11px] font-semibold">
+									{commit.anchor?.status ?? "queued"}
+								</span>
+							</li>
+						);
+					})}
+				</ul>
+			)}
+		</section>
 	);
 }
 
@@ -330,6 +400,7 @@ function RepositoryIssues({ repositoryId }: { repositoryId: string }) {
 					<div className="issue-commandbar-actions flex gap-2">
 						<Link
 							to="/work"
+							search={{ new: undefined }}
 							preload="intent"
 							className="issue-board-link inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
 						>
@@ -482,6 +553,8 @@ function RepositoryChanges({ repositoryId }: { repositoryId: string }) {
 
 function RepositoryRecords({ repositoryId }: { repositoryId: string }) {
 	const platform = usePlatform();
+	const [openingVersionId, setOpeningVersionId] = useState<string>();
+	const [documentError, setDocumentError] = useState<string>();
 	const records = platform.records.filter(
 		(record) => record.repositoryId === repositoryId,
 	);
@@ -492,6 +565,37 @@ function RepositoryRecords({ repositoryId }: { repositoryId: string }) {
 		}
 		grouped[record.collection].push(record);
 	}
+	const openVersion = async (
+		version: (typeof records)[number]["versions"][number],
+	) => {
+		const objectRef =
+			version.exactBlobRef ??
+			version.azureEvidenceRef ??
+			version.files[0]?.azureBlobRef;
+		if (!objectRef) {
+			setDocumentError(
+				"This legacy version does not have managed source bytes.",
+			);
+			return;
+		}
+		const preview = window.open("", "_blank", "noopener,noreferrer");
+		setOpeningVersionId(version.id);
+		setDocumentError(undefined);
+		try {
+			const url = await platform.requestDocumentUrl(objectRef);
+			if (preview) preview.location.href = url;
+			else window.location.assign(url);
+		} catch (error) {
+			preview?.close();
+			setDocumentError(
+				error instanceof Error
+					? error.message
+					: "The document could not be opened.",
+			);
+		} finally {
+			setOpeningVersionId(undefined);
+		}
+	};
 	return (
 		<div>
 			<div className="flex items-end justify-between border-b border-[#d0d7de] pb-4">
@@ -504,6 +608,11 @@ function RepositoryRecords({ repositoryId }: { repositoryId: string }) {
 				</div>
 				<span className="text-sm text-[#656d76]">{records.length} records</span>
 			</div>
+			{documentError && (
+				<p className="mt-3 text-sm font-medium text-[#cf222e]" role="alert">
+					{documentError}
+				</p>
+			)}
 			{records.length ? (
 				<div className="mt-6 space-y-7">
 					{Object.entries(grouped).map(([collection, collectionRecords]) => (
@@ -539,8 +648,64 @@ function RepositoryRecords({ repositoryId }: { repositoryId: string }) {
 															? "Google Drive"
 															: version?.masterProvider === "one-drive"
 																? "OneDrive for Business"
-																: "TieCamel storage on Azure"}
+																: "TieCamel managed storage"}
 													</p>
+													<details className="mt-3 text-sm">
+														<summary className="cursor-pointer font-semibold text-[#0969da]">
+															Browse all accepted versions
+														</summary>
+														<ol className="mt-2 space-y-2 border-l border-[#d0d7de] pl-3">
+															{[...record.versions]
+																.sort(
+																	(left, right) => right.version - left.version,
+																)
+																.map((item) => {
+																	const commit =
+																		platform.repositoryCommits.find(
+																			(entry) =>
+																				entry.recordVersionId === item.id,
+																		);
+																	return (
+																		<li key={item.id}>
+																			<span className="font-semibold">
+																				Version {item.version}
+																			</span>{" "}
+																			<span className="text-xs text-[#656d76]">
+																				{relativeDate(item.createdAt)} ·{" "}
+																				{item.sha256.slice(0, 12)}
+																			</span>
+																			{commit && (
+																				<Link
+																					to="/$organization/$repository/commits/$commitHash"
+																					params={{
+																						organization:
+																							platform.organization.slug,
+																						repository: repositorySlugFor(
+																							platform.repositories,
+																							repositoryId,
+																						),
+																						commitHash: commit.commitSha256,
+																					}}
+																					className="ml-2 font-semibold text-[#0969da] hover:underline"
+																				>
+																					Open commit
+																				</Link>
+																			)}
+																			<button
+																				type="button"
+																				onClick={() => void openVersion(item)}
+																				disabled={openingVersionId === item.id}
+																				className="ml-2 font-semibold text-[#0969da] hover:underline disabled:text-[#656d76]"
+																			>
+																				{openingVersionId === item.id
+																					? "Opening…"
+																					: "Open document"}
+																			</button>
+																		</li>
+																	);
+																})}
+														</ol>
+													</details>
 												</div>
 											</div>
 											<div className="flex items-center gap-2">
@@ -566,6 +731,16 @@ function RepositoryRecords({ repositoryId }: { repositoryId: string }) {
 				</div>
 			)}
 		</div>
+	);
+}
+
+function repositorySlugFor(
+	repositories: Array<{ id: string; slug: string }>,
+	repositoryId: string,
+) {
+	return (
+		repositories.find((repository) => repository.id === repositoryId)?.slug ??
+		"repository"
 	);
 }
 
@@ -710,7 +885,7 @@ function RepositorySettings({ repositoryId }: { repositoryId: string }) {
 		setStorageNotice(
 			storageProvider === "google-drive"
 				? "Fixed Google Drive destination saved."
-				: "TieCamel storage on Azure is now the master.",
+				: "TieCamel managed storage is now the master.",
 		);
 	}
 
@@ -727,7 +902,7 @@ function RepositorySettings({ repositoryId }: { repositoryId: string }) {
 		setBaselineFileName("");
 		setBaselineAttestation("");
 		setBaselineNotice(
-			"Legacy baseline queued for download, scanning, hashing, and Azure sealing.",
+			"Legacy baseline queued for download, scanning, hashing, and secure retention.",
 		);
 	}
 
@@ -1012,7 +1187,7 @@ function RepositorySettings({ repositoryId }: { repositoryId: string }) {
 									storage
 								</span>
 								<span className="mt-1 block text-xs leading-5 text-[#656d76]">
-									Azure Blob Storage is the accepted-record master. No external
+									TieCamel securely stores the accepted record. No external
 									client account is required.
 								</span>
 							</span>
@@ -1080,8 +1255,8 @@ function RepositorySettings({ repositoryId }: { repositoryId: string }) {
 							</label>
 							<p className="text-xs text-[#656d76]">
 								Publishers cannot redirect individual change requests. Existing
-								Azure-master records stay in Azure until a future approved
-								update is published.
+								TieCamel-managed records remain in managed storage until a
+								future approved update is published.
 							</p>
 							<div className="border-t border-[#d8dee4] pt-4">
 								<h3 className="text-sm font-semibold">
@@ -1196,11 +1371,15 @@ function NewChangeDialog({
 	const candidateIssues = platform.issues.filter(
 		(issue) => issue.repositoryId === repositoryId && issue.state === "open",
 	);
+	const candidateRecords = platform.records.filter(
+		(record) => record.repositoryId === repositoryId,
+	);
 	const [input, setInput] = useState<NewChangeInput>({
 		repositoryId,
 		title: "",
 		summary: "",
 		linkedIssueId: undefined,
+		targetRecordId: undefined,
 		locationIds: [],
 		labelIds: [],
 		publicAfterMerge: repository?.visibility === "public",
@@ -1270,6 +1449,64 @@ function NewChangeDialog({
 							required
 						/>
 					</label>
+					<fieldset className="rounded-md border border-[#d0d7de] p-3">
+						<legend className="px-1 text-sm font-semibold">
+							Record target
+						</legend>
+						<p className="mb-3 text-xs text-[#656d76]">
+							Choose the accepted document whose exact bytes should be compared,
+							or start a new record.
+						</p>
+						<label className="mb-2 flex cursor-pointer items-center gap-2 text-sm">
+							<input
+								type="radio"
+								name="record-target"
+								checked={!input.targetRecordId}
+								onChange={() =>
+									setInput({ ...input, targetRecordId: undefined })
+								}
+							/>
+							Create a new record
+						</label>
+						{candidateRecords.length > 0 && (
+							<div className="flex items-center gap-2 text-sm">
+								<label className="flex cursor-pointer items-center gap-2">
+									<input
+										type="radio"
+										name="record-target"
+										checked={Boolean(input.targetRecordId)}
+										onChange={() =>
+											setInput({
+												...input,
+												targetRecordId: candidateRecords[0].id,
+											})
+										}
+									/>
+									Update an accepted record
+								</label>
+								<select
+									value={input.targetRecordId ?? candidateRecords[0].id}
+									onChange={(event) =>
+										setInput({ ...input, targetRecordId: event.target.value })
+									}
+									onFocus={() =>
+										setInput({
+											...input,
+											targetRecordId:
+												input.targetRecordId ?? candidateRecords[0].id,
+										})
+									}
+									className="input ml-auto max-w-xs"
+								>
+									{candidateRecords.map((record) => (
+										<option key={record.id} value={record.id}>
+											{record.title}
+										</option>
+									))}
+								</select>
+							</div>
+						)}
+					</fieldset>
 					<div className="grid gap-4 sm:grid-cols-2">
 						<label className="block text-sm font-semibold">
 							Linked issue (optional)

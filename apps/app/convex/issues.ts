@@ -14,17 +14,25 @@ const issueStatus = v.union(
 );
 
 export const list = query({
-	args: { repositoryId: v.optional(v.id("repositories")) },
+	args: {
+		repositoryId: v.optional(v.id("repositories")),
+		demoSessionToken: v.optional(v.string()),
+	},
 	handler: async (ctx, args) => {
 		if (args.repositoryId) {
-			await requireRepositoryAccess(ctx, args.repositoryId);
+			await requireRepositoryAccess(
+				ctx,
+				args.repositoryId,
+				"read",
+				args.demoSessionToken,
+			);
 			const repositoryId = args.repositoryId;
 			return ctx.db
 				.query("platformIssues")
 				.withIndex("by_repository", (q) => q.eq("repositoryId", repositoryId))
 				.collect();
 		}
-		const session = await requirePlatformSession(ctx);
+		const session = await requirePlatformSession(ctx, args.demoSessionToken);
 		return ctx.db
 			.query("platformIssues")
 			.withIndex("by_organization", (q) =>
@@ -35,9 +43,18 @@ export const list = query({
 });
 
 export const getByNumber = query({
-	args: { repositoryId: v.id("repositories"), number: v.number() },
+	args: {
+		repositoryId: v.id("repositories"),
+		number: v.number(),
+		demoSessionToken: v.optional(v.string()),
+	},
 	handler: async (ctx, args) => {
-		await requireRepositoryAccess(ctx, args.repositoryId);
+		await requireRepositoryAccess(
+			ctx,
+			args.repositoryId,
+			"read",
+			args.demoSessionToken,
+		);
 		const issue = await ctx.db
 			.query("platformIssues")
 			.withIndex("by_repository_and_number", (q) =>
@@ -57,6 +74,7 @@ export const getByNumber = query({
 
 export const create = mutation({
 	args: {
+		demoSessionToken: v.optional(v.string()),
 		repositoryId: v.id("repositories"),
 		title: v.string(),
 		description: v.string(),
@@ -78,6 +96,7 @@ export const create = mutation({
 			ctx,
 			args.repositoryId,
 			"contribute",
+			args.demoSessionToken,
 		);
 		const title = args.title.trim();
 		const description = args.description.trim();
@@ -158,7 +177,11 @@ export const create = mutation({
 });
 
 export const transition = mutation({
-	args: { issueId: v.id("platformIssues"), status: issueStatus },
+	args: {
+		issueId: v.id("platformIssues"),
+		status: issueStatus,
+		demoSessionToken: v.optional(v.string()),
+	},
 	handler: async (ctx, args) => {
 		const issue = await ctx.db.get(args.issueId);
 		if (!issue) throw new Error("Issue not found");
@@ -166,6 +189,7 @@ export const transition = mutation({
 			ctx,
 			issue.repositoryId,
 			"contribute",
+			args.demoSessionToken,
 		);
 		const now = Date.now();
 		await ctx.db.patch(issue._id, {
@@ -188,6 +212,7 @@ export const transition = mutation({
 
 export const comment = mutation({
 	args: {
+		demoSessionToken: v.optional(v.string()),
 		issueId: v.id("platformIssues"),
 		body: v.string(),
 		visibility: v.union(v.literal("internal"), v.literal("public")),
@@ -199,6 +224,7 @@ export const comment = mutation({
 			ctx,
 			issue.repositoryId,
 			"contribute",
+			args.demoSessionToken,
 		);
 		const body = args.body.trim();
 		if (!body) throw new Error("Comment cannot be empty");

@@ -185,6 +185,26 @@ resource "azurerm_application_insights" "this" {
   tags                = local.common_tags
 }
 
+resource "azurerm_monitor_metric_alert" "service_bus_dead_letters" {
+  name                = "tiecamel-${var.environment}-service-bus-dead-letters"
+  resource_group_name = azurerm_resource_group.this.name
+  scopes              = [azurerm_servicebus_namespace.this.id]
+  description         = "A TieCamel processing, publication, reconciliation, or anchor message reached a dead-letter queue."
+  severity            = 1
+  frequency           = "PT5M"
+  window_size         = "PT5M"
+
+  criteria {
+    metric_namespace = "Microsoft.ServiceBus/namespaces"
+    metric_name      = "DeadletteredMessages"
+    aggregation      = "Maximum"
+    operator         = "GreaterThan"
+    threshold        = 0
+  }
+
+  tags = local.common_tags
+}
+
 resource "azurerm_service_plan" "functions" {
   name                = "asp-tiecamel-${var.environment}-${local.suffix}"
   resource_group_name = azurerm_resource_group.this.name
@@ -232,6 +252,7 @@ resource "azurerm_linux_function_app" "integrations" {
     TIECAMEL_SERVICE_TOKEN                                = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.this.name};SecretName=${azurerm_key_vault_secret.service_token.name})"
     SOLANA_NETWORK                                        = var.solana_network
     SOLANA_RPC_URL                                        = var.solana_rpc_url
+    SOLANA_MINIMUM_SIGNER_BALANCE_LAMPORTS                = tostring(var.solana_minimum_signer_balance_lamports)
     SOLANA_KEY_VAULT_SECRET_NAME                          = "solana-integrity-signer"
     MALWARE_SCANNER_URL                                   = var.malware_scanner_image != "" ? "https://${azurerm_container_app.malware_scanner[0].ingress[0].fqdn}" : ""
     REQUIRE_MALWARE_SCANNER                               = var.malware_scanner_image != "" ? "true" : "false"
@@ -265,6 +286,157 @@ resource "azurerm_container_app_environment" "this" {
   log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
   logs_destination           = "log-analytics"
   tags                       = local.common_tags
+}
+
+resource "azurerm_container_registry" "processor" {
+  name                = substr("acrtc${local.normalized_env}${local.suffix}", 0, 50)
+  resource_group_name = azurerm_resource_group.this.name
+  location            = azurerm_resource_group.this.location
+  sku                 = "Basic"
+  admin_enabled       = false
+  tags                = local.common_tags
+}
+
+resource "azurerm_user_assigned_identity" "document_processor" {
+  count = var.enable_document_processor_job ? 1 : 0
+
+  name                = "id-documents-${var.environment}-${local.suffix}"
+  resource_group_name = azurerm_resource_group.this.name
+  location            = azurerm_resource_group.this.location
+  tags                = local.common_tags
+}
+
+resource "azurerm_container_app_job" "document_processor" {
+  count = var.enable_document_processor_job ? 1 : 0
+
+  name                         = "job-documents-${var.environment}-${local.suffix}"
+  resource_group_name          = azurerm_resource_group.this.name
+  location                     = azurerm_resource_group.this.location
+  container_app_environment_id = azurerm_container_app_environment.this.id
+  replica_timeout_in_seconds   = 1800
+  replica_retry_limit          = 3
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.document_processor[0].id]
+  }
+
+  registry {
+    server   = azurerm_container_registry.processor.login_server
+    identity = azurerm_user_assigned_identity.document_processor[0].id
+  }
+
+  secret {
+    name                = "convex-callback-secret"
+    key_vault_secret_id = azurerm_key_vault_secret.callback.versionless_id
+    identity            = azurerm_user_assigned_identity.document_processor[0].id
+  }
+
+  event_trigger_config {
+    parallelism              = 1
+    replica_completion_count = 1
+
+    scale {
+      min_executions              = 0
+      max_executions              = 10
+      polling_interval_in_seconds = 15
+
+      rules {
+        name             = "processing-queue"
+        custom_rule_type = "azure-servicebus"
+        identity_id      = azurerm_user_assigned_identity.document_processor[0].id
+        metadata = {
+          namespace    = azurerm_servicebus_namespace.this.name
+          queueName    = azurerm_servicebus_queue.work["processing"].name
+          messageCount = "1"
+        }
+      }
+    }
+  }
+
+  template {
+    container {
+      name   = "document-processor"
+      image  = var.document_processor_image != "" ? var.document_processor_image : "${azurerm_container_registry.processor.login_server}/tiecamel-document-processor:latest"
+      cpu    = 2
+      memory = "4Gi"
+
+      env {
+        name  = "AZURE_STORAGE_BLOB_URL"
+        value = azurerm_storage_account.records.primary_blob_endpoint
+      }
+      env {
+        name  = "AZURE_CLIENT_ID"
+        value = azurerm_user_assigned_identity.document_processor[0].client_id
+      }
+      env {
+        name  = "AZURE_SERVICE_BUS_NAMESPACE"
+        value = "${azurerm_servicebus_namespace.this.name}.servicebus.windows.net"
+      }
+      env {
+        name  = "CONVEX_PROCESSING_CALLBACK_URL"
+        value = var.convex_processing_callback_url
+      }
+      env {
+        name        = "CONVEX_CALLBACK_SECRET"
+        secret_name = "convex-callback-secret"
+      }
+      env {
+        name  = "REQUIRE_MALWARE_SCANNER"
+        value = "true"
+      }
+    }
+  }
+
+  tags = local.common_tags
+
+  depends_on = [
+    azurerm_role_assignment.processor_acr_pull,
+    azurerm_role_assignment.processor_blob_contributor,
+    azurerm_role_assignment.processor_service_bus_receiver,
+    azurerm_role_assignment.processor_key_vault_user,
+    azurerm_role_assignment.processor_document_intelligence_user,
+  ]
+}
+
+resource "azurerm_role_assignment" "processor_acr_pull" {
+  count = var.enable_document_processor_job ? 1 : 0
+
+  scope                = azurerm_container_registry.processor.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_user_assigned_identity.document_processor[0].principal_id
+}
+
+resource "azurerm_role_assignment" "processor_blob_contributor" {
+  count = var.enable_document_processor_job ? 1 : 0
+
+  scope                = azurerm_storage_account.records.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_user_assigned_identity.document_processor[0].principal_id
+}
+
+resource "azurerm_role_assignment" "processor_service_bus_receiver" {
+  count = var.enable_document_processor_job ? 1 : 0
+
+  scope                = azurerm_servicebus_namespace.this.id
+  role_definition_name = "Azure Service Bus Data Receiver"
+  principal_id         = azurerm_user_assigned_identity.document_processor[0].principal_id
+}
+
+resource "azurerm_role_assignment" "processor_key_vault_user" {
+  count = var.enable_document_processor_job ? 1 : 0
+
+  scope                = azurerm_key_vault.this.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.document_processor[0].principal_id
+}
+
+resource "azurerm_role_assignment" "processor_document_intelligence_user" {
+  count = var.enable_document_processor_job && var.enable_document_intelligence ? 1 : 0
+
+  scope                = azurerm_cognitive_account.document_intelligence[0].id
+  role_definition_name = "Cognitive Services User"
+  principal_id         = azurerm_user_assigned_identity.document_processor[0].principal_id
 }
 
 resource "azurerm_container_app" "malware_scanner" {

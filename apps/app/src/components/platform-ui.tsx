@@ -129,6 +129,7 @@ export function RepositoryHeader({
 		| "issues"
 		| "changes"
 		| "records"
+		| "history"
 		| "activity"
 		| "settings";
 }) {
@@ -138,6 +139,7 @@ export function RepositoryHeader({
 		{ id: "issues", label: "Issues", href: `${base}/issues` },
 		{ id: "changes", label: "Change requests", href: `${base}/changes` },
 		{ id: "records", label: "Records", href: `${base}/records` },
+		{ id: "history", label: "History", href: `${base}/history` },
 		{ id: "activity", label: "Activity", href: `${base}/activity` },
 		{ id: "settings", label: "Settings", href: `${base}/settings` },
 	] as const;

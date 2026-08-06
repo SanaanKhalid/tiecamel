@@ -121,8 +121,17 @@ const audiences = [
 
 	<main id="main-content">
 		<section class="hero shell">
+			<div class="hero-field" aria-hidden="true">
+				<div class="field-ring field-ring-one"></div>
+				<div class="field-ring field-ring-two"></div>
+				<div class="field-axis field-axis-x"></div>
+				<div class="field-axis field-axis-y"></div>
+				<span class="field-node node-one"></span>
+				<span class="field-node node-two"></span>
+				<span class="field-node node-three"></span>
+			</div>
 			<div class="hero-copy-wrap">
-				<div class="eyebrow"><span></span> Trust infrastructure for nonprofits</div>
+				<div class="eyebrow"><span></span> Trust infrastructure for nonprofits <span></span></div>
 				<h1>Trust should never depend on <em>who happens to know.</em></h1>
 				<p class="hero-copy">
 					TieCamel makes critical obligations, financial signals, board decisions, and
@@ -138,20 +147,25 @@ const audiences = [
 					</a>
 				</div>
 				<div class="hero-note">
-					<span class="proof-glyph" aria-hidden="true">⌁</span>
-					<span>Publication integrity backed by Solana</span>
-					<span class="note-separator"></span>
-					<span>No wallets. No tokens. No operating funds on-chain.</span>
+					<span><i></i> Source-labeled</span>
+					<span><i></i> Privacy-respecting</span>
+					<span><i></i> Independently verifiable</span>
 				</div>
 			</div>
 
+			<div class="signal-tabs" aria-label="TieCamel assurance workflow">
+				<span class="active"><i></i> Observe</span>
+				<span><i></i> Escalate</span>
+				<span><i></i> Review</span>
+				<span><i></i> Prove</span>
+			</div>
+
 			<div class="product-stage" aria-label="Illustration of the TieCamel assurance dashboard">
-				<div class="orbit orbit-one"></div>
-				<div class="orbit orbit-two"></div>
+				<div class="stage-aura" aria-hidden="true"></div>
 				<div class="product-window">
 					<div class="window-bar">
 						<div class="window-dots" aria-hidden="true"><span></span><span></span><span></span></div>
-						<span>Example organization</span>
+						<span>Example organization · Assurance overview</span>
 						<span class="window-live"><i></i> Sources live</span>
 					</div>
 					<div class="window-body">
@@ -219,6 +233,10 @@ const audiences = [
 				<div class="floating-alert">
 					<span>Board notified</span>
 					<strong>8 of 8 acknowledged</strong>
+				</div>
+				<div class="stage-caption" aria-hidden="true">
+					<span>01 / Shared oversight</span>
+					<span>Every signal has a path forward</span>
 				</div>
 			</div>
 		</section>

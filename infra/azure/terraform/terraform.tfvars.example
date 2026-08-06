@@ -17,6 +17,11 @@ solana_signer_secret = ""
 # Set to an approved scanner image before production.
 malware_scanner_image = ""
 
+# Build apps/document-processor/Dockerfile, push the image to the Terraform ACR,
+# then enable the event-scaled job.
+enable_document_processor_job = false
+document_processor_image      = ""
+
 # Keep unlocked/disabled until legal and records-retention policy is approved.
 evidence_retention_days = 0
 lock_evidence_policy    = false

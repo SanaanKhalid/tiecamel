@@ -1,6 +1,9 @@
 import { DefaultAzureCredential } from "@azure/identity";
 import { SecretClient } from "@azure/keyvault-secrets";
-import { BlobServiceClient } from "@azure/storage-blob";
+import {
+	BlobServiceClient,
+	type BlockBlobClient,
+} from "@azure/storage-blob";
 import { createHash } from "node:crypto";
 import {
 	Connection,
@@ -21,13 +24,18 @@ export function integrityMemo(commitment: string) {
 	if (!/^[a-f0-9]{64}$/.test(normalized)) {
 		throw new Error("A Solana integrity commitment must be a SHA-256 hash.");
 	}
-	return `tiecamel:v1:${normalized}`;
+	return `tiecamel:commit:v2:${normalized}`;
 }
 
 export async function anchorIntegrity(command: IntegrityAnchorCommand) {
-	if (command.memo !== integrityMemo(command.commitment)) {
+	const expectedMemo =
+		command.proofFormat === "tiecamel-repository-commit/v2"
+			? integrityMemo(command.commitment)
+			: `tiecamel:v1:${command.commitment.toLowerCase()}`;
+	if (command.memo !== expectedMemo) {
 		throw new Error("Anchor memo does not match the integrity commitment.");
 	}
+	await sealCommitManifests(command);
 	const configuredNetwork =
 		(process.env.SOLANA_NETWORK as "devnet" | "mainnet-beta" | undefined) ??
 		"devnet";
@@ -40,6 +48,15 @@ export async function anchorIntegrity(command: IntegrityAnchorCommand) {
 	if (prior) return prior;
 	const connection = new Connection(requiredEnv("SOLANA_RPC_URL"), "confirmed");
 	const payer = await loadPayer();
+	const balance = await connection.getBalance(payer.publicKey, "confirmed");
+	const minimumLamports = Number(
+		process.env.SOLANA_MINIMUM_SIGNER_BALANCE_LAMPORTS ?? "10000000",
+	);
+	if (balance < minimumLamports) {
+		throw new Error(
+			`Solana signer balance is below the configured safety threshold (${balance} lamports).`,
+		);
+	}
 	const instruction = new TransactionInstruction({
 		keys: [],
 		programId: MEMO_PROGRAM_ID,
@@ -51,15 +68,27 @@ export async function anchorIntegrity(command: IntegrityAnchorCommand) {
 		[payer],
 		{ commitment: "confirmed", maxRetries: 5 },
 	);
-	const transaction = await connection.getTransaction(signature, {
+	const transaction = await connection.getParsedTransaction(signature, {
 		commitment: "confirmed",
 		maxSupportedTransactionVersion: 0,
 	});
+	const observedMemo = transaction?.transaction.message.instructions
+		.map((instruction) => {
+			if (!("parsed" in instruction)) return undefined;
+			return instruction.program === "spl-memo"
+				? String(instruction.parsed)
+				: undefined;
+		})
+		.find(Boolean);
+	if (observedMemo !== command.memo) {
+		throw new Error("Confirmed Solana transaction did not contain the expected commit memo.");
+	}
 	const cluster = command.network === "devnet" ? "?cluster=devnet" : "";
 	const result = {
 		signature,
 		slot: transaction?.slot ?? 0,
 		explorerUrl: `https://explorer.solana.com/tx/${signature}${cluster}`,
+		observedMemo,
 	};
 	await storeReceipt(command.idempotencyKey, result);
 	return result;
@@ -106,12 +135,18 @@ async function loadReceipt(idempotencyKey: string) {
 		signature: string;
 		slot: number;
 		explorerUrl: string;
+		observedMemo: string;
 	};
 }
 
 async function storeReceipt(
 	idempotencyKey: string,
-	result: { signature: string; slot: number; explorerUrl: string },
+	result: {
+		signature: string;
+		slot: number;
+		explorerUrl: string;
+		observedMemo: string;
+	},
 ) {
 	const blob = receiptBlob(idempotencyKey);
 	const body = JSON.stringify(result);
@@ -120,6 +155,60 @@ async function storeReceipt(
 			conditions: { ifNoneMatch: "*" },
 			blobHTTPHeaders: { blobContentType: "application/json" },
 			metadata: { idempotencykeyhash: receiptName(idempotencyKey) },
+		});
+	} catch (error) {
+		if (
+			typeof error !== "object" ||
+			error === null ||
+			!("statusCode" in error) ||
+			error.statusCode !== 412
+		) {
+			throw error;
+		}
+	}
+}
+
+async function sealCommitManifests(command: IntegrityAnchorCommand) {
+	if (!command.commitManifest || !command.treeManifest) return;
+	const commitHash = createHash("sha256")
+		.update(command.commitManifest)
+		.digest("hex");
+	if (commitHash !== command.commitment) {
+		throw new Error("Commit manifest hash does not match the requested commitment.");
+	}
+	const parsed = JSON.parse(command.commitManifest) as { treeSha256?: string };
+	const treeHash = createHash("sha256")
+		.update(command.treeManifest)
+		.digest("hex");
+	if (parsed.treeSha256 !== treeHash) {
+		throw new Error("Tree manifest hash does not match the commit manifest.");
+	}
+	const service = new BlobServiceClient(
+		requiredEnv("AZURE_STORAGE_BLOB_URL"),
+		new DefaultAzureCredential(),
+	);
+	const container = service.getContainerClient("evidence");
+	const prefix = `repository-commits/${command.commitment}`;
+	await Promise.all([
+		uploadImmutableJson(
+			container.getBlockBlobClient(`${prefix}/commit.json`),
+			command.commitManifest,
+		),
+		uploadImmutableJson(
+			container.getBlockBlobClient(`${prefix}/tree.json`),
+			command.treeManifest,
+		),
+	]);
+}
+
+async function uploadImmutableJson(
+	blob: BlockBlobClient,
+	body: string,
+) {
+	try {
+		await blob.upload(body, Buffer.byteLength(body), {
+			conditions: { ifNoneMatch: "*" },
+			blobHTTPHeaders: { blobContentType: "application/json" },
 		});
 	} catch (error) {
 		if (

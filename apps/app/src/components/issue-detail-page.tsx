@@ -3,7 +3,10 @@ import {
 	CalendarDays,
 	CheckCircle2,
 	CircleDot,
+	Download,
+	ExternalLink,
 	FileDiff,
+	FileText,
 	Link2,
 	MapPin,
 	Users,
@@ -107,6 +110,54 @@ export function IssueDetailPage({
 							<p className="whitespace-pre-wrap text-sm leading-6">
 								{issue.description}
 							</p>
+							{issue.attachments?.length ? (
+								<div className="mt-5 border-t border-[#d8dee4] pt-4">
+									<div className="mb-2 flex items-center justify-between gap-3">
+										<h2 className="text-xs font-semibold tracking-[0.08em] text-[#596761] uppercase">
+											Supporting documents
+										</h2>
+										<span className="rounded-full bg-[#eef6f3] px-2 py-1 text-[11px] font-semibold text-[#0f766e]">
+											{issue.attachments.length} PDF
+											{issue.attachments.length === 1 ? "" : "s"}
+										</span>
+									</div>
+									<div className="space-y-2">
+										{issue.attachments.map((attachment) => (
+											<div
+												key={attachment.id}
+												className="group flex flex-col gap-3 rounded-lg border border-[#cfdcd7] bg-[#f8fbfa] p-3 sm:flex-row sm:items-center"
+											>
+												<span className="grid size-10 shrink-0 place-items-center rounded-lg bg-white text-[#0f766e] shadow-[0_1px_2px_rgba(20,45,38,0.08)] ring-1 ring-[#dce7e3]">
+													<FileText className="size-5" />
+												</span>
+												<div className="min-w-0 flex-1">
+													<a
+														href={attachment.url}
+														target="_blank"
+														rel="noreferrer"
+														className="inline-flex max-w-full items-center gap-1.5 font-semibold text-[#0969da] hover:underline"
+													>
+														<span className="truncate">{attachment.name}</span>
+														<ExternalLink className="size-3.5 shrink-0" />
+													</a>
+													<p className="mt-0.5 text-xs text-[#656d76]">
+														{attachment.description} · {attachment.sizeLabel} ·
+														Demo fixture
+													</p>
+												</div>
+												<a
+													href={attachment.url}
+													download={attachment.name}
+													className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md border border-[#c8d6d1] bg-white px-3 py-2 text-xs font-semibold text-[#36433e] hover:border-[#8db2a5] hover:bg-[#f1f8f5]"
+												>
+													<Download className="size-3.5" />
+													Download
+												</a>
+											</div>
+										))}
+									</div>
+								</div>
+							) : null}
 						</TimelineEntry>
 						{issue.comments.map((comment) => (
 							<TimelineEntry

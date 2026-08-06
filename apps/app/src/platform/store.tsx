@@ -36,6 +36,7 @@ export type NewChangeInput = {
 	title: string;
 	summary: string;
 	linkedIssueId?: string;
+	targetRecordId?: string;
 	locationIds: string[];
 	labelIds: string[];
 	file?: File;
@@ -84,6 +85,8 @@ export type PlatformStore = PlatformData & {
 		body: string,
 	) => Promise<void>;
 	mergeChange: (id: string) => Promise<void>;
+	addChangeRevision: (id: string, message: string, file: File) => Promise<void>;
+	requestDocumentUrl: (objectRef: string) => Promise<string>;
 	markNotificationRead: (id: string) => void;
 	updateRepositoryRules: (
 		repositoryId: string,
@@ -139,6 +142,62 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
 							...parsed.data.organization,
 							name: platformSeed.organization.name,
 						},
+						issues: parsed.data.issues.map((issue) => ({
+							...issue,
+							attachments:
+								issue.attachments ??
+								platformSeed.issues.find(
+									(seedIssue) => seedIssue.id === issue.id,
+								)?.attachments,
+						})),
+						changeRequests: parsed.data.changeRequests.map((change) => {
+							const seedChange = platformSeed.changeRequests.find(
+								(item) => item.id === change.id,
+							);
+							return {
+								...change,
+								revisions: change.revisions.map((revision) => {
+									const seedRevision = seedChange?.revisions.find(
+										(item) => item.id === revision.id,
+									);
+									return {
+										...revision,
+										files: revision.files.map((file) => ({
+											...file,
+											previewUrl:
+												file.previewUrl ??
+												seedRevision?.files.find(
+													(seedFile) => seedFile.id === file.id,
+												)?.previewUrl,
+										})),
+									};
+								}),
+							};
+						}),
+						records: parsed.data.records.map((record) => {
+							const seedRecord = platformSeed.records.find(
+								(item) => item.id === record.id,
+							);
+							return {
+								...record,
+								versions: record.versions.map((version) => {
+									const seedVersion = seedRecord?.versions.find(
+										(item) => item.id === version.id,
+									);
+									return {
+										...version,
+										files: version.files.map((file) => ({
+											...file,
+											previewUrl:
+												file.previewUrl ??
+												seedVersion?.files.find(
+													(seedFile) => seedFile.id === file.id,
+												)?.previewUrl,
+										})),
+									};
+								}),
+							};
+						}),
 					});
 				}
 			}
@@ -431,6 +490,11 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
 					locationIds: input.locationIds,
 					labelIds: input.labelIds,
 					linkedIssueId: input.linkedIssueId,
+					targetRecordId: input.targetRecordId,
+					baseVersionId: input.targetRecordId
+						? data.records.find((record) => record.id === input.targetRecordId)
+								?.currentVersionId
+						: undefined,
 					createdAt: now,
 					updatedAt: now,
 					revisions: [
@@ -482,6 +546,7 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
 					comments: [],
 					structuredDiff: [],
 					textDiff: [],
+					artifacts: [],
 					unresolvedThreads: 0,
 					outOfDate: false,
 					publicAfterMerge: input.publicAfterMerge,
@@ -833,6 +898,49 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
 					};
 				});
 			},
+			addChangeRevision: async (id, message, file) => {
+				const now = new Date().toISOString();
+				setData((current) => ({
+					...current,
+					changeRequests: current.changeRequests.map((change) =>
+						change.id === id
+							? {
+									...change,
+									status: "open",
+									outOfDate: false,
+									updatedAt: now,
+									reviews: change.reviews.map((review) => ({
+										...review,
+										stale: true,
+									})),
+									revisions: [
+										...change.revisions,
+										{
+											id: crypto.randomUUID(),
+											number: change.revisions.length + 1,
+											authorId: current.viewerId,
+											createdAt: now,
+											message: message.trim() || "Uploaded a revised document.",
+											files: [
+												{
+													id: crypto.randomUUID(),
+													name: file.name,
+													mimeType: file.type,
+													sizeLabel: `${Math.max(1, Math.round(file.size / 1024))} KB`,
+													sha256: `local-${crypto.randomUUID().replaceAll("-", "")}`,
+													role: "primary",
+													previewUrl: URL.createObjectURL(file),
+													processingStatus: "ready",
+												},
+											],
+										},
+									],
+								}
+							: change,
+					),
+				}));
+			},
+			requestDocumentUrl: async (objectRef) => objectRef,
 			markNotificationRead: (id) =>
 				setData((current) => ({
 					...current,
@@ -1014,7 +1122,7 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
 							action: "requested legacy baseline import for",
 							target: input.fileName.trim(),
 							detail:
-								"No historical approval is implied. The file will be scanned, hashed, and sealed in Azure.",
+								"No historical approval is implied. The file will be scanned, hashed, and securely retained.",
 							createdAt: now,
 							visibility: "internal",
 						},
@@ -1089,7 +1197,7 @@ function storageProviderLabel(provider: StorageProvider) {
 		case "one-drive":
 			return "OneDrive for Business";
 		default:
-			return "TieCamel storage on Azure";
+			return "TieCamel managed storage";
 	}
 }
 
