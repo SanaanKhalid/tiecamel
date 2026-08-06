@@ -542,8 +542,8 @@ p { text-wrap: pretty; }
 	border-inline: 1px solid rgba(7, 26, 18, 0.09);
 	border-bottom-color: rgba(7, 26, 18, 0.09);
 	color: var(--ink);
-	background: rgba(249, 247, 238, 0.82);
-	box-shadow: 0 0 0 100vmax rgba(249, 247, 238, 0.82);
+	background: #f8f6eb;
+	box-shadow: 0 0 0 100vmax #f8f6eb;
 	clip-path: inset(0 -100vmax);
 	backdrop-filter: blur(18px);
 }
