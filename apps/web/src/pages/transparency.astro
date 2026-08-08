@@ -1,0 +1,331 @@
+---
+import SiteLayout from '../layouts/site-layout.astro';
+
+const contactUrl =
+	'mailto:hello@tiecamel.com?subject=TieCamel%20early%20access&body=I%27d%20like%20to%20learn%20more%20about%20TieCamel.';
+
+const architecture = [
+	{
+		name: 'Governance control plane',
+		body: 'Tenant isolation, repository authorization, change requests, review rules, publication state, public snapshots, notifications, and the audit ledger.',
+	},
+	{
+		name: 'Evidence plane',
+		body: 'Quarantine, document processing, exact approved bytes, canonical manifests, immutable commit objects, storage credentials, queues, and integrity receipts.',
+	},
+	{
+		name: 'Repository protocol',
+		body: 'Canonical JSON, content hashes, repository trees, parent-linked commits, protected merge rules, and portable verification bundles.',
+	},
+	{
+		name: 'Solana proof layer',
+		body: 'Optional public timestamping of the repository commit SHA-256 through the standard Solana Memo Program—never document bytes or private metadata.',
+	},
+];
+
+const repositorySteps = [
+	{
+		number: '01',
+		title: 'Propose',
+		body: 'A change request identifies the target record, exact revision, proposed files, structured differences, source evidence, and intended visibility.',
+	},
+	{
+		number: '02',
+		title: 'Review',
+		body: 'Repository protection rules require current-revision approvals, checks, and resolved blocking threads. Authors cannot approve their own change.',
+	},
+	{
+		number: '03',
+		title: 'Publish',
+		body: 'The evidence worker scans, hashes, seals, and publishes the approved bytes. A signed callback must match the exact revision and storage configuration.',
+	},
+	{
+		number: '04',
+		title: 'Commit',
+		body: 'Only then does TieCamel create an immutable RecordVersion, rebuild the canonical repository tree, and append a parent-linked commit.',
+	},
+];
+
+const proofPipeline = [
+	['Canonicalize', 'Recursively sort object keys, omit undefined values, and serialize deterministic JSON.'],
+	['Hash the tree', 'Hash the canonical repository tree manifest with SHA-256.'],
+	['Hash the commit', 'Embed the tree hash and parent commit hash in the commit manifest, then hash that manifest.'],
+	['Seal manifests', 'Recompute both hashes in an isolated integrity worker and write commit.json and tree.json as immutable objects.'],
+	['Anchor the commitment', 'Submit tiecamel:commit:v2:<commitSha256> through the standard Solana Memo Program.'],
+	['Verify independently', 'Recompute local hashes, fetch the transaction through Solana RPC, and compare the observed Memo byte-for-byte.'],
+];
+
+const proofIncludes = [
+	'One 64-character SHA-256 repository commit hash',
+	'The protocol prefix tiecamel:commit:v2:',
+	'A transaction signature, slot, network, and confirmation state',
+	'Public descriptive context only when the repository itself is public',
+];
+
+const proofExcludes = [
+	'Document bytes, filenames, organization names, or repository titles',
+	'Reviewer identities, comments, or approval discussions',
+	'Donor identities, transactions, bank details, or personnel data',
+	'Provider URLs, external file identifiers, credentials, or legal content',
+];
+
+const verificationChecks = [
+	['Commit integrity', 'SHA-256(commitManifest) === commitSha256'],
+	['Tree integrity', 'SHA-256(treeManifest) === treeSha256'],
+	['Tree binding', 'commitManifest.treeSha256 === SHA-256(treeManifest)'],
+	['History linkage', 'commitManifest.parentCommitSha256 === prior commitSha256'],
+	['Solana proof', 'observed Memo === tiecamel:commit:v2:<commitSha256>'],
+];
+---
+
+<SiteLayout
+	title="Transparency, repository integrity & Solana verification — TieCamel"
+	description="The technical architecture behind TieCamel's Git-style repository history, SHA-256 document integrity, sealed evidence, and optional Solana proofs."
+>
+	<a class="skip-link" href="#main-content">Skip to content</a>
+
+	<header class="site-header trust-page-header shell">
+		<a class="brand" href="/" aria-label="TieCamel home">
+			<span class="brand-mark" aria-hidden="true"><img src="/tiecamel-logo.png" alt="" /></span>
+			<span class="brand-name">TieCamel</span>
+		</a>
+		<nav class="nav" aria-label="Technical page navigation">
+			<a href="#repository-protocol">Repository protocol</a>
+			<a href="#solana">Solana</a>
+			<a href="#verify">Verify</a>
+		</nav>
+		<a class="button button-small button-dark header-cta" href={contactUrl}>Join the pilot</a>
+	</header>
+
+	<main id="main-content" class="trust-page technical-trust-page">
+		<section class="trust-page-hero shell">
+			<div class="trust-page-hero-copy">
+				<p class="eyebrow"><span></span> Technical trust architecture</p>
+				<h1>Every approved change becomes <em>verifiable history.</em></h1>
+				<p class="trust-page-intro">
+					TieCamel combines an in-house Git-style repository protocol, deterministic SHA-256 manifests, immutable evidence storage, and optional Solana anchoring. The result is a chain of institutional records that can be checked without trusting a screenshot, a database row, or TieCamel's word alone.
+				</p>
+				<div class="technical-badges" aria-label="Core technologies">
+					<span>Canonical JSON</span><span>SHA-256</span><span>Parent-linked commits</span><span>Solana Memo</span>
+				</div>
+				<div class="hero-actions">
+					<a class="button button-dark" href="#repository-protocol">Read the protocol <span aria-hidden="true">↓</span></a>
+					<a class="button trust-page-button-ghost" href="/">Back to TieCamel</a>
+				</div>
+			</div>
+
+			<div class="proof-preview technical-proof-preview" aria-label="Example repository commit proof">
+				<div class="proof-preview-top">
+					<span>Repository commit · sequence 42</span>
+					<strong><i></i> Anchored</strong>
+				</div>
+				<div class="technical-commit-line"><span>commit</span><code>83f2a91c047b…d7e4</code></div>
+				<div class="technical-commit-line"><span>parent</span><code>1be760f244ac…8a32</code></div>
+				<div class="technical-commit-line"><span>tree</span><code>a820cb9d1f35…ce09</code></div>
+				<div class="technical-chain" aria-hidden="true">
+					<div><i></i><span>40</span></div><b></b><div><i></i><span>41</span></div><b></b><div class="active"><i></i><span>42</span></div>
+				</div>
+				<div class="technical-memo">
+					<span>Solana Memo payload</span>
+					<code>tiecamel:commit:v2:83f2a91c047b…d7e4</code>
+				</div>
+				<div class="proof-result"><span>✓</span><div><strong>Three proofs agree</strong><small>Commit manifest · repository tree · on-chain Memo</small></div></div>
+			</div>
+		</section>
+
+		<section class="technical-overview shell" aria-labelledby="architecture-title">
+			<div class="trust-page-heading trust-page-heading-wide">
+				<p class="eyebrow"><span></span> Separation of concerns</p>
+				<h2 id="architecture-title">Four layers. One verifiable result.</h2>
+				<p>No single datastore is asked to prove everything. Workflow authority, binary custody, repository integrity, and public timestamping are deliberately separated.</p>
+			</div>
+			<div class="architecture-grid">
+				{architecture.map((layer, index) => (
+					<article><span>{String(index + 1).padStart(2, '0')}</span><h3>{layer.name}</h3><p>{layer.body}</p></article>
+				))}
+			</div>
+		</section>
+
+		<section class="trust-page-process technical-repository-section" id="repository-protocol" aria-labelledby="repository-title">
+			<div class="shell">
+				<div class="trust-page-heading">
+					<div>
+						<p class="eyebrow"><span></span> In-house Git technology</p>
+						<h2 id="repository-title">Git semantics for governed records.</h2>
+					</div>
+					<p>TieCamel is not a thin UI over a <code>.git</code> directory. We built a domain-specific repository protocol that applies Git's strongest ideas—content addressing, immutable versions, review-before-merge, complete tree snapshots, parent links, and inspectable history—to nonprofit documents and decisions.</p>
+				</div>
+
+				<ol class="verification-steps repository-steps">
+					{repositorySteps.map((step) => (
+						<li><span>{step.number}</span><h3>{step.title}</h3><p>{step.body}</p></li>
+					))}
+				</ol>
+
+				<div class="manifest-grid">
+					<article>
+						<div class="code-card-heading"><span>Tree object</span><code>tiecamel-repository-tree/v1</code></div>
+						<p>The tree is a canonical snapshot of every accepted record in one repository. Entries are sorted by <code>recordId</code>; each binds a record identity to an immutable version and its exact content hash.</p>
+						<pre><code>{`{
+  "format": "tiecamel-repository-tree/v1",
+  "repositoryId": "opaque-id",
+  "records": [{
+    "recordId": "record-id",
+    "recordVersionId": "version-id",
+    "contentSha256": "9f2c…b810"
+  }]
+}`}</code></pre>
+					</article>
+					<article>
+						<div class="code-card-heading"><span>Commit object</span><code>tiecamel-repository-commit/v2</code></div>
+						<p>The commit binds that tree to its predecessor, the accepted change request, immutable record version, publication manifest, actor, sequence, and creation time.</p>
+						<pre><code>{`{
+  "format": "tiecamel-repository-commit/v2",
+  "sequence": 42,
+  "parentCommitSha256": "1be7…8a32",
+  "treeSha256": "a820…ce09",
+  "changeRequestId": "change-id",
+  "recordVersionId": "version-id",
+  "publicationManifestSha256": "947a…2dc0",
+  "createdBy": "membership-id",
+  "createdAt": 1786219200000
+}`}</code></pre>
+					</article>
+				</div>
+
+				<div class="technical-note">
+					<strong>Why canonical JSON matters</strong>
+					<p>Cryptographic hashes operate on bytes, not semantic objects. TieCamel recursively sorts object keys, removes undefined values, deterministically serializes JSON, and sorts tree entries before hashing. The same logical repository state therefore produces the same byte sequence and the same SHA-256 digest.</p>
+				</div>
+			</div>
+		</section>
+
+		<section class="trust-page-section shell" aria-labelledby="chain-title">
+			<div class="trust-page-heading">
+				<div>
+					<p class="eyebrow"><span></span> Hash-linked history</p>
+					<h2 id="chain-title">A rewrite changes everything after it.</h2>
+				</div>
+				<p>Each commit contains the prior commit's SHA-256. Changing an old record changes its content hash, which changes the tree hash, which changes that commit hash, which breaks the parent reference in the next commit. The history is tamper-evident by construction.</p>
+			</div>
+			<div class="hash-chain-diagram" aria-label="Content, tree, commit, and parent hash dependency chain">
+				<div><span>Approved bytes</span><code>contentSha256</code></div><b>→</b>
+				<div><span>Repository tree</span><code>treeSha256</code></div><b>→</b>
+				<div><span>Commit manifest</span><code>commitSha256</code></div><b>→</b>
+				<div><span>Next commit</span><code>parentCommitSha256</code></div>
+			</div>
+			<div class="integrity-properties">
+				<article><strong>Exact-byte identity</strong><p>The approved file and normalized representation retain separate SHA-256 values, so exact binary identity is not confused with extracted or normalized content.</p></article>
+				<article><strong>Atomic acceptance</strong><p>A change remains approved while publication runs. It becomes merged only after the signed callback matches the reviewed revision and repository destination.</p></article>
+				<article><strong>Append-only correction</strong><p>A corrected document becomes a new record version and a new repository commit. The old bytes, version, review context, and parent-linked history remain intact.</p></article>
+			</div>
+		</section>
+
+		<section class="solana-section" id="solana" aria-labelledby="solana-title">
+			<div class="shell">
+				<div class="solana-heading">
+					<p class="eyebrow"><span></span> Optional public proof layer</p>
+					<h2 id="solana-title">Solana provides the external timestamp.</h2>
+					<p>For approved public Transparency repositories with integrity anchoring enabled, TieCamel commits the repository hash to Solana. Solana is an advisory public notary; the sealed evidence store and authorization ledger remain the operational sources of truth.</p>
+				</div>
+
+				<div class="solana-protocol-grid">
+					<article class="solana-memo-card">
+						<span>Current protocol · v2</span>
+						<h3>Standard Memo Program</h3>
+						<p>The production path uses the standard Solana Memo Program at:</p>
+						<code class="break-code">MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr</code>
+						<p>The UTF-8 instruction data is exactly:</p>
+						<code class="memo-code">tiecamel:commit:v2:&lt;64-char commit SHA-256&gt;</code>
+						<p class="small-note">Supported networks: <strong>devnet</strong> and <strong>mainnet-beta</strong>. Confirmation is requested at Solana's <strong>confirmed</strong> commitment level.</p>
+					</article>
+					<div class="solana-pipeline">
+						{proofPipeline.map(([title, body], index) => (
+							<article><span>{String(index + 1).padStart(2, '0')}</span><div><h3>{title}</h3><p>{body}</p></div></article>
+						))}
+					</div>
+				</div>
+
+				<div class="worker-detail-grid">
+					<article><span>Idempotency</span><p>Anchors use <code>anchor:commit:v2:&lt;commitSha256&gt;</code>. The integrity service stores a receipt under a hash of that key and uses create-only writes, preventing duplicate transactions during retries.</p></article>
+					<article><span>Signer custody</span><p>The 64-byte Solana signer secret is loaded from a managed secret store through workload identity. The worker also enforces a configurable minimum-lamport safety threshold before submitting.</p></article>
+					<article><span>Post-confirmation readback</span><p>After confirmation, the worker fetches the parsed transaction, locates the <code>spl-memo</code> instruction, and rejects the result unless the observed payload exactly matches the requested commitment.</p></article>
+					<article><span>Failure behavior</span><p>An anchoring failure never rolls back an accepted record. The proof stays visibly queued, running, or failed and can be retried by an authorized repository administrator.</p></article>
+				</div>
+			</div>
+		</section>
+
+		<section class="trust-page-section shell proof-boundaries" aria-labelledby="boundaries-title">
+			<div class="trust-page-heading">
+				<p class="eyebrow"><span></span> On-chain privacy boundary</p>
+				<h2 id="boundaries-title">A commitment is not the document.</h2>
+				<p>SHA-256 is a one-way integrity commitment, not encryption. The public Memo proves that a particular commit hash existed by a network-confirmed slot; access control and secure storage still protect the underlying evidence.</p>
+			</div>
+			<div class="proof-split">
+				<article>
+					<span class="proof-split-label">The public proof can include</span>
+					<ul>{proofIncludes.map((item) => <li><span>✓</span>{item}</li>)}</ul>
+				</article>
+				<article class="proof-split-private">
+					<span class="proof-split-label">Never placed in the Memo</span>
+					<ul>{proofExcludes.map((item) => <li><span>—</span>{item}</li>)}</ul>
+				</article>
+			</div>
+		</section>
+
+		<section class="verification-section" id="verify" aria-labelledby="verify-title">
+			<div class="shell verification-section-grid">
+				<div>
+					<p class="eyebrow"><span></span> Independent verification</p>
+					<h2 id="verify-title">Verify from the manifests to the network.</h2>
+					<p>A TieCamel public verification bundle uses the format <code>tiecamel-public-verification/v2</code>. The verifier does not merely trust a stored “verified” flag—it recomputes the canonical hashes and reads the Solana transaction again through RPC.</p>
+					<div class="verification-equation"><code>verified = commitMatches &amp;&amp; treeMatches &amp;&amp; onChainMatches</code></div>
+				</div>
+				<div class="verification-checks">
+					{verificationChecks.map(([name, test], index) => (
+						<div><span>{String(index + 1).padStart(2, '0')}</span><strong>{name}</strong><code>{test}</code></div>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<section class="trust-page-section shell roadmap-section" aria-labelledby="roadmap-title">
+			<div class="roadmap-label">Roadmap · not the current protocol</div>
+			<div class="trust-page-heading">
+				<div><p class="eyebrow"><span></span> Future Anchor program</p><h2 id="roadmap-title">From receipts to an on-chain repository head.</h2></div>
+				<p>A future custom Anchor program could maintain one <code>RepositoryHead</code> PDA per opaque repository chain. The current Memo implementation remains intentionally simpler and requires no custom program authority.</p>
+			</div>
+			<div class="roadmap-grid">
+				<article><strong>Parent enforcement</strong><p><code>append_commit(expected_parent, next_commit, tree_hash)</code> succeeds only when the expected parent equals the current head, making competing appends explicit.</p></article>
+				<article><strong>Queryable head state</strong><p>The PDA would retain current commit hash, parent hash, monotonic sequence, program version, append authority, and last update slot.</p></article>
+				<article><strong>Two-step authority rotation</strong><p><code>propose_authority</code> and <code>accept_authority</code> would prevent accidental or unilateral signer replacement while preserving repository identity.</p></article>
+				<article><strong>Receipt-preserving migration</strong><p>Existing Memo transactions remain valid. A signed migration manifest would link the full historical receipt chain into the program's genesis head without rewriting any record.</p></article>
+			</div>
+			<div class="technical-note roadmap-note"><strong>Why defer it?</strong><p>A custom program adds deployment authority, upgrade policy, audits, account rent, RPC indexing, signer migration, and incident-response obligations. The Memo Program already provides durable third-party timestamping and tamper evidence while TieCamel validates real repository workflows and privacy boundaries.</p></div>
+		</section>
+
+		<section class="trust-page-cta shell">
+			<div>
+				<p class="eyebrow"><span></span> Build verifiability into the workflow</p>
+				<h2>Institutional memory should have a cryptographic spine.</h2>
+			</div>
+			<a class="button button-dark" href={contactUrl}>Join early access <span aria-hidden="true">↗</span></a>
+		</section>
+	</main>
+
+	<footer class="footer shell">
+		<div class="footer-brand">
+			<a class="brand" href="/" aria-label="TieCamel home"><span class="brand-mark" aria-hidden="true"><img src="/tiecamel-logo.png" alt="" /></span><span class="brand-name">TieCamel</span></a>
+			<p>Trust, made visible.</p>
+		</div>
+		<div class="footer-links">
+			<div><strong>Explore</strong><a href="/#platform">Platform</a><a href="/#trust-model">Trust model</a><a href="/transparency" aria-current="page">Transparency &amp; verification</a><a href="/#faq">FAQ</a></div>
+			<div><strong>Connect</strong><a href={contactUrl}>Early access</a><a href="mailto:hello@tiecamel.com">hello@tiecamel.com</a></div>
+		</div>
+		<div class="footer-bottom">
+			<span>© {new Date().getFullYear()} TieCamel</span>
+			<span>Transparent by design. Private where it matters.</span>
+			<span class="footer-proof">Repository commits anchored with optional Solana proofs.</span>
+		</div>
+	</footer>
+</SiteLayout>

@@ -1,0 +1,17 @@
+Local product sources:
+- /Users/sunny.k/Developer/tiecamel/README.md (product summary and scope), accessed 2026-08-02.
+- /Users/sunny.k/Developer/tiecamel/PRODUCT_PLAN.md (product principles, pilot framing, audience model, workflow), accessed 2026-08-02.
+- /Users/sunny.k/Developer/tiecamel/apps/web/src/pages/index.astro (Observe / Escalate / Prove copy, trust states, audience language), accessed 2026-08-02.
+- /Users/sunny.k/Developer/tiecamel/apps/app/src/platform/seed.ts (mosque-specific demo organization and repository structure), accessed 2026-08-02.
+
+Local product screenshots captured from the seeded development app on 2026-08-02:
+- assets/product-home.png — Islamic Center of Naperville organization workspace.
+- assets/product-compliance.png — compliance repository overview.
+- assets/product-issue.png — property tax notice issue workflow.
+- assets/product-public.png — public transparency repository.
+
+Generated visual:
+- assets/mosque-hero.png — generated with OpenAI image generation on 2026-08-02 for this deck. Prompt: contemporary modern mosque interior at blue hour, left-side negative space, deep emerald shadows, warm brass edge lighting, subtle geometric screening, no text, no calligraphy, no logos.
+
+Brand asset:
+- assets/tiecamel-logo.png — repository-local TieCamel logo.

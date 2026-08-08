@@ -1,0 +1,234 @@
+{"kind":"deck","id":"pr/n77i5z","name":"Deck"}
+{"kind":"layout","layoutId":"f94302e2-e7af-4392-9d9e-56dee757994b","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"af6911d5-40fc-4762-9f64-47515e0e52ea","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/rktx2d","slide":1,"title":"TieCamel","textShapes":5}
+{"kind":"shape","id":"sh/ytkne9sb","slide":1,"bbox":[0,0,690,720]}
+{"kind":"textbox","id":"sh/8jm5k3ad","slide":1,"text":"TieCamel","textPreview":"TieCamel","textChars":8,"textLines":1,"bbox":[111,56,160,30]}
+{"kind":"shape","id":"sh/9kv6t8ry","slide":1,"bbox":[70,184,28,0]}
+{"kind":"textbox","id":"sh/mx4nits7","slide":1,"text":"GOVERNANCE INFRASTRUCTURE FOR MOSQUES","textPreview":"GOVERNANCE INFRASTRUCTURE FOR MOSQUES","textChars":37,"textLines":1,"bbox":[112,174,480,24]}
+{"kind":"textbox","id":"sh/7ydory9s","slide":1,"text":"Stewardship\nyou can prove.","textPreview":"Stewardship | you can prove.","textChars":26,"textLines":2,"bbox":[68,224,590,190]}
+{"kind":"textbox","id":"sh/gn65o3a9","slide":1,"text":"Protect entrusted assets. Surface risk early.\nBuild member trust with evidence—not assurances.","textPreview":"Protect entrusted assets. Surface risk early. | Build member trust with evidence—not assurances.","textChars":94,"textLines":2,"bbox":[72,440,540,86]}
+{"kind":"shape","id":"sh/hof6x8ru","slide":1,"bbox":[72,580,72,0]}
+{"kind":"textbox","id":"sh/hoj65gfy","slide":1,"text":"MOSQUE DESIGN-PARTNER PITCH · 2026","textPreview":"MOSQUE DESIGN-PARTNER PITCH · 2026","textChars":34,"textLines":1,"bbox":[162,569,360,24]}
+{"kind":"image","id":"im/kzq5sfy9","slide":1,"name":"","geometry":"rect","alt":"Contemporary mosque interior at blue hour","bbox":[0,0,1280,720]}
+{"kind":"image","id":"im/yxonq5g3","slide":1,"name":"","geometry":"rect","alt":"TieCamel logo","bbox":[68,54,34,34]}
+{"kind":"notes","id":"nt/rktx2d","slide":1,"text":"Open on stewardship: the promise is not simply to manage a mosque, but to protect an amanah and make responsible action visible.\n\n[Sources]\n- TieCamel PRODUCT_PLAN.md, accessed 2026-08-02.\n- AI-generated architecture visual created for this deck with OpenAI image generation, 2026-08-02.\n- TieCamel repository-local logo asset."}
+{"kind":"slide","id":"sl/8pqa18","slide":2,"title":"THE OPERATING REALITY","textShapes":18}
+{"kind":"shape","id":"sh/zal8juxg","slide":2,"bbox":[64,64,28,0]}
+{"kind":"textbox","id":"sh/0bupcze1","slide":2,"text":"THE OPERATING REALITY","textPreview":"THE OPERATING REALITY","textChars":21,"textLines":1,"bbox":[106,54,420,24]}
+{"kind":"textbox","id":"sh/lc3ql4f6","slide":2,"text":"Mosques carry more\nthan a mission.","textPreview":"Mosques carry more | than a mission.","textChars":34,"textLines":2,"bbox":[64,104,670,130]}
+{"kind":"textbox","id":"sh/mdcre9wr","slide":2,"text":"Amanah","textPreview":"Amanah","textChars":6,"textLines":1,"bbox":[66,286,520,112]}
+{"kind":"textbox","id":"sh/nel8nexc","slide":2,"text":"The trust is sacred. The operating complexity is real.","textPreview":"The trust is sacred. The operating complexity is real.","textChars":54,"textLines":1,"bbox":[70,410,600,48]}
+{"kind":"shape","id":"sh/8fe9gzex","slide":2,"bbox":[680,86,0,456]}
+{"kind":"textbox","id":"sh/90nqp4fi","slide":2,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[740,108,40,28]}
+{"kind":"textbox","id":"sh/a1wri9w3","slide":2,"text":"Property & exemptions","textPreview":"Property & exemptions","textChars":21,"textLines":1,"bbox":[798,98,390,38]}
+{"kind":"shape","id":"sh/v258rexo","slide":2,"bbox":[798,143,390,0]}
+{"kind":"textbox","id":"sh/ni1cnyx8","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[740,181,40,28]}
+{"kind":"textbox","id":"sh/mhsbutgn","slide":2,"text":"Insurance & safety","textPreview":"Insurance & safety","textChars":18,"textLines":1,"bbox":[798,171,390,38]}
+{"kind":"shape","id":"sh/9k3up8fy","slide":2,"bbox":[798,216,390,0]}
+{"kind":"textbox","id":"sh/8jatw3yd","slide":2,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[740,254,40,28]}
+{"kind":"textbox","id":"sh/ze1sjexw","slide":2,"text":"Zakat & restricted funds","textPreview":"Zakat & restricted funds","textChars":24,"textLines":1,"bbox":[798,244,390,38]}
+{"kind":"shape","id":"sh/ydsbq9gb","slide":2,"bbox":[798,289,390,0]}
+{"kind":"textbox","id":"sh/lgjulof2","slide":2,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[740,327,40,28]}
+{"kind":"textbox","id":"sh/0fatsjyh","slide":2,"text":"Schools & youth programs","textPreview":"Schools & youth programs","textChars":24,"textLines":1,"bbox":[798,317,390,38]}
+{"kind":"shape","id":"sh/jalcvixg","slide":2,"bbox":[798,362,390,0]}
+{"kind":"textbox","id":"sh/i9cb2dwv","slide":2,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[740,400,40,28]}
+{"kind":"textbox","id":"sh/eh0na14z","slide":2,"text":"Payroll, grants & filings","textPreview":"Payroll, grants & filings","textChars":25,"textLines":1,"bbox":[798,390,390,38]}
+{"kind":"shape","id":"sh/fi9oj6lk","slide":2,"bbox":[798,435,390,0]}
+{"kind":"textbox","id":"sh/gji5cb25","slide":2,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[740,473,40,28]}
+{"kind":"textbox","id":"sh/1kr6lg3q","slide":2,"text":"Board decisions & member expectations","textPreview":"Board decisions & member expectations","textChars":37,"textLines":1,"bbox":[798,463,390,38]}
+{"kind":"textbox","id":"sh/3m9onqlw","slide":2,"text":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textPreview":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textChars":37,"textLines":1,"bbox":[64,680,430,16]}
+{"kind":"textbox","id":"sh/oni5gv2h","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1170,678,46,18]}
+{"kind":"image","id":"im/dwni5ovi","slide":2,"name":"","geometry":"rect","alt":"TieCamel camel mark","bbox":[1060,540,120,120]}
+{"kind":"notes","id":"nt/8pqa18","slide":2,"text":"Connect the mission to the operational load carried by mosque boards, staff, volunteers, finance committees, and independent reviewers.\n\n[Sources]\n- TieCamel PRODUCT_PLAN.md: obligation categories and faith-based institution use case, accessed 2026-08-02.\n- TieCamel apps/web/src/pages/index.astro: assets and obligations module copy, accessed 2026-08-02."}
+{"kind":"slide","id":"sl/jf8gd2","slide":3,"title":"THE HIDDEN FAILURE MODE","textShapes":18}
+{"kind":"shape","id":"sh/z2pozqhk","slide":3,"bbox":[64,60,28,0]}
+{"kind":"textbox","id":"sh/03ipsvy5","slide":3,"text":"THE HIDDEN FAILURE MODE","textPreview":"THE HIDDEN FAILURE MODE","textChars":23,"textLines":1,"bbox":[106,50,420,24]}
+{"kind":"textbox","id":"sh/l4r610zq","slide":3,"text":"The risk lives between systems.","textPreview":"The risk lives between systems.","textChars":31,"textLines":1,"bbox":[64,92,1100,72]}
+{"kind":"textbox","id":"sh/qxg7m1g3","slide":3,"text":"Accounting records the transaction. Email carries the notice. A shared drive holds the file.\nBut none of them guarantees that the full board sees the risk—or that it escalates.","textPreview":"Accounting records the transaction. Email carries the notice. A shared drive holds the file. | But none of them guarantees that the full ...","textChars":176,"textLines":2,"bbox":[64,160,1080,76]}
+{"kind":"shape","id":"sh/bypov6ho","slide":3,"bbox":[182,346,126,0]}
+{"kind":"shape","id":"sh/czypoby9","slide":3,"bbox":[472,346,126,0]}
+{"kind":"shape","id":"sh/d076xgzu","slide":3,"bbox":[762,346,126,0]}
+{"kind":"shape","id":"sh/at07y5g7","slide":3,"bbox":[100,310,72,72]}
+{"kind":"textbox","id":"sh/vu987axs","slide":3,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[100,326,72,34]}
+{"kind":"textbox","id":"sh/n6lo7el8","slide":3,"text":"Notice arrives","textPreview":"Notice arrives","textChars":14,"textLines":1,"bbox":[66,412,220,34]}
+{"kind":"textbox","id":"sh/25snyt43","slide":3,"text":"A filing, bill, renewal, grant report, or board decision lands.","textPreview":"A filing, bill, renewal, grant report, or board decision lands.","textChars":63,"textLines":1,"bbox":[66,456,220,104]}
+{"kind":"shape","id":"sh/ps369o3e","slide":3,"bbox":[390,310,72,72]}
+{"kind":"textbox","id":"sh/o7u50jmt","slide":3,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[390,326,72,34]}
+{"kind":"textbox","id":"sh/bulobylk","slide":3,"text":"One person knows","textPreview":"One person knows","textChars":16,"textLines":1,"bbox":[356,412,220,34]}
+{"kind":"textbox","id":"sh/atc72t4z","slide":3,"text":"The obligation stays inside an inbox, folder, or private conversation.","textPreview":"The obligation stays inside an inbox, folder, or private conversation.","textChars":70,"textLines":1,"bbox":[356,482,220,82]}
+{"kind":"shape","id":"sh/xw36d83q","slide":3,"bbox":[680,310,72,72]}
+{"kind":"textbox","id":"sh/cvup43m5","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[680,326,72,34]}
+{"kind":"textbox","id":"sh/zy5ofilg","slide":3,"text":"The moment slips","textPreview":"The moment slips","textChars":16,"textLines":1,"bbox":[646,412,220,34]}
+{"kind":"textbox","id":"sh/yxc76d4v","slide":3,"text":"No shared owner, evidence standard, reviewer, or escalation clock.","textPreview":"No shared owner, evidence standard, reviewer, or escalation clock.","textChars":66,"textLines":1,"bbox":[646,456,220,104]}
+{"kind":"shape","id":"sh/utgryho3","slide":3,"bbox":[970,310,72,72]}
+{"kind":"textbox","id":"sh/vup8725o","slide":3,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[970,326,72,34]}
+{"kind":"textbox","id":"sh/gvy90769","slide":3,"text":"Trust breaks late","textPreview":"Trust breaks late","textChars":17,"textLines":1,"bbox":[936,412,220,34]}
+{"kind":"textbox","id":"sh/hw7a9cnu","slide":3,"text":"Leaders and members learn after cost, conflict, or exposure grows.","textPreview":"Leaders and members learn after cost, conflict, or exposure grows.","textChars":66,"textLines":1,"bbox":[936,456,220,104]}
+{"kind":"shape","id":"sh/6pwruxo7","slide":3,"bbox":[64,590,1152,54]}
+{"kind":"textbox","id":"sh/7qp8325s","slide":3,"text":"The issue is not a lack of care. It is a lack of shared visibility, evidence, and escalation.","textPreview":"The issue is not a lack of care. It is a lack of shared visibility, evidence, and escalation.","textChars":93,"textLines":1,"bbox":[92,604,1100,28]}
+{"kind":"textbox","id":"sh/8ry9w76d","slide":3,"text":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textPreview":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textChars":37,"textLines":1,"bbox":[64,680,430,16]}
+{"kind":"textbox","id":"sh/ts7q5cny","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1170,678,46,18]}
+{"kind":"notes","id":"nt/jf8gd2","slide":3,"text":"Frame the competitive gap: bookkeeping, board portals, email, and storage each solve a narrow problem, but not the handoff between knowledge, responsibility, evidence, escalation, and disclosure.\n\n[Sources]\n- TieCamel PRODUCT_PLAN.md: Why this product should exist, accessed 2026-08-02."}
+{"kind":"slide","id":"sl/1sx6jf","slide":4,"title":"THE TIECAMEL MODEL","textShapes":13}
+{"kind":"shape","id":"sh/4v25krm5","slide":4,"bbox":[64,54,28,0]}
+{"kind":"textbox","id":"sh/jutorm50","slide":4,"text":"THE TIECAMEL MODEL","textPreview":"THE TIECAMEL MODEL","textChars":18,"textLines":1,"bbox":[106,44,420,24]}
+{"kind":"textbox","id":"sh/itknihof","slide":4,"text":"One shared system: observe, escalate, prove.","textPreview":"One shared system: observe, escalate, prove.","textChars":44,"textLines":1,"bbox":[64,84,1100,72]}
+{"kind":"textbox","id":"sh/hsb6pcnu","slide":4,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[64,178,48,26]}
+{"kind":"textbox","id":"sh/wr25g769","slide":4,"text":"Observe","textPreview":"Observe","textChars":7,"textLines":1,"bbox":[64,210,310,44]}
+{"kind":"textbox","id":"sh/v6tonm5o","slide":4,"text":"Bring property, filings, grants, insurance, loans, licenses, legal matters, and financial reporting into one source-labeled view.","textPreview":"Bring property, filings, grants, insurance, loans, licenses, legal matters, and financial reporting into one source-labeled view.","textChars":129,"textLines":1,"bbox":[64,264,310,88]}
+{"kind":"shape","id":"sh/u50neho3","slide":4,"bbox":[426,190,0,146]}
+{"kind":"textbox","id":"sh/94r6lcni","slide":4,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[458,178,48,26]}
+{"kind":"textbox","id":"sh/83i5c76d","slide":4,"text":"Escalate","textPreview":"Escalate","textChars":8,"textLines":1,"bbox":[458,210,310,44]}
+{"kind":"textbox","id":"sh/q5o321s7","slide":4,"text":"Assign an owner, backup, reviewer, evidence requirement, and an escalation path that cannot end in one silent inbox.","textPreview":"Assign an owner, backup, reviewer, evidence requirement, and an escalation path that cannot end in one silent inbox.","textChars":116,"textLines":1,"bbox":[458,264,310,88]}
+{"kind":"shape","id":"sh/r6hkv6ts","slide":4,"bbox":[820,190,0,146]}
+{"kind":"textbox","id":"sh/c7ql4bad","slide":4,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[852,178,48,26]}
+{"kind":"textbox","id":"sh/dszmxgby","slide":4,"text":"Prove","textPreview":"Prove","textChars":5,"textLines":1,"bbox":[852,210,310,44]}
+{"kind":"textbox","id":"sh/21o3y1sb","slide":4,"text":"Publish privacy-respecting reports with source labels, reviewer attestations, append-only history, and verifiable proof.","textPreview":"Publish privacy-respecting reports with source labels, reviewer attestations, append-only history, and verifiable proof.","textChars":120,"textLines":1,"bbox":[852,264,310,88]}
+{"kind":"shape","id":"sh/32xkr6tw","slide":4,"bbox":[64,390,1152,236]}
+{"kind":"textbox","id":"sh/p4f2tgb2","slide":4,"text":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textPreview":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textChars":37,"textLines":1,"bbox":[64,680,430,16]}
+{"kind":"textbox","id":"sh/ux43uhsf","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1170,678,46,18]}
+{"kind":"image","id":"im/nmdcbits","slide":4,"name":"","geometry":"roundRect","alt":"TieCamel mosque organization workspace","bbox":[70,396,1140,224]}
+{"kind":"notes","id":"nt/1sx6jf","slide":4,"text":"Tie the three-part promise to the actual product workspace. The screenshot uses the seeded Islamic Center of Naperville demo organization.\n\n[Sources]\n- TieCamel apps/web/src/pages/index.astro: Observe / Escalate / Prove copy, accessed 2026-08-02.\n- Local TieCamel seeded demo screenshot: Islamic Center of Naperville organization workspace, captured 2026-08-02."}
+{"kind":"slide","id":"sl/g1c0ca","slide":5,"title":"BOARD VISIBILITY","textShapes":13}
+{"kind":"shape","id":"sh/nahwje9k","slide":5,"bbox":[64,60,28,0]}
+{"kind":"textbox","id":"sh/8badsja5","slide":5,"text":"BOARD VISIBILITY","textPreview":"BOARD VISIBILITY","textChars":16,"textLines":1,"bbox":[106,50,420,24]}
+{"kind":"textbox","id":"sh/9cjelorq","slide":5,"text":"Your board sees the whole picture—\nbefore the meeting.","textPreview":"Your board sees the whole picture— | before the meeting.","textChars":54,"textLines":2,"bbox":[64,92,520,124]}
+{"kind":"textbox","id":"sh/adsvutsb","slide":5,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[66,260,36,24]}
+{"kind":"textbox","id":"sh/ve1wne9w","slide":5,"text":"Governed work areas","textPreview":"Governed work areas","textChars":19,"textLines":1,"bbox":[116,254,390,34]}
+{"kind":"textbox","id":"sh/wfadwja1","slide":5,"text":"Governance, compliance, funding, and transparency each carry their own rules and audience.","textPreview":"Governance, compliance, funding, and transparency each carry their own rules and audience.","textChars":90,"textLines":1,"bbox":[116,292,410,70]}
+{"kind":"textbox","id":"sh/hgjeporm","slide":5,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[66,378,36,24]}
+{"kind":"textbox","id":"sh/ihsvyts7","slide":5,"text":"What needs attention","textPreview":"What needs attention","textChars":20,"textLines":1,"bbox":[116,372,390,34]}
+{"kind":"textbox","id":"sh/jilwry9s","slide":5,"text":"Open issues, review queues, unresolved actions, and close-to-breach items are visible in one place.","textPreview":"Open issues, review queues, unresolved actions, and close-to-breach items are visible in one place.","textChars":99,"textLines":1,"bbox":[116,410,410,70]}
+{"kind":"textbox","id":"sh/7mtsrmhk","slide":5,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[66,496,36,24]}
+{"kind":"textbox","id":"sh/ml0byh0z","slide":5,"text":"Durable history","textPreview":"Durable history","textChars":15,"textLines":1,"bbox":[116,490,390,34]}
+{"kind":"textbox","id":"sh/9obatwzq","slide":5,"text":"Accepted records cannot be silently overwritten; corrections arrive as reviewed changes.","textPreview":"Accepted records cannot be silently overwritten; corrections arrive as reviewed changes.","textChars":88,"textLines":1,"bbox":[116,528,410,70]}
+{"kind":"shape","id":"sh/8n2t0ri5","slide":5,"bbox":[574,104,642,502]}
+{"kind":"textbox","id":"sh/yx0buh03","slide":5,"text":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textPreview":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textChars":37,"textLines":1,"bbox":[64,680,430,16]}
+{"kind":"textbox","id":"sh/l0rapcze","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1170,678,46,18]}
+{"kind":"image","id":"im/sva98nip","slide":5,"name":"","geometry":"roundRect","alt":"TieCamel board operating picture for a mosque","bbox":[582,112,626,486]}
+{"kind":"notes","id":"nt/g1c0ca","slide":5,"text":"Show how a board member or treasurer can orient quickly across governed repositories, work requiring attention, and recent anchored activity.\n\n[Sources]\n- Local TieCamel seeded demo screenshot: Islamic Center of Naperville organization workspace, captured 2026-08-02.\n- TieCamel README.md and PRODUCT_PLAN.md: repository oversight and correction history, accessed 2026-08-02."}
+{"kind":"slide","id":"sl/ni85nl","slide":6,"title":"CONTROLLED FOLLOW-THROUGH","textShapes":20}
+{"kind":"shape","id":"sh/i1s3e18b","slide":6,"bbox":[64,54,28,0]}
+{"kind":"textbox","id":"sh/5ojm9grm","slide":6,"text":"CONTROLLED FOLLOW-THROUGH","textPreview":"CONTROLLED FOLLOW-THROUGH","textChars":25,"textLines":1,"bbox":[106,44,420,24]}
+{"kind":"textbox","id":"sh/k3algbq1","slide":6,"text":"Every obligation has\na path to resolution.","textPreview":"Every obligation has | a path to resolution.","textChars":42,"textLines":2,"bbox":[64,86,510,118]}
+{"kind":"shape","id":"sh/7q14bq9s","slide":6,"bbox":[90,266,0,256]}
+{"kind":"shape","id":"sh/6ps3il87","slide":6,"bbox":[74,240,32,32]}
+{"kind":"textbox","id":"sh/ts3mdgry","slide":6,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[74,245,32,20]}
+{"kind":"textbox","id":"sh/sralkbqd","slide":6,"text":"Owner","textPreview":"Owner","textChars":5,"textLines":1,"bbox":[128,238,126,26]}
+{"kind":"textbox","id":"sh/ful4fq9o","slide":6,"text":"Someone is responsible.","textPreview":"Someone is responsible.","textChars":23,"textLines":1,"bbox":[258,240,255,38]}
+{"kind":"shape","id":"sh/utc3ml83","slide":6,"bbox":[74,310,32,32]}
+{"kind":"textbox","id":"sh/k32dgbmh","slide":6,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[74,315,32,20]}
+{"kind":"textbox","id":"sh/l4bepg32","slide":6,"text":"Backup","textPreview":"Backup","textChars":6,"textLines":1,"bbox":[128,308,126,26]}
+{"kind":"textbox","id":"sh/yhkvel4b","slide":6,"text":"Silence cannot stop the work.","textPreview":"Silence cannot stop the work.","textChars":29,"textLines":1,"bbox":[258,310,255,38]}
+{"kind":"shape","id":"sh/jitwnqlw","slide":6,"bbox":[74,380,32,32]}
+{"kind":"textbox","id":"sh/87mdkvmt","slide":6,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[74,385,32,20]}
+{"kind":"textbox","id":"sh/t8vet03y","slide":6,"text":"Evidence","textPreview":"Evidence","textChars":8,"textLines":1,"bbox":[128,378,126,26]}
+{"kind":"textbox","id":"sh/654vil4n","slide":6,"text":"Completion requires proof.","textPreview":"Completion requires proof.","textChars":26,"textLines":1,"bbox":[258,380,255,38]}
+{"kind":"shape","id":"sh/76dwrql8","slide":6,"bbox":[74,450,32,32]}
+{"kind":"textbox","id":"sh/gbmdofmp","slide":6,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[74,455,32,20]}
+{"kind":"textbox","id":"sh/hcfex03a","slide":6,"text":"Reviewer","textPreview":"Reviewer","textChars":8,"textLines":1,"bbox":[128,448,126,26]}
+{"kind":"textbox","id":"sh/psbeh0ve","slide":6,"text":"High-risk closure gets a second set of eyes.","textPreview":"High-risk closure gets a second set of eyes.","textChars":44,"textLines":1,"bbox":[258,450,255,38]}
+{"kind":"shape","id":"sh/4r2d8vet","slide":6,"bbox":[74,520,32,32]}
+{"kind":"textbox","id":"sh/3q9cfqd8","slide":6,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[74,525,32,20]}
+{"kind":"textbox","id":"sh/2p0v65wn","slide":6,"text":"Escalation","textPreview":"Escalation","textChars":10,"textLines":1,"bbox":[128,518,126,26]}
+{"kind":"textbox","id":"sh/dwbelkva","slide":6,"text":"Unresolved risk reaches the full board.","textPreview":"Unresolved risk reaches the full board.","textChars":39,"textLines":1,"bbox":[258,520,255,38]}
+{"kind":"shape","id":"sh/cv2dcfe5","slide":6,"bbox":[566,92,650,452]}
+{"kind":"shape","id":"sh/qtkva5wz","slide":6,"bbox":[566,570,650,66]}
+{"kind":"textbox","id":"sh/t0ru9gv6","slide":6,"text":"A critical item cannot be quietly closed by the same person who owns it.","textPreview":"A critical item cannot be quietly closed by the same person who owns it.","textChars":72,"textLines":1,"bbox":[590,585,604,34]}
+{"kind":"textbox","id":"sh/szyd0bel","slide":6,"text":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textPreview":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textChars":37,"textLines":1,"bbox":[64,680,430,16]}
+{"kind":"textbox","id":"sh/i5wbahcj","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1170,678,46,18]}
+{"kind":"image","id":"im/ovqlcnu9","slide":6,"name":"","geometry":"roundRect","alt":"Property tax notice review issue in TieCamel","bbox":[574,100,634,436]}
+{"kind":"notes","id":"nt/ni85nl","slide":6,"text":"Use the property-tax-notice demo to make the workflow tangible. TieCamel does not decide legal responsibility; it makes the obligation, evidence, owner, reviewer, and response status visible.\n\n[Sources]\n- Local TieCamel seeded demo screenshot: property tax notice issue workflow, captured 2026-08-02.\n- TieCamel PRODUCT_PLAN.md: obligation lifecycle, independent review, and no-single-point-of-silence principles, accessed 2026-08-02."}
+{"kind":"slide","id":"sl/r9ywqg","slide":7,"title":"TRUST WITH PRIVACY","textShapes":14}
+{"kind":"shape","id":"sh/lgr294ju","slide":7,"bbox":[64,58,28,0]}
+{"kind":"textbox","id":"sh/ydgjypkj","slide":7,"text":"TRUST WITH PRIVACY","textPreview":"TRUST WITH PRIVACY","textChars":18,"textLines":1,"bbox":[106,48,420,24]}
+{"kind":"textbox","id":"sh/zepk7u14","slide":7,"text":"Transparency without oversharing.","textPreview":"Transparency without oversharing.","textChars":33,"textLines":1,"bbox":[64,90,1100,72]}
+{"kind":"textbox","id":"sh/83i14z2l","slide":7,"text":"The same truth—presented at the right level for each audience.","textPreview":"The same truth—presented at the right level for each audience.","textChars":62,"textLines":1,"bbox":[64,154,760,38]}
+{"kind":"shape","id":"sh/t4r2d4j6","slide":7,"bbox":[100,238,1080,64]}
+{"kind":"textbox","id":"sh/6h0j29kf","slide":7,"text":"PUBLIC","textPreview":"PUBLIC","textChars":6,"textLines":1,"bbox":[124,250,190,18]}
+{"kind":"textbox","id":"sh/7i9kbu10","slide":7,"text":"Approved reports, leadership, material-risk summaries, freshness and publication proof","textPreview":"Approved reports, leadership, material-risk summaries, freshness and publication proof","textChars":86,"textLines":1,"bbox":[320,248,836,42]}
+{"kind":"shape","id":"sh/g7il8j2h","slide":7,"bbox":[170,320,940,64]}
+{"kind":"textbox","id":"sh/h8b2hoj2","slide":7,"text":"VERIFIED MEMBERS","textPreview":"VERIFIED MEMBERS","textChars":16,"textLines":1,"bbox":[194,332,190,18]}
+{"kind":"textbox","id":"sh/xk3a5of6","slide":7,"text":"Financial and governance summaries, board actions, structured questions and responses","textPreview":"Financial and governance summaries, board actions, structured questions and responses","textChars":85,"textLines":1,"bbox":[390,330,696,42]}
+{"kind":"shape","id":"sh/wjutwjyl","slide":7,"bbox":[240,402,800,64]}
+{"kind":"textbox","id":"sh/bils3yx0","slide":7,"text":"FULL BOARD","textPreview":"FULL BOARD","textChars":10,"textLines":1,"bbox":[264,414,190,18]}
+{"kind":"textbox","id":"sh/ahsbutgf","slide":7,"text":"Obligations, evidence, decisions, dissent, unresolved actions and scoped financial detail","textPreview":"Obligations, evidence, decisions, dissent, unresolved actions and scoped financial detail","textChars":89,"textLines":1,"bbox":[460,412,556,42]}
+{"kind":"shape","id":"sh/lo3a98f2","slide":7,"bbox":[310,484,660,64]}
+{"kind":"textbox","id":"sh/knut03yh","slide":7,"text":"RESTRICTED","textPreview":"RESTRICTED","textChars":10,"textLines":1,"bbox":[334,496,190,18]}
+{"kind":"textbox","id":"sh/jmls7yxw","slide":7,"text":"Donor identities, employee data, credentials and privileged legal strategy stay protected","textPreview":"Donor identities, employee data, credentials and privileged legal strategy stay protected","textChars":89,"textLines":1,"bbox":[530,494,416,42]}
+{"kind":"shape","id":"sh/ylcbytgb","slide":7,"bbox":[100,590,1080,0]}
+{"kind":"textbox","id":"sh/1sjax4zy","slide":7,"text":"Meaningful transparency does not require publishing transactions, donor identities, or privileged strategy.","textPreview":"Meaningful transparency does not require publishing transactions, donor identities, or privileged strategy.","textChars":107,"textLines":1,"bbox":[148,608,984,36]}
+{"kind":"textbox","id":"sh/0ra9ozyd","slide":7,"text":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textPreview":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textChars":37,"textLines":1,"bbox":[64,680,430,16]}
+{"kind":"textbox","id":"sh/c7e103al","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1170,678,46,18]}
+{"kind":"notes","id":"nt/r9ywqg","slide":7,"text":"This is a tiered access model, not a one-size-fits-all public portal. Emphasize that transparency and privacy reinforce each other when boundaries are explicit.\n\n[Sources]\n- TieCamel PRODUCT_PLAN.md: information-access model and transparency with privacy principle, accessed 2026-08-02."}
+{"kind":"slide","id":"sl/0epzxf","slide":8,"title":"PROVENANCE ON EVERY CLAIM","textShapes":14}
+{"kind":"shape","id":"sh/vupgv21w","slide":8,"bbox":[64,54,28,0]}
+{"kind":"textbox","id":"sh/wvyho72h","slide":8,"text":"PROVENANCE ON EVERY CLAIM","textPreview":"PROVENANCE ON EVERY CLAIM","textChars":25,"textLines":1,"bbox":[106,44,420,24]}
+{"kind":"textbox","id":"sh/hw7yxcjm","slide":8,"text":"Trust is stronger\nwhen every claim\ncarries its source.","textPreview":"Trust is stronger | when every claim | carries its source.","textChars":54,"textLines":3,"bbox":[64,86,520,150]}
+{"kind":"shape","id":"sh/m5wzixkz","slide":8,"bbox":[70,274,12,12]}
+{"kind":"textbox","id":"sh/765gr21k","slide":8,"text":"Verified","textPreview":"Verified","textChars":8,"textLines":1,"bbox":[100,266,230,28]}
+{"kind":"textbox","id":"sh/87yhk725","slide":8,"text":"Confirmed by an official, connected, or independently reviewed source.","textPreview":"Confirmed by an official, connected, or independently reviewed source.","textChars":70,"textLines":1,"bbox":[100,298,430,42]}
+{"kind":"shape","id":"sh/987ytsjq","slide":8,"bbox":[70,353,12,12]}
+{"kind":"textbox","id":"sh/y1wzedk3","slide":8,"text":"Organization reported","textPreview":"Organization reported","textChars":21,"textLines":1,"bbox":[100,345,230,28]}
+{"kind":"textbox","id":"sh/z25gni1o","slide":8,"text":"Submitted by the mosque with its source and reporting date visible.","textPreview":"Submitted by the mosque with its source and reporting date visible.","textChars":67,"textLines":1,"bbox":[100,377,430,42]}
+{"kind":"shape","id":"sh/3ux0bml8","slide":8,"bbox":[70,432,12,12]}
+{"kind":"textbox","id":"sh/2t4z2h4n","slide":8,"text":"Unavailable","textPreview":"Unavailable","textChars":11,"textLines":1,"bbox":[100,424,230,28]}
+{"kind":"textbox","id":"sh/pgfidw3e","slide":8,"text":"Missing, disconnected, stale, or not available for verification.","textPreview":"Missing, disconnected, stale, or not available for verification.","textChars":64,"textLines":1,"bbox":[100,456,430,42]}
+{"kind":"shape","id":"sh/4v6h4rmt","slide":8,"bbox":[70,511,12,12]}
+{"kind":"textbox","id":"sh/rix0f6l4","slide":8,"text":"Disputed","textPreview":"Disputed","textChars":8,"textLines":1,"bbox":[100,503,230,28]}
+{"kind":"textbox","id":"sh/qhoz614j","slide":8,"text":"The evidence and each response remain preserved.","textPreview":"The evidence and each response remain preserved.","textChars":48,"textLines":1,"bbox":[100,535,430,42]}
+{"kind":"shape","id":"sh/dkfihg3a","slide":8,"bbox":[620,98,596,396]}
+{"kind":"shape","id":"sh/7md032l0","slide":8,"bbox":[620,530,596,102]}
+{"kind":"textbox","id":"sh/6lkzux4f","slide":8,"text":"Corrections append. Originals remain visible.","textPreview":"Corrections append. Originals remain visible.","textChars":45,"textLines":1,"bbox":[650,548,536,30]}
+{"kind":"textbox","id":"sh/ahs325o3","slide":8,"text":"Published records can change without history disappearing.","textPreview":"Published records can change without history disappearing.","textChars":58,"textLines":1,"bbox":[650,586,536,22]}
+{"kind":"textbox","id":"sh/bi1kba5o","slide":8,"text":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textPreview":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textChars":37,"textLines":1,"bbox":[64,680,430,16]}
+{"kind":"textbox","id":"sh/wjal4f69","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1170,678,46,18]}
+{"kind":"image","id":"im/72xwruhg","slide":8,"name":"","geometry":"roundRect","alt":"TieCamel public transparency repository","bbox":[628,106,580,380]}
+{"kind":"notes","id":"nt/0epzxf","slide":8,"text":"Explain the trust-state vocabulary and the public boundary: only independently reviewed, board-approved, authorized snapshots appear publicly; internal drafts and review discussion remain excluded.\n\n[Sources]\n- TieCamel apps/web/src/pages/index.astro: trust states, accessed 2026-08-02.\n- TieCamel PRODUCT_PLAN.md: provenance and append-only correction principles, accessed 2026-08-02.\n- Local TieCamel public transparency repository screenshot, captured 2026-08-02."}
+{"kind":"slide","id":"sl/dc2iqa","slide":9,"title":"PROPOSED DESIGN-PARTNER PILOT","textShapes":22}
+{"kind":"shape","id":"sh/gna9cfi9","slide":9,"bbox":[64,58,28,0]}
+{"kind":"textbox","id":"sh/fm1sja1o","slide":9,"text":"PROPOSED DESIGN-PARTNER PILOT","textPreview":"PROPOSED DESIGN-PARTNER PILOT","textChars":29,"textLines":1,"bbox":[106,48,420,24]}
+{"kind":"textbox","id":"sh/ulsra503","slide":9,"text":"A focused 90 days to prove the model.","textPreview":"A focused 90 days to prove the model.","textChars":37,"textLines":1,"bbox":[64,90,1100,72]}
+{"kind":"textbox","id":"sh/tkjah0ji","slide":9,"text":"Start bounded. Learn with real obligations. Publish one credible result.","textPreview":"Start bounded. Learn with real obligations. Publish one credible result.","textChars":72,"textLines":1,"bbox":[64,154,860,36]}
+{"kind":"shape","id":"sh/sja98vid","slide":9,"bbox":[160,302,186,0]}
+{"kind":"shape","id":"sh/7i1sfq1s","slide":9,"bbox":[450,302,186,0]}
+{"kind":"shape","id":"sh/6hsr6l07","slide":9,"bbox":[740,302,186,0]}
+{"kind":"shape","id":"sh/dgnatkz2","slide":9,"bbox":[108,272,60,60]}
+{"kind":"textbox","id":"sh/cfetkzih","slide":9,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[108,288,60,24]}
+{"kind":"textbox","id":"sh/m1cvilor","slide":9,"text":"DAYS 1–14","textPreview":"DAYS 1–14","textChars":9,"textLines":1,"bbox":[72,354,160,18]}
+{"kind":"textbox","id":"sh/72lwbq5c","slide":9,"text":"Align","textPreview":"Align","textChars":5,"textLines":1,"bbox":[72,384,160,32]}
+{"kind":"textbox","id":"sh/83uxkv6x","slide":9,"text":"Scope, governance, data boundaries, and a draft Transparency Covenant.","textPreview":"Scope, governance, data boundaries, and a draft Transparency Covenant.","textChars":70,"textLines":1,"bbox":[46,430,212,88]}
+{"kind":"shape","id":"sh/943ed0ni","slide":9,"bbox":[398,272,60,60]}
+{"kind":"textbox","id":"sh/yxsvelov","slide":9,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[398,288,60,24]}
+{"kind":"textbox","id":"sh/zy1w7qpg","slide":9,"text":"DAYS 15–45","textPreview":"DAYS 15–45","textChars":10,"textLines":1,"bbox":[362,354,160,18]}
+{"kind":"textbox","id":"sh/kzudgb61","slide":9,"text":"Configure","textPreview":"Configure","textChars":9,"textLines":1,"bbox":[362,384,160,32]}
+{"kind":"textbox","id":"sh/l03e9gnm","slide":9,"text":"Import priority obligations; assign owners, backups, evidence, and escalation.","textPreview":"Import priority obligations; assign owners, backups, evidence, and escalation.","textChars":78,"textLines":1,"bbox":[336,430,212,88]}
+{"kind":"shape","id":"sh/itwfq5oz","slide":9,"bbox":[688,272,60,60]}
+{"kind":"textbox","id":"sh/3u5wja5k","slide":9,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[688,288,60,24]}
+{"kind":"textbox","id":"sh/fexsb25w","slide":9,"text":"DAYS 46–75","textPreview":"DAYS 46–75","textChars":10,"textLines":1,"bbox":[652,354,160,18]}
+{"kind":"textbox","id":"sh/edobix4r","slide":9,"text":"Operate","textPreview":"Operate","textChars":7,"textLines":1,"bbox":[652,384,160,32]}
+{"kind":"textbox","id":"sh/10zudc32","slide":9,"text":"Run alerts, reviews, board decisions, and member-question workflows.","textPreview":"Run alerts, reviews, board decisions, and member-question workflows.","textChars":68,"textLines":1,"bbox":[626,430,212,88]}
+{"kind":"shape","id":"sh/0z6tk7mh","slide":9,"bbox":[978,272,60,60]}
+{"kind":"textbox","id":"sh/n2hcfml8","slide":9,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[978,288,60,24]}
+{"kind":"textbox","id":"sh/218bmh4n","slide":9,"text":"DAYS 76–90","textPreview":"DAYS 76–90","textChars":10,"textLines":1,"bbox":[942,354,160,18]}
+{"kind":"textbox","id":"sh/p4zuhc3e","slide":9,"text":"Publish","textPreview":"Publish","textChars":7,"textLines":1,"bbox":[942,384,160,32]}
+{"kind":"textbox","id":"sh/o3qtormt","slide":9,"text":"Release one approved member-facing report with verification proof.","textPreview":"Release one approved member-facing report with verification proof.","textChars":66,"textLines":1,"bbox":[916,430,212,88]}
+{"kind":"shape","id":"sh/b6hcjml4","slide":9,"bbox":[64,566,1152,76]}
+{"kind":"textbox","id":"sh/a58bqh4j","slide":9,"text":"Pilot outcome: one authoritative obligation register · board-level visibility · a member report · tamper-evident publication proof","textPreview":"Pilot outcome: one authoritative obligation register · board-level visibility · a member report · tamper-evident publication proof","textChars":130,"textLines":1,"bbox":[92,584,1096,42]}
+{"kind":"textbox","id":"sh/8bat0r2x","slide":9,"text":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textPreview":"TIECAMEL · MOSQUE DESIGN-PARTNER DECK","textChars":37,"textLines":1,"bbox":[64,680,430,16]}
+{"kind":"textbox","id":"sh/9cja9wji","slide":9,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1170,678,46,18]}
+{"kind":"notes","id":"nt/dc2iqa","slide":9,"text":"Position this as a proposed working plan. The exact sequencing should be finalized with the mosque's board, counsel, finance team, and independent reviewer.\n\n[Sources]\n- TieCamel PRODUCT_PLAN.md: recommended 90-day design-partner pilot and four pilot outcomes, accessed 2026-08-02.\n- Pilot stage allocation is a proposed presentation framework derived from the product roadmap, 2026-08-02."}
+{"kind":"slide","id":"sl/j2zqc6","slide":10,"title":"TieCamel","textShapes":6}
+{"kind":"shape","id":"sh/hcza54j6","slide":10,"bbox":[0,0,730,720]}
+{"kind":"textbox","id":"sh/3e1s7e1c","slide":10,"text":"TieCamel","textPreview":"TieCamel","textChars":8,"textLines":1,"bbox":[111,56,160,30]}
+{"kind":"shape","id":"sh/idsry9kr","slide":10,"bbox":[70,178,28,0]}
+{"kind":"textbox","id":"sh/5gja9oji","slide":10,"text":"BECOME A DESIGN PARTNER","textPreview":"BECOME A DESIGN PARTNER","textChars":23,"textLines":1,"bbox":[112,168,430,24]}
+{"kind":"textbox","id":"sh/4fa90j2x","slide":10,"text":"Start with the obligations\nthat keep leaders up at night.","textPreview":"Start with the obligations | that keep leaders up at night.","textChars":57,"textLines":2,"bbox":[68,214,620,150]}
+{"kind":"textbox","id":"sh/ri1sby18","slide":10,"text":"Property & exemptions  ·  Insurance & safety\nFilings & grants  ·  Board decisions  ·  Member reporting","textPreview":"Property & exemptions  ·  Insurance & safety | Filings & grants  ·  Board decisions  ·  Member reporting","textChars":102,"textLines":2,"bbox":[72,402,590,70]}
+{"kind":"shape","id":"sh/qhsr2tkn","slide":10,"bbox":[72,522,420,72]}
+{"kind":"textbox","id":"sh/crydkfyd","slide":10,"text":"hello@tiecamel.com","textPreview":"hello@tiecamel.com","textChars":18,"textLines":1,"bbox":[96,540,372,34]}
+{"kind":"textbox","id":"sh/ds7utkfy","slide":10,"text":"A bounded pilot. Real obligations. Trust made visible.","textPreview":"A bounded pilot. Real obligations. Trust made visible.","textChars":54,"textLines":1,"bbox":[72,624,560,28]}
+{"kind":"image","id":"im/3a10jy50","slide":10,"name":"","geometry":"rect","alt":"Contemporary mosque interior at blue hour","bbox":[0,0,1280,720]}
+{"kind":"image","id":"im/pc3il8n6","slide":10,"name":"","geometry":"rect","alt":"TieCamel logo","bbox":[68,54,34,34]}
+{"kind":"notes","id":"nt/j2zqc6","slide":10,"text":"Close on the next decision: choose a small number of high-consequence obligations and explore a bounded design-partner pilot.\n\n[Sources]\n- TieCamel PRODUCT_PLAN.md: pilot recommendation and initial obligation categories, accessed 2026-08-02.\n- TieCamel apps/web/src/pages/index.astro: design-partner contact and positioning, accessed 2026-08-02.\n- AI-generated architecture visual created for this deck with OpenAI image generation, 2026-08-02."}

@@ -93,7 +93,7 @@ const audiences = [
 
 <SiteLayout
 	title="TieCamel — Trust, made visible"
-	description="Coming soon: nonprofit governance infrastructure for shared oversight, meaningful transparency, and cryptographically verifiable reporting."
+	description="Coming soon: nonprofit governance infrastructure for shared oversight, meaningful transparency, and independently verifiable reporting."
 >
 	<a class="skip-link" href="#main-content">Skip to content</a>
 
@@ -168,13 +168,15 @@ const audiences = [
 						<span>tiecamel.com · Organization workspace</span>
 						<span class="window-live"><i></i> Demo workspace</span>
 					</div>
-					<img
-						class="app-preview-image"
-						src="/app-preview.png"
-						alt="TieCamel organization workspace showing repositories, open work, governed records, and recent activity"
-						loading="eager"
-						decoding="async"
-					/>
+					<div class="app-preview-image-wrap">
+						<img
+							class="app-preview-image"
+							src="/app-preview.png?v=2"
+							alt="TieCamel organization workspace showing repositories, open work, governed records, and recent activity"
+							loading="eager"
+							decoding="async"
+						/>
+					</div>
 				</div>
 				<div class="stage-caption" aria-hidden="true">
 					<span>Live product interface</span>
@@ -339,19 +341,20 @@ const audiences = [
 					<div class="chain-node">⌁</div>
 				</div>
 				<div class="verification-copy">
-					<span class="verification-label">Cryptographically verifiable · backed by Solana</span>
+					<span class="verification-label">Document integrity · independently verifiable</span>
 					<h2>A public notary for approved reports.</h2>
 					<p>
-						TieCamel converts each approved publication into a small cryptographic fingerprint.
-						That fingerprint can be publicly timestamped on Solana, allowing anyone to verify
-						that the report they received is complete for its stated scope and has not been silently replaced.
+						TieCamel converts each approved publication into a unique cryptographic fingerprint.
+						That fingerprint is recorded with the publication's scope, approval history, and timestamp,
+						allowing authorized readers to verify that the document is complete and has not been silently replaced.
 					</p>
 					<div class="verification-facts">
-						<span>Report fingerprints only</span>
-						<span>No private data on-chain</span>
-						<span>Independent browser verification</span>
+						<span>Document fingerprints only</span>
+						<span>No private contents exposed</span>
+						<span>Independent verification</span>
 						<span>Corrections remain visible</span>
 					</div>
+					<a class="verification-link" href="/transparency">How verification works <span aria-hidden="true">↗</span></a>
 				</div>
 			</div>
 		</section>
@@ -388,8 +391,8 @@ const audiences = [
 					<p>No. Access is intentionally tiered. Donor identity, individual transactions, bank details, privileged legal strategy, personnel information, and sensitive security data remain private. Members and the public receive approved, useful summaries.</p>
 				</details>
 				<details>
-					<summary>Why use Solana at all?<span>+</span></summary>
-					<p>Solana acts like a public notary. It can timestamp a tiny fingerprint of an approved report so anyone can later detect whether that report changed. No donations, documents, operating funds, or personal data need to go on-chain.</p>
+					<summary>How are published documents verified?<span>+</span></summary>
+					<p>Each approved document receives a unique cryptographic fingerprint. TieCamel preserves that fingerprint with its scope, approvals, timestamp, and correction history so authorized readers can confirm that the document they received matches the approved publication.</p>
 				</details>
 				<details>
 					<summary>Can one officer close a critical incident?<span>+</span></summary>
@@ -428,13 +431,13 @@ const audiences = [
 			<p>Trust, made visible.</p>
 		</div>
 		<div class="footer-links">
-			<div><strong>Explore</strong><a href="#platform">Platform</a><a href="#trust-model">Trust model</a><a href="#faq">FAQ</a></div>
+			<div><strong>Explore</strong><a href="#platform">Platform</a><a href="#trust-model">Trust model</a><a href="/transparency">Transparency &amp; verification</a><a href="#faq">FAQ</a></div>
 			<div><strong>Connect</strong><a href={contactUrl}>Early access</a><a href="mailto:hello@tiecamel.com">hello@tiecamel.com</a></div>
 		</div>
 		<div class="footer-bottom">
 			<span>© {new Date().getFullYear()} TieCamel</span>
 			<span>Transparent by design. Private where it matters.</span>
-			<span class="footer-solana">Cryptographic integrity backed by Solana</span>
+			<span class="footer-proof">Documents remain verifiable. Private data stays private.</span>
 		</div>
 	</footer>
 </SiteLayout>

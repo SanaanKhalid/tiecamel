@@ -1,0 +1,1080 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/r9ywqg",
+    "id": "r9ywqg",
+    "slide": 7,
+    "layoutId": "af6911d5-40fc-4762-9f64-47515e0e52ea",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "f94302e2-e7af-4392-9d9e-56dee757994b",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#F7F5E9",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "+mn-lt"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "af6911d5-40fc-4762-9f64-47515e0e52ea",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "f94302e2-e7af-4392-9d9e-56dee757994b",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "f94302e2-e7af-4392-9d9e-56dee757994b",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lgr294ju",
+      "id": "1",
+      "bbox": [
+        64,
+        58,
+        28,
+        0
+      ],
+      "geometry": "line",
+      "lineColor": "#133B2C",
+      "lineWidth": 2
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ydgjypkj",
+      "id": "2",
+      "bbox": [
+        106,
+        48,
+        420,
+        24
+      ],
+      "geometry": "rect",
+      "text": "TRUST WITH PRIVACY",
+      "textPreview": "TRUST WITH PRIVACY",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 13,
+        "typeface": "+mn-lt",
+        "color": "#133B2C",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "TRUST WITH PRIVACY"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "TRUST WITH PRIVACY",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#133B2C",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "TRUST WITH PRIVACY",
+              "fontSize": 13,
+              "color": "#133B2C",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zepk7u14",
+      "id": "3",
+      "bbox": [
+        64,
+        90,
+        1100,
+        72
+      ],
+      "geometry": "rect",
+      "text": "Transparency without oversharing.",
+      "textPreview": "Transparency without oversharing.",
+      "resolvedFontSize": 42,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 42,
+        "typeface": "+mn-lt",
+        "color": "#061A12",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Transparency without oversharing."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Transparency without oversharing.",
+          "resolvedTextStyle": {
+            "fontSize": 42,
+            "color": "#061A12",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Transparency without oversharing.",
+              "fontSize": 42,
+              "color": "#061A12",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/83i14z2l",
+      "id": "4",
+      "bbox": [
+        64,
+        154,
+        760,
+        38
+      ],
+      "geometry": "rect",
+      "text": "The same truth—presented at the right level for each audience.",
+      "textPreview": "The same truth—presented at the right level for each audience.",
+      "resolvedFontSize": 22,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 22,
+        "typeface": "+mn-lt",
+        "color": "#55685E",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "The same truth—presented at the right level for each audience."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "The same truth—presented at the right level for each audience.",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "color": "#55685E",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "The same truth—presented at the right level for each audience.",
+              "fontSize": 22,
+              "color": "#55685E",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/t4r2d4j6",
+      "id": "5",
+      "bbox": [
+        100,
+        238,
+        1080,
+        64
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#DDE9E0",
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6h0j29kf",
+      "id": "6",
+      "bbox": [
+        124,
+        250,
+        190,
+        18
+      ],
+      "geometry": "rect",
+      "text": "PUBLIC",
+      "textPreview": "PUBLIC",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 11,
+        "typeface": "+mn-lt",
+        "color": "#133B2C",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "PUBLIC"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "PUBLIC",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#133B2C",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "PUBLIC",
+              "fontSize": 11,
+              "color": "#133B2C",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7i9kbu10",
+      "id": "7",
+      "bbox": [
+        320,
+        248,
+        836,
+        42
+      ],
+      "geometry": "rect",
+      "text": "Approved reports, leadership, material-risk summaries, freshness and publication proof",
+      "textPreview": "Approved reports, leadership, material-risk summaries, freshness and publication proof",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 16,
+        "typeface": "+mn-lt",
+        "color": "#133B2C",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Approved reports, leadership, material-risk summaries, freshness and publication proof"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Approved reports, leadership, material-risk summaries, freshness and publication proof",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#133B2C",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Approved reports, leadership, material-risk summaries, freshness and publication proof",
+              "fontSize": 16,
+              "color": "#133B2C",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/g7il8j2h",
+      "id": "8",
+      "bbox": [
+        170,
+        320,
+        940,
+        64
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#BED9C7",
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/h8b2hoj2",
+      "id": "9",
+      "bbox": [
+        194,
+        332,
+        190,
+        18
+      ],
+      "geometry": "rect",
+      "text": "VERIFIED MEMBERS",
+      "textPreview": "VERIFIED MEMBERS",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 11,
+        "typeface": "+mn-lt",
+        "color": "#061A12",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "VERIFIED MEMBERS"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "VERIFIED MEMBERS",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#061A12",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "VERIFIED MEMBERS",
+              "fontSize": 11,
+              "color": "#061A12",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xk3a5of6",
+      "id": "10",
+      "bbox": [
+        390,
+        330,
+        696,
+        42
+      ],
+      "geometry": "rect",
+      "text": "Financial and governance summaries, board actions, structured questions and responses",
+      "textPreview": "Financial and governance summaries, board actions, structured questions and responses",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 16,
+        "typeface": "+mn-lt",
+        "color": "#061A12",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Financial and governance summaries, board actions, structured questions and"
+          },
+          {
+            "index": 2,
+            "text": "responses"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Financial and governance summaries, board actions, structured questions and responses",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#061A12",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Financial and governance summaries, board actions, structured questions and responses",
+              "fontSize": 16,
+              "color": "#061A12",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wjutwjyl",
+      "id": "11",
+      "bbox": [
+        240,
+        402,
+        800,
+        64
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#7FB695",
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bils3yx0",
+      "id": "12",
+      "bbox": [
+        264,
+        414,
+        190,
+        18
+      ],
+      "geometry": "rect",
+      "text": "FULL BOARD",
+      "textPreview": "FULL BOARD",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 11,
+        "typeface": "+mn-lt",
+        "color": "#061A12",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "FULL BOARD"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "FULL BOARD",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#061A12",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "FULL BOARD",
+              "fontSize": 11,
+              "color": "#061A12",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ahsbutgf",
+      "id": "13",
+      "bbox": [
+        460,
+        412,
+        556,
+        42
+      ],
+      "geometry": "rect",
+      "text": "Obligations, evidence, decisions, dissent, unresolved actions and scoped financial detail",
+      "textPreview": "Obligations, evidence, decisions, dissent, unresolved actions and scoped financial detail",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 16,
+        "typeface": "+mn-lt",
+        "color": "#061A12",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Obligations, evidence, decisions, dissent, unresolved actions and"
+          },
+          {
+            "index": 2,
+            "text": "scoped financial detail"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Obligations, evidence, decisions, dissent, unresolved actions and scoped financial detail",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#061A12",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Obligations, evidence, decisions, dissent, unresolved actions and scoped financial detail",
+              "fontSize": 16,
+              "color": "#061A12",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lo3a98f2",
+      "id": "14",
+      "bbox": [
+        310,
+        484,
+        660,
+        64
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#133B2C",
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/knut03yh",
+      "id": "15",
+      "bbox": [
+        334,
+        496,
+        190,
+        18
+      ],
+      "geometry": "rect",
+      "text": "RESTRICTED",
+      "textPreview": "RESTRICTED",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 11,
+        "typeface": "+mn-lt",
+        "color": "#F1F3E9",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "RESTRICTED"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "RESTRICTED",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#F1F3E9",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "RESTRICTED",
+              "fontSize": 11,
+              "color": "#F1F3E9",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jmls7yxw",
+      "id": "16",
+      "bbox": [
+        530,
+        494,
+        416,
+        42
+      ],
+      "geometry": "rect",
+      "text": "Donor identities, employee data, credentials and privileged legal strategy stay protected",
+      "textPreview": "Donor identities, employee data, credentials and privileged legal strategy stay protected",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 16,
+        "typeface": "+mn-lt",
+        "color": "#F1F3E9",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Donor identities, employee data, credentials and"
+          },
+          {
+            "index": 2,
+            "text": "privileged legal strategy stay protected"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Donor identities, employee data, credentials and privileged legal strategy stay protected",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "color": "#F1F3E9",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Donor identities, employee data, credentials and privileged legal strategy stay protected",
+              "fontSize": 16,
+              "color": "#F1F3E9",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ylcbytgb",
+      "id": "17",
+      "bbox": [
+        100,
+        590,
+        1080,
+        0
+      ],
+      "geometry": "line",
+      "lineColor": "#C4A650",
+      "lineWidth": 2
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1sjax4zy",
+      "id": "18",
+      "bbox": [
+        148,
+        608,
+        984,
+        36
+      ],
+      "geometry": "rect",
+      "text": "Meaningful transparency does not require publishing transactions, donor identities, or privileged strategy.",
+      "textPreview": "Meaningful transparency does not require publishing transactions, donor identities, or privileged strategy.",
+      "resolvedFontSize": 19,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 19,
+        "typeface": "+mn-lt",
+        "color": "#061A12",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Meaningful transparency does not require publishing transactions, donor identities, or privileged strategy."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Meaningful transparency does not require publishing transactions, donor identities, or privileged strategy.",
+          "resolvedTextStyle": {
+            "fontSize": 19,
+            "color": "#061A12",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Meaningful transparency does not require publishing transactions, donor identities, or privileged strategy.",
+              "fontSize": 19,
+              "color": "#061A12",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0ra9ozyd",
+      "id": "19",
+      "bbox": [
+        64,
+        680,
+        430,
+        16
+      ],
+      "geometry": "rect",
+      "text": "TIECAMEL · MOSQUE DESIGN-PARTNER DECK",
+      "textPreview": "TIECAMEL · MOSQUE DESIGN-PARTNER DECK",
+      "resolvedFontSize": 10,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 10,
+        "typeface": "+mn-lt",
+        "color": "#55685E",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "TIECAMEL · MOSQUE DESIGN-PARTNER DECK"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "TIECAMEL · MOSQUE DESIGN-PARTNER DECK",
+          "resolvedTextStyle": {
+            "fontSize": 10,
+            "color": "#55685E",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "TIECAMEL · MOSQUE DESIGN-PARTNER DECK",
+              "fontSize": 10,
+              "color": "#55685E",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/c7e103al",
+      "id": "20",
+      "bbox": [
+        1170,
+        678,
+        46,
+        18
+      ],
+      "geometry": "rect",
+      "text": "07",
+      "textPreview": "07",
+      "resolvedFontSize": 11,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 11,
+        "typeface": "+mn-lt",
+        "color": "#133B2C",
+        "bold": true,
+        "alignment": "right",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "07"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "07",
+          "resolvedTextStyle": {
+            "fontSize": 11,
+            "color": "#133B2C",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "07",
+              "fontSize": 11,
+              "color": "#133B2C",
+              "bold": true,
+              "alignment": "right"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

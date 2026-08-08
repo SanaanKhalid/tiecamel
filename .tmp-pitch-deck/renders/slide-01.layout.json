@@ -1,0 +1,537 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/rktx2d",
+    "id": "rktx2d",
+    "slide": 1,
+    "layoutId": "af6911d5-40fc-4762-9f64-47515e0e52ea",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "f94302e2-e7af-4392-9d9e-56dee757994b",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#061A12",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "+mn-lt"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "af6911d5-40fc-4762-9f64-47515e0e52ea",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "f94302e2-e7af-4392-9d9e-56dee757994b",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "f94302e2-e7af-4392-9d9e-56dee757994b",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/kzq5sfy9",
+      "id": "1",
+      "bbox": [
+        0,
+        0,
+        1280,
+        720
+      ],
+      "geometry": "rect",
+      "alt": "Contemporary mosque interior at blue hour",
+      "contentType": "image/png",
+      "imageFit": "cover",
+      "imageMask": {
+        "geometry": "rect"
+      },
+      "asset": {
+        "assetId": "b4d56c07-ec29-4b71-a2f2-40206cbc3d85",
+        "contentType": "image/png",
+        "byteLength": 1895883
+      }
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ytkne9sb",
+      "id": "2",
+      "bbox": [
+        0,
+        0,
+        690,
+        720
+      ],
+      "geometry": "rect",
+      "fillColor": "#061A12",
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/yxonq5g3",
+      "id": "3",
+      "bbox": [
+        68,
+        54,
+        34,
+        34
+      ],
+      "geometry": "rect",
+      "alt": "TieCamel logo",
+      "contentType": "image/png",
+      "imageFit": "contain",
+      "imageMask": {
+        "geometry": "rect"
+      },
+      "asset": {
+        "assetId": "29cc89ec-b2a3-4442-9a09-f326479ae9be",
+        "contentType": "image/png",
+        "byteLength": 49074
+      }
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8jm5k3ad",
+      "id": "4",
+      "bbox": [
+        111,
+        56,
+        160,
+        30
+      ],
+      "geometry": "rect",
+      "text": "TieCamel",
+      "textPreview": "TieCamel",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 21,
+        "typeface": "+mn-lt",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "TieCamel"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "TieCamel",
+          "resolvedTextStyle": {
+            "fontSize": 21,
+            "color": "#FFFFFF",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "TieCamel",
+              "fontSize": 21,
+              "color": "#FFFFFF",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9kv6t8ry",
+      "id": "5",
+      "bbox": [
+        70,
+        184,
+        28,
+        0
+      ],
+      "geometry": "line",
+      "lineColor": "#8BD8AE",
+      "lineWidth": 2
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mx4nits7",
+      "id": "6",
+      "bbox": [
+        112,
+        174,
+        480,
+        24
+      ],
+      "geometry": "rect",
+      "text": "GOVERNANCE INFRASTRUCTURE FOR MOSQUES",
+      "textPreview": "GOVERNANCE INFRASTRUCTURE FOR MOSQUES",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 13,
+        "typeface": "+mn-lt",
+        "color": "#8BD8AE",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "GOVERNANCE INFRASTRUCTURE FOR MOSQUES"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "GOVERNANCE INFRASTRUCTURE FOR MOSQUES",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#8BD8AE",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "GOVERNANCE INFRASTRUCTURE FOR MOSQUES",
+              "fontSize": 13,
+              "color": "#8BD8AE",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7ydory9s",
+      "id": "7",
+      "bbox": [
+        68,
+        224,
+        590,
+        190
+      ],
+      "geometry": "rect",
+      "text": "Stewardship\nyou can prove.",
+      "textPreview": "Stewardship | you can prove.",
+      "resolvedFontSize": 66,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 66,
+        "typeface": "+mn-lt",
+        "color": "#F1F3E9",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Stewardship"
+          },
+          {
+            "index": 2,
+            "text": "you can prove."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Stewardship",
+          "resolvedTextStyle": {
+            "fontSize": 66,
+            "color": "#F1F3E9",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Stewardship",
+              "fontSize": 66,
+              "color": "#F1F3E9",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "you can prove.",
+          "resolvedTextStyle": {
+            "fontSize": 66,
+            "color": "#F1F3E9",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "you can prove.",
+              "fontSize": 66,
+              "color": "#F1F3E9",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gn65o3a9",
+      "id": "8",
+      "bbox": [
+        72,
+        440,
+        540,
+        86
+      ],
+      "geometry": "rect",
+      "text": "Protect entrusted assets. Surface risk early.\nBuild member trust with evidence—not assurances.",
+      "textPreview": "Protect entrusted assets. Surface risk early. | Build member trust with evidence—not assurances.",
+      "resolvedFontSize": 23,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 23,
+        "typeface": "+mn-lt",
+        "color": "#A6B9AD",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Protect entrusted assets. Surface risk early."
+          },
+          {
+            "index": 2,
+            "text": "Build member trust with evidence—not"
+          },
+          {
+            "index": 3,
+            "text": "assurances."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Protect entrusted assets. Surface risk early.",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "color": "#A6B9AD",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Protect entrusted assets. Surface risk early.",
+              "fontSize": 23,
+              "color": "#A6B9AD",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "Build member trust with evidence—not assurances.",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "color": "#A6B9AD",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Build member trust with evidence—not assurances.",
+              "fontSize": 23,
+              "color": "#A6B9AD",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hof6x8ru",
+      "id": "9",
+      "bbox": [
+        72,
+        580,
+        72,
+        0
+      ],
+      "geometry": "line",
+      "lineColor": "#C4A650",
+      "lineWidth": 3
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hoj65gfy",
+      "id": "10",
+      "bbox": [
+        162,
+        569,
+        360,
+        24
+      ],
+      "geometry": "rect",
+      "text": "MOSQUE DESIGN-PARTNER PITCH · 2026",
+      "textPreview": "MOSQUE DESIGN-PARTNER PITCH · 2026",
+      "resolvedFontSize": 13,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 13,
+        "typeface": "+mn-lt",
+        "color": "#D8C47F",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "MOSQUE DESIGN-PARTNER PITCH · 2026"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "MOSQUE DESIGN-PARTNER PITCH · 2026",
+          "resolvedTextStyle": {
+            "fontSize": 13,
+            "color": "#D8C47F",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "MOSQUE DESIGN-PARTNER PITCH · 2026",
+              "fontSize": 13,
+              "color": "#D8C47F",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}
