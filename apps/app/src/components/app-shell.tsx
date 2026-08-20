@@ -9,6 +9,7 @@ import {
 	type FileDiff,
 	FolderGit2,
 	Inbox,
+	Landmark,
 	Menu,
 	Plus,
 	Search,
@@ -189,6 +190,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 							active={pathname === `/${platform.organization.slug}`}
 							icon={FolderGit2}
 							label="Repositories"
+						/>
+						<NavItem
+							href={`/${platform.organization.slug}/financials`}
+							active={pathname === `/${platform.organization.slug}/financials`}
+							icon={Landmark}
+							label="Financials"
 						/>
 						<NavItem
 							href="/work"

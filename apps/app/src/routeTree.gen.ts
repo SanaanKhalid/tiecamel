@@ -17,7 +17,9 @@ import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppWorkRouteImport } from './routes/_app.work'
 import { Route as VerifyCommitHashRouteImport } from './routes/verify.$commitHash'
 import { Route as AppOrganizationIndexRouteImport } from './routes/_app.$organization.index'
+import { Route as AppOrganizationFinancialsRouteImport } from './routes/_app.$organization.financials'
 import { Route as PublicOrganizationRepositoryRouteImport } from './routes/public.$organization.$repository'
+import { Route as PublicOrganizationFinancialsRouteImport } from './routes/public.$organization.financials'
 import { Route as AppOrganizationRepositoryIndexRouteImport } from './routes/_app.$organization.$repository.index'
 import { Route as AppOrganizationRepositoryActivityRouteImport } from './routes/_app.$organization.$repository.activity'
 import { Route as AppOrganizationRepositoryHistoryRouteImport } from './routes/_app.$organization.$repository.history'
@@ -68,10 +70,22 @@ const AppOrganizationIndexRoute = AppOrganizationIndexRouteImport.update({
   path: '/$organization/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppOrganizationFinancialsRoute =
+  AppOrganizationFinancialsRouteImport.update({
+    id: '/$organization/financials',
+    path: '/$organization/financials',
+    getParentRoute: () => AppRoute,
+  } as any)
 const PublicOrganizationRepositoryRoute =
   PublicOrganizationRepositoryRouteImport.update({
     id: '/public/$organization/$repository',
     path: '/public/$organization/$repository',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const PublicOrganizationFinancialsRoute =
+  PublicOrganizationFinancialsRouteImport.update({
+    id: '/public/$organization/financials',
+    path: '/public/$organization/financials',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AppOrganizationRepositoryIndexRoute =
@@ -142,7 +156,9 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AppSettingsRoute
   '/work': typeof AppWorkRoute
   '/verify/$commitHash': typeof VerifyCommitHashRoute
+  '/$organization/financials': typeof AppOrganizationFinancialsRoute
   '/public/$organization/$repository': typeof PublicOrganizationRepositoryRoute
+  '/public/$organization/financials': typeof PublicOrganizationFinancialsRoute
   '/$organization/': typeof AppOrganizationIndexRoute
   '/$organization/$repository/activity': typeof AppOrganizationRepositoryActivityRoute
   '/$organization/$repository/history': typeof AppOrganizationRepositoryHistoryRoute
@@ -162,7 +178,9 @@ export interface FileRoutesByTo {
   '/work': typeof AppWorkRoute
   '/verify/$commitHash': typeof VerifyCommitHashRoute
   '/': typeof AppIndexRoute
+  '/$organization/financials': typeof AppOrganizationFinancialsRoute
   '/public/$organization/$repository': typeof PublicOrganizationRepositoryRoute
+  '/public/$organization/financials': typeof PublicOrganizationFinancialsRoute
   '/$organization': typeof AppOrganizationIndexRoute
   '/$organization/$repository/activity': typeof AppOrganizationRepositoryActivityRoute
   '/$organization/$repository/history': typeof AppOrganizationRepositoryHistoryRoute
@@ -184,7 +202,9 @@ export interface FileRoutesById {
   '/_app/work': typeof AppWorkRoute
   '/verify/$commitHash': typeof VerifyCommitHashRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/$organization/financials': typeof AppOrganizationFinancialsRoute
   '/public/$organization/$repository': typeof PublicOrganizationRepositoryRoute
+  '/public/$organization/financials': typeof PublicOrganizationFinancialsRoute
   '/_app/$organization/': typeof AppOrganizationIndexRoute
   '/_app/$organization/$repository/activity': typeof AppOrganizationRepositoryActivityRoute
   '/_app/$organization/$repository/history': typeof AppOrganizationRepositoryHistoryRoute
@@ -206,7 +226,9 @@ export interface FileRouteTypes {
     | '/settings'
     | '/work'
     | '/verify/$commitHash'
+    | '/$organization/financials'
     | '/public/$organization/$repository'
+    | '/public/$organization/financials'
     | '/$organization/'
     | '/$organization/$repository/activity'
     | '/$organization/$repository/history'
@@ -226,7 +248,9 @@ export interface FileRouteTypes {
     | '/work'
     | '/verify/$commitHash'
     | '/'
+    | '/$organization/financials'
     | '/public/$organization/$repository'
+    | '/public/$organization/financials'
     | '/$organization'
     | '/$organization/$repository/activity'
     | '/$organization/$repository/history'
@@ -247,7 +271,9 @@ export interface FileRouteTypes {
     | '/_app/work'
     | '/verify/$commitHash'
     | '/_app/'
+    | '/_app/$organization/financials'
     | '/public/$organization/$repository'
+    | '/public/$organization/financials'
     | '/_app/$organization/'
     | '/_app/$organization/$repository/activity'
     | '/_app/$organization/$repository/history'
@@ -265,6 +291,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   VerifyCommitHashRoute: typeof VerifyCommitHashRoute
   PublicOrganizationRepositoryRoute: typeof PublicOrganizationRepositoryRoute
+  PublicOrganizationFinancialsRoute: typeof PublicOrganizationFinancialsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -325,11 +352,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOrganizationIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/$organization/financials': {
+      id: '/_app/$organization/financials'
+      path: '/$organization/financials'
+      fullPath: '/$organization/financials'
+      preLoaderRoute: typeof AppOrganizationFinancialsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/public/$organization/$repository': {
       id: '/public/$organization/$repository'
       path: '/public/$organization/$repository'
       fullPath: '/public/$organization/$repository'
       preLoaderRoute: typeof PublicOrganizationRepositoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/public/$organization/financials': {
+      id: '/public/$organization/financials'
+      path: '/public/$organization/financials'
+      fullPath: '/public/$organization/financials'
+      preLoaderRoute: typeof PublicOrganizationFinancialsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/$organization/$repository/': {
@@ -411,6 +452,7 @@ interface AppRouteChildren {
   AppSettingsRoute: typeof AppSettingsRoute
   AppWorkRoute: typeof AppWorkRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppOrganizationFinancialsRoute: typeof AppOrganizationFinancialsRoute
   AppOrganizationIndexRoute: typeof AppOrganizationIndexRoute
   AppOrganizationRepositoryActivityRoute: typeof AppOrganizationRepositoryActivityRoute
   AppOrganizationRepositoryHistoryRoute: typeof AppOrganizationRepositoryHistoryRoute
@@ -430,6 +472,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsRoute: AppSettingsRoute,
   AppWorkRoute: AppWorkRoute,
   AppIndexRoute: AppIndexRoute,
+  AppOrganizationFinancialsRoute: AppOrganizationFinancialsRoute,
   AppOrganizationIndexRoute: AppOrganizationIndexRoute,
   AppOrganizationRepositoryActivityRoute:
     AppOrganizationRepositoryActivityRoute,
@@ -456,6 +499,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   VerifyCommitHashRoute: VerifyCommitHashRoute,
   PublicOrganizationRepositoryRoute: PublicOrganizationRepositoryRoute,
+  PublicOrganizationFinancialsRoute: PublicOrganizationFinancialsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -21,6 +21,10 @@ import type {
 } from "./contracts.js";
 import { sendSignedCallback } from "./callbacks.js";
 import { anchorIntegrity } from "./solana-anchor.js";
+import {
+	syncSolanaFinance,
+	type SolanaFinanceSyncRequest,
+} from "./solana-finance.js";
 import { processPublication, sendCallback } from "./publisher.js";
 import { verifyServiceToken } from "./security.js";
 
@@ -198,6 +202,32 @@ app.http("enqueueIntegrityAnchor", {
 			status: 202,
 			jsonBody: { commandId: command.commandId, duplicate: false },
 		};
+	},
+});
+
+app.http("syncSolanaFinance", {
+	methods: ["POST"],
+	authLevel: "anonymous",
+	route: "finance/solana/sync",
+	handler: async (request) => {
+		if (!authorized(request)) return unauthorized();
+		try {
+			const body = (await request.json()) as SolanaFinanceSyncRequest;
+			if (!body.network || !body.ownerAddress || !body.mintAddress) {
+				return {
+					status: 400,
+					jsonBody: { error: "Invalid Solana sync request" },
+				};
+			}
+			return { status: 200, jsonBody: await syncSolanaFinance(body) };
+		} catch (error) {
+			return {
+				status: 400,
+				jsonBody: {
+					error: error instanceof Error ? error.message : "Solana sync failed",
+				},
+			};
+		}
 	},
 });
 

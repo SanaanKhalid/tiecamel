@@ -59,8 +59,12 @@ Production services:
 - Azure Blob Storage for quarantine, processed artifacts, and sealed evidence.
 - Azure Key Vault, Service Bus, Functions, and Container Apps for document
   processing and provider publication.
-- Optional Solana manifest anchoring for independently verifiable public
-  Transparency records. No document contents or personal data go on-chain.
+- A financial “glass ledger” built from validated CSV imports and optional
+  read-only native USDC wallet synchronization. Public financial pages read
+  immutable sanitized snapshots, never the private transaction tables.
+- Optional Solana manifest anchoring for independently verifiable repository
+  commits and financial snapshots. Only canonical SHA-256 commitments go
+  on-chain; TieCamel does not custody donations or operating funds.
 - Optional Google Shared Drive destinations configured per repository.
   OneDrive for Business follows through the same provider contract.
 
@@ -77,6 +81,10 @@ The repository domain is split across focused modules in `apps/app/convex`.
 server-side access and workflow rules. Cloudflare hosts the app; Convex remains
 the transactional control plane, while Azure owns binary storage and
 background integration work.
+
+The financial transparency model, publication invariant, CSV contract, and
+privacy boundary are documented in
+[`docs/financial-transparency.md`](docs/financial-transparency.md).
 
 ## Quality checks
 

@@ -7,7 +7,10 @@ import {
 	mutation,
 	query,
 } from "./_generated/server";
-import { requireRepositoryAccess } from "./lib/platformAuth";
+import {
+	requirePlatformSession,
+	requireRepositoryAccess,
+} from "./lib/platformAuth";
 
 export const queueForCommit = internalMutation({
 	args: {
@@ -121,6 +124,51 @@ export const queueForPublishedVersion = internalMutation({
 			manifestSha256: version.manifestSha256,
 			memo: `tiecamel:v1:${version.manifestSha256}`,
 			network,
+			status: "queued",
+			attempts: 0,
+			createdAt: now,
+			updatedAt: now,
+		});
+		await ctx.db.patch(snapshot._id, { integrityAnchorId: anchorId });
+		await ctx.scheduler.runAfter(0, internal.integrity.dispatch, {
+			integrityAnchorId: anchorId,
+		});
+		return anchorId;
+	},
+});
+
+export const queueForFinancialSnapshot = internalMutation({
+	args: {
+		financialSnapshotId: v.id("financialSnapshots"),
+		network: v.union(v.literal("devnet"), v.literal("mainnet-beta")),
+	},
+	handler: async (ctx, args) => {
+		const snapshot = await ctx.db.get(args.financialSnapshotId);
+		if (!snapshot) return null;
+		const idempotencyKey = `anchor:financial:v1:${snapshot.sha256}`;
+		const existing = await ctx.db
+			.query("integrityAnchors")
+			.withIndex("by_idempotency_key", (q) =>
+				q.eq("idempotencyKey", idempotencyKey),
+			)
+			.unique();
+		if (existing) {
+			if (!snapshot.integrityAnchorId) {
+				await ctx.db.patch(snapshot._id, { integrityAnchorId: existing._id });
+			}
+			return existing._id;
+		}
+		const now = Date.now();
+		const anchorId = await ctx.db.insert("integrityAnchors", {
+			organizationId: snapshot.organizationId,
+			financialSnapshotId: snapshot._id,
+			idempotencyKey,
+			algorithm: "sha256",
+			commitment: snapshot.sha256,
+			manifestSha256: snapshot.sha256,
+			proofFormat: "tiecamel-financial-snapshot/v1",
+			memo: `tiecamel:financial:v1:${snapshot.sha256}`,
+			network: args.network,
 			status: "queued",
 			attempts: 0,
 			createdAt: now,
@@ -287,7 +335,7 @@ export const finalize = internalMutation({
 		const snapshot = anchor.publicSnapshotId
 			? await ctx.db.get(anchor.publicSnapshotId)
 			: null;
-		if (snapshot) {
+		if (snapshot && anchor.repositoryId && anchor.recordId) {
 			await ctx.db.insert("platformNotifications", {
 				organizationId: anchor.organizationId,
 				membershipId: snapshot.publishedBy,
@@ -302,11 +350,19 @@ export const finalize = internalMutation({
 		}
 		await ctx.db.insert("auditEvents", {
 			organizationId: anchor.organizationId,
-			action: "Repository commit anchored",
-			targetType: anchor.repositoryCommitId
-				? "repository-commit"
-				: "record-version",
-			targetId: String(anchor.repositoryCommitId ?? anchor.recordVersionId),
+			action: anchor.financialSnapshotId
+				? "Financial snapshot anchored"
+				: "Repository commit anchored",
+			targetType: anchor.financialSnapshotId
+				? "financial-snapshot"
+				: anchor.repositoryCommitId
+					? "repository-commit"
+					: "record-version",
+			targetId: String(
+				anchor.financialSnapshotId ??
+					anchor.repositoryCommitId ??
+					anchor.recordVersionId,
+			),
 			reason: `${anchor.network} transaction ${args.signature} committed ${anchor.memo}.`,
 			source: "Solana integrity worker",
 			createdAt: now,
@@ -337,12 +393,24 @@ export const retry = mutation({
 	handler: async (ctx, args) => {
 		const anchor = await ctx.db.get(args.integrityAnchorId);
 		if (!anchor) throw new Error("Integrity anchor not found");
-		await requireRepositoryAccess(
-			ctx,
-			anchor.repositoryId,
-			"admin",
-			args.demoSessionToken,
-		);
+		if (anchor.repositoryId) {
+			await requireRepositoryAccess(
+				ctx,
+				anchor.repositoryId,
+				"admin",
+				args.demoSessionToken,
+			);
+		} else if (anchor.financialSnapshotId) {
+			const session = await requirePlatformSession(ctx, args.demoSessionToken);
+			if (
+				session.membership.organizationId !== anchor.organizationId ||
+				!["owner", "administrator", "finance"].includes(session.membership.role)
+			) {
+				throw new Error("Finance management access is required");
+			}
+		} else {
+			throw new Error("Integrity anchor subject is unavailable");
+		}
 		if (anchor.status !== "failed") {
 			throw new Error("Only failed integrity anchors can be retried");
 		}

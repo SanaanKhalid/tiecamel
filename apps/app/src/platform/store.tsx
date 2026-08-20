@@ -59,6 +59,7 @@ export type UpdateRepositoryInput = {
 };
 
 export type PlatformStore = PlatformData & {
+	demoSessionToken?: string;
 	reset: () => void;
 	switchViewer: (memberId: string) => void;
 	createIssue: (input: NewIssueInput) => Promise<Issue>;
@@ -219,6 +220,7 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
 	const store = useMemo<PlatformStore>(
 		() => ({
 			...data,
+			demoSessionToken: undefined,
 			reset: () => {
 				window.localStorage.removeItem(DEMO_STORAGE_KEY);
 				setData(structuredClone(platformSeed));
