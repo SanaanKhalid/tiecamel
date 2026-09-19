@@ -1,6 +1,6 @@
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { type ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import {
@@ -58,6 +58,39 @@ function AuthenticatedConvexPlatformProvider({
 	onSwitchDemoMember,
 }: ConvexPlatformProviderProps) {
 	const convexAuth = useConvexAuth();
+	const choices = useQuery(
+		api.organizations.choices,
+		convexAuth.isAuthenticated ? {} : "skip",
+	);
+	const select = useMutation(api.organizations.select);
+	const [selectionError, setSelectionError] = useState("");
+	if (
+		choices &&
+		choices.length > 1 &&
+		!choices.some((entry) => entry.selected)
+	) {
+		return (
+			<main className="mx-auto max-w-lg space-y-4 p-8">
+				<h1 className="text-2xl font-semibold">Choose your organization</h1>
+				<p>Select the board workspace you want to access.</p>
+				{choices.map((entry) => (
+					<button
+						key={entry.id}
+						type="button"
+						className="block w-full rounded-xl border bg-white p-4 text-left"
+						onClick={() => {
+							void select({ organizationId: entry.id }).catch((error: Error) =>
+								setSelectionError(error.message),
+							);
+						}}
+					>
+						{entry.name}
+					</button>
+				))}
+				{selectionError && <p role="alert">{selectionError}</p>}
+			</main>
+		);
+	}
 	return (
 		<ConvexPlatformProviderInner
 			onSwitchDemoMember={onSwitchDemoMember}

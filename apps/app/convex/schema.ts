@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { responsibility } from "./lib/governanceValidators";
 
 const riskStatus = v.union(
 	v.literal("healthy"),
@@ -121,6 +122,7 @@ const publicationStatus = v.union(
 
 export default defineSchema({
 	organizations: defineTable({
+		demoOnly: v.optional(v.boolean()),
 		name: v.string(),
 		slug: v.string(),
 		publicSlug: v.optional(v.string()),
@@ -137,6 +139,7 @@ export default defineSchema({
 		.index("by_slug", ["slug"])
 		.index("by_public_slug", ["publicSlug"]),
 	users: defineTable({
+		selectedOrganizationId: v.optional(v.id("organizations")),
 		clerkUserId: v.string(),
 		name: v.string(),
 		email: v.string(),
@@ -267,6 +270,7 @@ export default defineSchema({
 		.index("by_organization", ["organizationId"])
 		.index("by_repository", ["repositoryId"]),
 	platformIssues: defineTable({
+		obligationId: v.optional(v.id("obligations")),
 		organizationId: v.id("organizations"),
 		repositoryId: v.id("repositories"),
 		number: v.number(),
@@ -802,6 +806,9 @@ export default defineSchema({
 		createdAt: v.number(),
 	}).index("by_organization", ["organizationId"]),
 	obligations: defineTable({
+		control: v.optional(responsibility),
+		governanceActive: v.optional(v.boolean()),
+		linkedIssueId: v.optional(v.id("platformIssues")),
 		organizationId: v.id("organizations"),
 		assetId: v.optional(v.id("assets")),
 		title: v.string(),
@@ -825,6 +832,42 @@ export default defineSchema({
 		.index("by_organization", ["organizationId"])
 		.index("by_organization_and_status", ["organizationId", "status"])
 		.index("by_organization_and_due_date", ["organizationId", "dueDate"]),
+	governanceEvents: defineTable({
+		organizationId: v.id("organizations"),
+		obligationId: v.id("obligations"),
+		actorMembershipId: v.id("memberships"),
+		revision: v.number(),
+		kind: v.string(),
+		payload: v.string(),
+		stateSha256: v.string(),
+		priorEventSha256: v.string(),
+		eventSha256: v.string(),
+		createdAt: v.number(),
+	})
+		.index("by_obligation", ["obligationId"])
+		.index("by_organization", ["organizationId"]),
+	governancePublications: defineTable({
+		organizationId: v.id("organizations"),
+		obligationId: v.id("obligations"),
+		text: v.string(),
+		approvedAt: v.number(),
+		revision: v.number(),
+	}).index("by_organization", ["organizationId"]),
+	governanceMonitor: defineTable({
+		name: v.string(),
+		lastSweepAt: v.number(),
+	}).index("by_name", ["name"]),
+	governanceAlerts: defineTable({
+		organizationId: v.id("organizations"),
+		obligationId: v.id("obligations"),
+		membershipId: v.id("memberships"),
+		dedupeKey: v.string(),
+		stage: v.string(),
+		createdAt: v.number(),
+		acknowledgedAt: v.optional(v.number()),
+	})
+		.index("by_dedupe", ["dedupeKey"])
+		.index("by_organization", ["organizationId"]),
 	evidenceSubmissions: defineTable({
 		organizationId: v.id("organizations"),
 		obligationId: v.id("obligations"),

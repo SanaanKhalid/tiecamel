@@ -192,6 +192,13 @@ export const transition = mutation({
 			args.demoSessionToken,
 		);
 		const now = Date.now();
+		if (issue.obligationId && args.status === "done") {
+			const obligation = await ctx.db.get(issue.obligationId);
+			if (obligation?.control?.phase !== "resolved")
+				throw new Error(
+					"Resolve the linked responsibility through independent evidence review first",
+				);
+		}
 		await ctx.db.patch(issue._id, {
 			status: args.status,
 			state: args.status === "done" ? "closed" : "open",

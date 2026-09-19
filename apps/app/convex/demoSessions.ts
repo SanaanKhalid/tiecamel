@@ -1,11 +1,15 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { sha256Hex } from "./lib/canonical";
 
 export const start = mutation({
 	args: { organizationSlug: v.string() },
 	handler: async (ctx, args) => {
 		assertDemoEnabled();
+		if (!/^demo-[a-z0-9-]{8,80}$/.test(args.organizationSlug))
+			throw new Error(
+				"Demo organizations must use an isolated demo identifier",
+			);
 		let organization = await ctx.db
 			.query("organizations")
 			.withIndex("by_slug", (q) => q.eq("slug", args.organizationSlug))
@@ -13,7 +17,8 @@ export const start = mutation({
 		if (!organization) {
 			const now = Date.now();
 			const organizationId = await ctx.db.insert("organizations", {
-				name: "Islamic Center of Naperville",
+				name: "TieCamel Demo Foundation",
+				demoOnly: true,
 				slug: args.organizationSlug,
 				publicSlug: args.organizationSlug,
 				status: "pilot",
@@ -46,6 +51,8 @@ export const start = mutation({
 		}
 		if (!organization)
 			throw new Error("Demo organization could not be created");
+		if (!organization.demoOnly)
+			throw new Error("Demo sessions cannot access pilot organizations");
 		const memberships = (
 			await ctx.db
 				.query("memberships")
@@ -93,11 +100,28 @@ export const switchMembership = mutation({
 		) {
 			throw new Error("Demo session is invalid or expired");
 		}
+		const organization = await ctx.db.get(session.organizationId);
+		if (!organization?.demoOnly)
+			throw new Error("Demo sessions cannot access pilot organizations");
 		await ctx.db.patch(session._id, {
 			activeMembershipId: args.membershipId,
 			updatedAt: Date.now(),
 		});
 		return { ok: true as const };
+	},
+});
+
+export const validate = query({
+	args: { token: v.string() },
+	handler: async (ctx, args) => {
+		if (process.env.TIECAMEL_DEMO_SESSIONS_ENABLED !== "true") return false;
+		const tokenSha256 = await sha256Hex(args.token);
+		const session = await ctx.db
+			.query("demoSessions")
+			.withIndex("by_token_sha256", (q) => q.eq("tokenSha256", tokenSha256))
+			.unique();
+		if (!session || session.expiresAt <= Date.now()) return false;
+		return (await ctx.db.get(session.organizationId))?.demoOnly === true;
 	},
 });
 

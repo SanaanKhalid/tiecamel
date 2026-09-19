@@ -43,3 +43,13 @@ recruitment and production rollout are not implied by a successful local build.
 ## Progress
 
 - Baseline integrated; no production deployment performed.
+- Deliverable 2: shared responsibility policy engine, persistent Convex workflows,
+  optimistic revision checks, append-only hash-linked events, automatic minimal
+  community summary, independent publication review and five-minute escalation
+  scans. Linked issues cannot close unresolved responsibilities.
+- Demo sessions are isolated from pilot organizations. Multiple active memberships
+  require an explicit organization choice. Expired demo sessions show recovery UI.
+- Critical approvals/closure in real organizations deliberately fail closed until
+  individual secure signing is provisioned. Demo approvals are simulations, not
+  cryptographic receipts. Hash-linked database events are tamper-evident exports,
+  not independently anchored proof by themselves.

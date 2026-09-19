@@ -1,5 +1,10 @@
 import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start";
-import { ConvexProvider, ConvexReactClient, useMutation } from "convex/react";
+import {
+	ConvexProvider,
+	ConvexReactClient,
+	useMutation,
+	useQuery,
+} from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
@@ -50,6 +55,7 @@ function DemoSession({ children }: { children: React.ReactNode }) {
 	const switchMembership = useMutation(api.demoSessions.switchMembership);
 	const [token, setToken] = useState<string>();
 	const [error, setError] = useState("");
+	const valid = useQuery(api.demoSessions.validate, token ? { token } : "skip");
 	const starting = useRef(false);
 	useEffect(() => {
 		const stored = window.localStorage.getItem("tiecamel:demo-session");
@@ -59,7 +65,7 @@ function DemoSession({ children }: { children: React.ReactNode }) {
 		}
 		if (starting.current) return;
 		starting.current = true;
-		void start({ organizationSlug: "icn" })
+		void start({ organizationSlug: `demo-${crypto.randomUUID()}` })
 			.then((session) => {
 				window.localStorage.setItem("tiecamel:demo-session", session.token);
 				setToken(session.token);
@@ -73,17 +79,34 @@ function DemoSession({ children }: { children: React.ReactNode }) {
 				);
 			});
 	}, [start]);
+	useEffect(() => {
+		if (valid !== false) return;
+		window.localStorage.removeItem("tiecamel:demo-session");
+		setError(
+			"This demo session expired or was replaced by isolated demo workspaces. Start a fresh demonstration to continue.",
+		);
+	}, [valid]);
 	if (error) {
 		return (
 			<main className="grid min-h-screen place-items-center p-8 text-center">
 				<div>
 					<h1 className="text-xl font-semibold">Demo session unavailable</h1>
 					<p className="mt-2 max-w-lg text-sm text-slate-600">{error}</p>
+					<button
+						type="button"
+						className="mt-4 rounded-lg border px-4 py-2"
+						onClick={() => {
+							window.localStorage.removeItem("tiecamel:demo-session");
+							window.location.reload();
+						}}
+					>
+						Start a fresh demo
+					</button>
 				</div>
 			</main>
 		);
 	}
-	if (!token) {
+	if (!token || valid !== true) {
 		return (
 			<div className="min-h-screen bg-[#f7faf9] p-10" aria-busy="true">
 				<div className="mx-auto h-32 max-w-6xl animate-pulse rounded-2xl bg-slate-100" />

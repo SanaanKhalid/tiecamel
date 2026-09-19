@@ -8,6 +8,7 @@ type Ctx = QueryCtx | MutationCtx;
 export async function requirePlatformSession(
 	ctx: Ctx,
 	demoSessionToken?: string,
+	organizationId?: Id<"organizations">,
 ) {
 	if (demoSessionToken) {
 		if (process.env.TIECAMEL_DEMO_SESSIONS_ENABLED !== "true") {
@@ -21,6 +22,12 @@ export async function requirePlatformSession(
 		if (!demo || demo.expiresAt <= Date.now()) {
 			throw new Error("Demo session is invalid or expired");
 		}
+		const organization = await ctx.db.get(demo.organizationId);
+		if (
+			!organization?.demoOnly ||
+			(organizationId && organizationId !== demo.organizationId)
+		)
+			throw new Error("Demo sessions cannot access pilot organizations");
 		const membership = await ctx.db.get(demo.activeMembershipId);
 		const user = membership ? await ctx.db.get(membership.userId) : null;
 		if (
@@ -33,7 +40,7 @@ export async function requirePlatformSession(
 		}
 		return { identity: null, user, membership, demoSessionId: demo._id };
 	}
-	const session = await requireMembership(ctx);
+	const session = await requireMembership(ctx, organizationId);
 	if (!session) throw new Error("Active organization membership required");
 	return session;
 }
