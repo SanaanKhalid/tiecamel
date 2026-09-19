@@ -1,0 +1,45 @@
+# TieCamel — hackathon implementation ledger
+
+Implementation began September 19, 2026. Existing work is explicitly disclosed;
+it is not claimed as work produced during the hackathon.
+
+## Existing baseline
+
+- Main before this implementation: `4e438ac`.
+- Pre-existing financial-transparency branch: `6fb7f13`, merged without rewriting history.
+- Existing capabilities: document repositories, issues, change review, immutable
+  versions, public publications, Azure processing, Solana Memo receipts, CSV
+  financial ledgers and read-only wallet reconciliation.
+- Baseline verification: 37 application tests and 9 integration tests pass.
+
+## Implementation sequence
+
+1. Integrate the financial baseline and preserve attribution/history.
+2. Add controlled responsibilities, human-confirmed notice intake, immutable
+   evidence revisions, independent closure and a board-visible escalation ledger.
+3. Deliver a usable responsibilities/approvals/community workflow, clearly
+   separating local demonstration from authenticated organization data.
+4. Add durable notification processing and provider configuration, exposing
+   delivery failure and stale monitoring rather than claiming success.
+5. Implement and test focused Solana governance controls and independent proof
+   verification; integrate secure individual approvals only after provider and
+   network setup are verified.
+
+Each deliverable is tested and pushed separately. Provider provisioning, pilot
+recruitment and production rollout are not implied by a successful local build.
+
+## Non-negotiable product controls
+
+- Acknowledging a notice does not approve it or resolve the underlying obligation.
+- Pending exemption does not resolve a tax liability.
+- Owner, backup, source, actual deadline and required evidence stay visible.
+- Critical closure requires two distinct independent people, including a director.
+- Revised evidence invalidates earlier approvals; administrators cannot bypass it.
+- Critical risks are visible to the whole board. Sensitive documents are not public.
+- Minimal community status is automatic; detailed disclosure requires review.
+- Monitoring describes registered responsibilities, not all possible obligations.
+- No wallet, token, gas or seed phrase vocabulary is required in everyday nonprofit work.
+
+## Progress
+
+- Baseline integrated; no production deployment performed.
