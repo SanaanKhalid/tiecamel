@@ -10,6 +10,7 @@ import {
 	type Responsibility,
 	riskFor,
 } from "../src/governance/model";
+import { previewSeed } from "../src/governance/preview";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import {
@@ -165,8 +166,20 @@ export const workspace = query({
 					]
 				: [],
 		);
+		const publications = await ctx.db
+			.query("governancePublications")
+			.withIndex("by_organization", (q) =>
+				q.eq("organizationId", args.organizationId),
+			)
+			.order("desc")
+			.take(100);
 		return {
 			cases,
+			publications: publications.map((entry) => ({
+				text: entry.text,
+				approvedAt: entry.approvedAt,
+				revision: entry.revision,
+			})),
 			roster,
 			viewerId: String(session.membership._id),
 			alerts,
@@ -263,6 +276,35 @@ export const act = mutation({
 		);
 		if (!actor || !isGovernanceStaff(actor))
 			throw new Error("Active officer required");
+		if (
+			args.command.type === "evidence" &&
+			!(
+				"demoSessionId" in session &&
+				args.command.reference.startsWith("demo://")
+			)
+		) {
+			const command = args.command;
+			const files = await ctx.db
+				.query("changeFiles")
+				.withIndex("by_sha256", (q) => q.eq("sha256", command.digest))
+				.collect();
+			const file = files.find(
+				(entry) =>
+					entry.organizationId === args.organizationId &&
+					entry.azureBlobRef === command.reference &&
+					entry.processingStatus === "ready",
+			);
+			if (!file)
+				throw new Error(
+					"Select a processed managed document with a matching fingerprint. Unprocessed or external references cannot be closure evidence.",
+				);
+			await requireRepositoryAccess(
+				ctx,
+				file.repositoryId,
+				"read",
+				args.demoSessionToken,
+			);
+		}
 		// Do not silently substitute account login for the approved individual-signing design.
 		if (
 			(args.command.type === "approve" || args.command.type === "resolve") &&
@@ -321,6 +363,47 @@ export const act = mutation({
 			});
 		await queueAlerts(ctx, { ...obligation, control: state }, now);
 		return state.revision;
+	},
+});
+export const seedDemo = mutation({
+	args: scope,
+	handler: async (ctx, args) => {
+		const session = await staffSession(ctx, args);
+		if (!("demoSessionId" in session))
+			throw new Error(
+				"Sample records are available only in isolated demo organizations",
+			);
+		const existing = await ctx.db
+			.query("obligations")
+			.withIndex("by_organization", (q) =>
+				q.eq("organizationId", args.organizationId),
+			)
+			.first();
+		if (existing) return;
+		const roster = await governanceRoster(ctx, args.organizationId);
+		const sample = previewSeed(roster, Date.now());
+		for (const entry of sample.cases) {
+			const state = entry.state;
+			const id = await ctx.db.insert("obligations", {
+				organizationId: args.organizationId,
+				...legacyFields(state, state.updatedAt),
+				control: state,
+				governanceActive: true,
+				visibility: "board",
+				createdAt: state.createdAt,
+			});
+			const obligation = await ctx.db.get(id);
+			if (obligation) {
+				await appendEvent(
+					ctx,
+					obligation,
+					session.membership._id,
+					"demo-register",
+					state,
+				);
+				await queueAlerts(ctx, obligation, state.updatedAt);
+			}
+		}
 	},
 });
 export const history = query({

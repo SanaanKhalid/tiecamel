@@ -53,3 +53,13 @@ recruitment and production rollout are not implied by a successful local build.
   individual secure signing is provisioned. Demo approvals are simulations, not
   cryptographic receipts. Hash-linked database events are tamper-evident exports,
   not independently anchored proof by themselves.
+- Deliverable 3: responsive Overview, Responsibilities, Approvals and Community
+  screens; human confirmation, source excerpts, owner/backup/reviewer assignments,
+  separate exemption state, evidence review and redacted community publication.
+  Managed PDF/photo uploads reuse the Azure document-processing pipeline. Only
+  processed managed documents can be live closure evidence. The local demo has an
+  explicitly simulated clock and sample evidence, with no outbound notifications.
+- Public community pages do not require sign-in or create demo sessions. Approved
+  publications are append-only; proposing a correction does not erase older updates.
+- Development Convex functions deployed to `careful-setter-342` for browser tests.
+  Production Convex and production hosting have not been deployed by this work.

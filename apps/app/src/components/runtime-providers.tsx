@@ -1,4 +1,5 @@
 import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start";
+import { useRouterState } from "@tanstack/react-router";
 import {
 	ConvexProvider,
 	ConvexReactClient,
@@ -14,6 +15,16 @@ import { ConvexPlatformProvider } from "../platform/convex-store";
 import { PlatformProvider } from "../platform/store";
 
 export function RuntimeProviders({ children }: { children: React.ReactNode }) {
+	const pathname = useRouterState({
+		select: (state) => state.location.pathname,
+	});
+	if (pathname.startsWith("/public/") || pathname.startsWith("/verify/")) {
+		return clientConfig.convexConfigured ? (
+			<PublicConvexBridge>{children}</PublicConvexBridge>
+		) : (
+			<>{children}</>
+		);
+	}
 	if (clientConfig.demoMode && clientConfig.convexConfigured) {
 		return <DemoConvexBridge>{children}</DemoConvexBridge>;
 	}
@@ -36,6 +47,14 @@ export function RuntimeProviders({ children }: { children: React.ReactNode }) {
 			)}
 		</ClerkProvider>
 	);
+}
+
+function PublicConvexBridge({ children }: { children: React.ReactNode }) {
+	const client = useMemo(
+		() => new ConvexReactClient(runtimeConfig.convexUrl),
+		[],
+	);
+	return <ConvexProvider client={client}>{children}</ConvexProvider>;
 }
 
 function DemoConvexBridge({ children }: { children: React.ReactNode }) {

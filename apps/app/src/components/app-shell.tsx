@@ -6,14 +6,18 @@ import {
 	Check,
 	ChevronDown,
 	CircleDot,
+	ClipboardCheck,
 	type FileDiff,
 	FolderGit2,
+	Globe2,
 	Inbox,
 	Landmark,
+	LayoutDashboard,
 	Menu,
 	Plus,
 	Search,
 	Settings,
+	ShieldCheck,
 	X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -184,12 +188,39 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 							<X className="size-5" />
 						</button>
 					</div>
-					<nav className="space-y-1 p-3 text-sm" aria-label="Workspace">
+					<nav
+						className="max-h-[calc(100dvh-9rem)] space-y-1 overflow-y-auto p-3 text-sm"
+						aria-label="Workspace"
+					>
+						<NavItem
+							href={`/${platform.organization.slug}/overview`}
+							active={pathname.endsWith("/overview")}
+							icon={LayoutDashboard}
+							label="Overview"
+						/>
+						<NavItem
+							href={`/${platform.organization.slug}/responsibilities`}
+							active={pathname.endsWith("/responsibilities")}
+							icon={ClipboardCheck}
+							label="Responsibilities"
+						/>
+						<NavItem
+							href={`/${platform.organization.slug}/approvals`}
+							active={pathname.endsWith("/approvals")}
+							icon={ShieldCheck}
+							label="Approvals"
+						/>
+						<NavItem
+							href={`/${platform.organization.slug}/community`}
+							active={pathname.endsWith("/community")}
+							icon={Globe2}
+							label="Community"
+						/>
 						<NavItem
 							href={`/${platform.organization.slug}`}
 							active={pathname === `/${platform.organization.slug}`}
 							icon={FolderGit2}
-							label="Repositories"
+							label="Documents"
 						/>
 						<NavItem
 							href={`/${platform.organization.slug}/financials`}

@@ -600,7 +600,9 @@ function mapWorkspace(workspace: Workspace): PlatformData {
 			id: String(workspace.organization._id),
 			slug: workspace.organization.slug,
 			name: workspace.organization.name,
-			shortName: workspace.organization.slug.toUpperCase(),
+			shortName: workspace.organization.demoOnly
+				? "Demo Foundation"
+				: workspace.organization.name,
 			description:
 				"Shared governance, compliance, funding, and public accountability records.",
 		},
