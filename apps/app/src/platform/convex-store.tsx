@@ -156,6 +156,7 @@ function ConvexPlatformProviderInner({
 	const data = mapWorkspace(workspace);
 	const store: PlatformStore = {
 		...data,
+		demoSessionToken,
 		reset: () => {
 			void ensureSeeded({ demoSessionToken });
 		},

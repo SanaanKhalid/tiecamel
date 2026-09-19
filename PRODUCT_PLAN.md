@@ -361,13 +361,17 @@ Create a five- to seven-person steering group:
 #### 5. Manual financial reporting
 
 - Import a standardized monthly CSV or entered summary from the accounting system.
+- Optionally synchronize a public Solana owner address for native Circle USDC in read-only mode.
+- Declare included and excluded bank, card, cash, processor, and wallet accounts so report coverage is explicit.
 - Budget versus actual by major category.
 - Restricted and unrestricted balances.
 - Cash, debt, legal fees, and construction-project summary.
+- Reconcile opening balance plus period activity to each statement closing balance.
+- Publish sanitized individual rows, period aggregates, or confidential totals according to a versioned sensitivity policy.
 - Reporting-period status: draft, prepared, reviewed, approved, and published.
 - Treasurer and reviewer attestations.
 
-The MVP should not attempt to become the general ledger. The nonprofit's accounting system remains authoritative.
+The MVP is a read-only glass ledger and publication layer, not the system of record. The nonprofit's accounting system and bank statements remain authoritative.
 
 #### 6. Member transparency portal
 
@@ -423,7 +427,7 @@ Subject to counsel and board approval, the first nonprofit tenant should contain
 ### Explicit Phase 1 non-goals
 
 - No cryptocurrency treasury or donation conversion.
-- No individual transaction publication.
+- No raw donor, employee, beneficiary, legal-matter, private-counterparty, account-identifier, CSV-row, or RPC-data publication. Sanitized individual rows may be published only under the organization’s adopted disclosure policy.
 - No automatic legal conclusions.
 - No public allegation board.
 - No binding elections or no-confidence vote in the application.

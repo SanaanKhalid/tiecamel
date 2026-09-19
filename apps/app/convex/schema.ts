@@ -35,6 +35,27 @@ const disclosureApprovalStatus = v.union(
 	v.literal("withheld"),
 );
 
+const financialSource = v.union(
+	v.literal("demo"),
+	v.literal("csv"),
+	v.literal("solana"),
+);
+
+const financialSensitivity = v.union(
+	v.literal("ordinary"),
+	v.literal("donation"),
+	v.literal("payroll"),
+	v.literal("beneficiary"),
+	v.literal("legal"),
+	v.literal("security"),
+);
+
+const disclosureTreatment = v.union(
+	v.literal("individual-redacted"),
+	v.literal("period-aggregate"),
+	v.literal("confidential-total"),
+);
+
 const repositoryVisibility = v.union(
 	v.literal("restricted"),
 	v.literal("internal"),
@@ -615,11 +636,12 @@ export default defineSchema({
 	}).index("by_upload_session", ["uploadSessionId"]),
 	integrityAnchors: defineTable({
 		organizationId: v.id("organizations"),
-		repositoryId: v.id("repositories"),
-		recordId: v.id("platformRecords"),
-		recordVersionId: v.id("recordVersions"),
+		repositoryId: v.optional(v.id("repositories")),
+		recordId: v.optional(v.id("platformRecords")),
+		recordVersionId: v.optional(v.id("recordVersions")),
 		repositoryCommitId: v.optional(v.id("repositoryCommits")),
 		publicSnapshotId: v.optional(v.id("publicRepositorySnapshots")),
+		financialSnapshotId: v.optional(v.id("financialSnapshots")),
 		idempotencyKey: v.string(),
 		algorithm: v.literal("sha256"),
 		commitment: v.string(),
@@ -628,6 +650,7 @@ export default defineSchema({
 			v.union(
 				v.literal("tiecamel-publication-manifest/v1"),
 				v.literal("tiecamel-repository-commit/v2"),
+				v.literal("tiecamel-financial-snapshot/v1"),
 			),
 		),
 		memo: v.string(),
@@ -653,6 +676,7 @@ export default defineSchema({
 		.index("by_organization", ["organizationId"])
 		.index("by_record_version", ["recordVersionId"])
 		.index("by_repository_commit", ["repositoryCommitId"])
+		.index("by_financial_snapshot", ["financialSnapshotId"])
 		.index("by_idempotency_key", ["idempotencyKey"])
 		.index("by_repository_and_time", ["repositoryId", "createdAt"]),
 	providerConnections: defineTable({
@@ -924,6 +948,10 @@ export default defineSchema({
 	financialPeriods: defineTable({
 		organizationId: v.id("organizations"),
 		period: v.string(),
+		startAt: v.optional(v.number()),
+		endAt: v.optional(v.number()),
+		publicLimitation: v.optional(v.string()),
+		publishedSnapshotId: v.optional(v.id("financialSnapshots")),
 		status: v.union(
 			v.literal("draft"),
 			v.literal("prepared"),
@@ -940,7 +968,208 @@ export default defineSchema({
 		),
 		createdAt: v.number(),
 		updatedAt: v.number(),
+	})
+		.index("by_organization", ["organizationId"])
+		.index("by_organization_and_period", ["organizationId", "period"]),
+	financialConnections: defineTable({
+		organizationId: v.id("organizations"),
+		source: financialSource,
+		displayName: v.string(),
+		status: integrationHealth,
+		network: v.optional(
+			v.union(v.literal("devnet"), v.literal("mainnet-beta")),
+		),
+		ownerAddress: v.optional(v.string()),
+		mintAddress: v.optional(v.string()),
+		cursor: v.optional(v.string()),
+		observedBalanceBaseUnits: v.optional(v.number()),
+		lastSuccessfulSyncAt: v.optional(v.number()),
+		healthMessage: v.optional(v.string()),
+		createdBy: v.id("memberships"),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_organization", ["organizationId"])
+		.index("by_organization_and_source", ["organizationId", "source"]),
+	financialAccounts: defineTable({
+		organizationId: v.id("organizations"),
+		connectionId: v.optional(v.id("financialConnections")),
+		name: v.string(),
+		publicLabel: v.string(),
+		kind: v.union(
+			v.literal("bank"),
+			v.literal("card"),
+			v.literal("cash"),
+			v.literal("wallet"),
+		),
+		source: financialSource,
+		currency: v.union(v.literal("USD"), v.literal("USDC")),
+		decimals: v.number(),
+		included: v.boolean(),
+		lastFour: v.optional(v.string()),
+		lastSuccessfulRefreshAt: v.optional(v.number()),
+		health: integrationHealth,
+		healthMessage: v.optional(v.string()),
+		simulated: v.optional(v.boolean()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_organization", ["organizationId"])
+		.index("by_connection", ["connectionId"])
+		.index("by_organization_and_name", ["organizationId", "name"]),
+	financialFunds: defineTable({
+		organizationId: v.id("organizations"),
+		name: v.string(),
+		restricted: v.boolean(),
+		publicDescription: v.string(),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_organization", ["organizationId"])
+		.index("by_organization_and_name", ["organizationId", "name"]),
+	financialTransactions: defineTable({
+		organizationId: v.id("organizations"),
+		accountId: v.id("financialAccounts"),
+		fundId: v.id("financialFunds"),
+		externalId: v.string(),
+		source: financialSource,
+		postedAt: v.number(),
+		direction: v.union(v.literal("inbound"), v.literal("outbound")),
+		amountBaseUnits: v.number(),
+		currency: v.union(v.literal("USD"), v.literal("USDC")),
+		decimals: v.number(),
+		reportingAmountMinor: v.optional(v.number()),
+		state: v.union(
+			v.literal("pending"),
+			v.literal("posted"),
+			v.literal("removed"),
+			v.literal("review-required"),
+		),
+		rawDescription: v.string(),
+		privateCounterparty: v.optional(v.string()),
+		publicDescription: v.string(),
+		publicCounterparty: v.optional(v.string()),
+		category: v.string(),
+		sensitivity: financialSensitivity,
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_organization", ["organizationId"])
+		.index("by_account", ["accountId"])
+		.index("by_account_and_external_id", ["accountId", "externalId"])
+		.index("by_organization_and_time", ["organizationId", "postedAt"]),
+	financialTransactionEvents: defineTable({
+		organizationId: v.id("organizations"),
+		transactionId: v.id("financialTransactions"),
+		importRunId: v.optional(v.id("financialImportRuns")),
+		syncRunId: v.optional(v.id("financialSyncRuns")),
+		kind: v.union(
+			v.literal("added"),
+			v.literal("modified"),
+			v.literal("posted"),
+			v.literal("removed"),
+			v.literal("reviewed"),
+		),
+		payloadSha256: v.string(),
+		observedAt: v.number(),
+	}).index("by_transaction", ["transactionId"]),
+	financialImportRuns: defineTable({
+		organizationId: v.id("organizations"),
+		source: v.literal("csv"),
+		fileName: v.string(),
+		fileSha256: v.string(),
+		status: v.union(
+			v.literal("processing"),
+			v.literal("succeeded"),
+			v.literal("failed"),
+		),
+		inserted: v.number(),
+		updated: v.number(),
+		duplicates: v.number(),
+		errors: v.array(v.object({ row: v.number(), message: v.string() })),
+		createdBy: v.id("memberships"),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_organization", ["organizationId"])
+		.index("by_organization_and_hash", ["organizationId", "fileSha256"]),
+	financialSyncRuns: defineTable({
+		organizationId: v.id("organizations"),
+		connectionId: v.id("financialConnections"),
+		status: v.union(
+			v.literal("running"),
+			v.literal("succeeded"),
+			v.literal("failed"),
+		),
+		cursor: v.optional(v.string()),
+		inserted: v.number(),
+		duplicates: v.number(),
+		error: v.optional(v.string()),
+		startedAt: v.number(),
+		completedAt: v.optional(v.number()),
+	}).index("by_connection", ["connectionId"]),
+	financialReconciliations: defineTable({
+		organizationId: v.id("organizations"),
+		periodId: v.id("financialPeriods"),
+		accountId: v.id("financialAccounts"),
+		openingBalanceMinor: v.optional(v.number()),
+		closingBalanceMinor: v.optional(v.number()),
+		calculatedClosingMinor: v.optional(v.number()),
+		differenceMinor: v.optional(v.number()),
+		status: v.union(
+			v.literal("incomplete"),
+			v.literal("reconciled"),
+			v.literal("exception"),
+		),
+		publicExplanation: v.optional(v.string()),
+		updatedBy: v.id("memberships"),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_organization", ["organizationId"])
+		.index("by_period", ["periodId"])
+		.index("by_period_and_account", ["periodId", "accountId"]),
+	financialDisclosurePolicies: defineTable({
+		organizationId: v.id("organizations"),
+		version: v.number(),
+		treatments: v.object({
+			ordinary: disclosureTreatment,
+			donation: disclosureTreatment,
+			payroll: disclosureTreatment,
+			beneficiary: disclosureTreatment,
+			legal: disclosureTreatment,
+			security: disclosureTreatment,
+		}),
+		createdBy: v.id("memberships"),
+		createdAt: v.number(),
+	}).index("by_organization_and_version", ["organizationId", "version"]),
+	financialTransparencySettings: defineTable({
+		organizationId: v.id("organizations"),
+		anchoringEnabled: v.boolean(),
+		anchoringNetwork: v.union(v.literal("devnet"), v.literal("mainnet-beta")),
+		updatedBy: v.id("memberships"),
+		createdAt: v.number(),
+		updatedAt: v.number(),
 	}).index("by_organization", ["organizationId"]),
+	financialSnapshots: defineTable({
+		organizationId: v.id("organizations"),
+		organizationSlug: v.string(),
+		periodId: v.id("financialPeriods"),
+		version: v.number(),
+		payload: v.any(),
+		canonicalJson: v.string(),
+		sha256: v.string(),
+		sourceStateSha256: v.optional(v.string()),
+		previousSnapshotId: v.optional(v.id("financialSnapshots")),
+		previousSnapshotSha256: v.optional(v.string()),
+		integrityAnchorId: v.optional(v.id("integrityAnchors")),
+		publishedBy: v.id("memberships"),
+		publishedAt: v.number(),
+	})
+		.index("by_organization", ["organizationId"])
+		.index("by_organization_and_time", ["organizationId", "publishedAt"])
+		.index("by_public_slug", ["organizationSlug", "publishedAt"])
+		.index("by_period", ["periodId"]),
 	fundingPools: defineTable({
 		organizationId: v.id("organizations"),
 		period: v.string(),

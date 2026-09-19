@@ -6,7 +6,7 @@ import {
 	extractTaxNoticeFields,
 	normalizeExtractedContent,
 } from "./document-processor.js";
-import { integrityMemo } from "./solana-anchor.js";
+import { financialIntegrityMemo, integrityMemo } from "./solana-anchor.js";
 
 describe("publication integrity", () => {
 	it("produces stable manifest hashes regardless of object key order", () => {
@@ -24,10 +24,15 @@ describe("publication integrity", () => {
 
 	it("places only the repository commit hash in the Solana v2 memo", () => {
 		const commitment = "a".repeat(64);
-		expect(integrityMemo(commitment)).toBe(
-			`tiecamel:commit:v2:${commitment}`,
-		);
+		expect(integrityMemo(commitment)).toBe(`tiecamel:commit:v2:${commitment}`);
 		expect(() => integrityMemo("not-a-hash")).toThrow(/SHA-256/);
+	});
+
+	it("places only the snapshot hash in a financial v1 memo", () => {
+		const snapshotHash = "f".repeat(64);
+		expect(financialIntegrityMemo(snapshotHash)).toBe(
+			`tiecamel:financial:v1:${snapshotHash}`,
+		);
 	});
 });
 

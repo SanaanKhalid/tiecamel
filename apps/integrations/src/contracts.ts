@@ -179,7 +179,8 @@ export type IntegrityAnchorCommand = {
 	memo: string;
 	proofFormat?:
 		| "tiecamel-publication-manifest/v1"
-		| "tiecamel-repository-commit/v2";
+		| "tiecamel-repository-commit/v2"
+		| "tiecamel-financial-snapshot/v1";
 	repositoryCommitId?: string;
 	commitManifest?: string;
 	treeManifest?: string;

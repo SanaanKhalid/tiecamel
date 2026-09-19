@@ -18,11 +18,14 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { ChangeDetailPage } from "../components/change-detail-page";
+import { FinancialPage } from "../components/financial-page";
 import { IssueDetailPage } from "../components/issue-detail-page";
 import { OrganizationPage } from "../components/organization-page";
+import { PublicFinancialPage } from "../components/public-financial-page";
 import { PublicRepositoryPage } from "../components/public-repository-page";
 import { RepositoryPage } from "../components/repository-page";
 import { WorkPlatformPage } from "../components/work-platform-page";
+import { financialSeed } from "../finance/seed";
 import { PlatformProvider, usePlatform } from "../platform/store";
 
 afterEach(() => {
@@ -95,6 +98,21 @@ function RepositoryMutationProbe() {
 				Create programs repository
 			</button>
 		</div>
+	);
+}
+
+function MemberFinancialProbe() {
+	const platform = usePlatform();
+	return (
+		<>
+			<button
+				type="button"
+				onClick={() => platform.switchViewer("member-fatima")}
+			>
+				Use member financial view
+			</button>
+			<FinancialPage />
+		</>
 	);
 }
 
@@ -436,5 +454,101 @@ describe("TieCamel repository platform", () => {
 		expect(
 			screen.getByRole("link", { name: "Preview public repository" }),
 		).toBeTruthy();
+	});
+});
+
+describe("financial transparency experience", () => {
+	it("routes an ordinary authenticated member to the published snapshot", async () => {
+		await renderPlatform(<MemberFinancialProbe />);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Use member financial view" }),
+		);
+		await waitFor(() =>
+			expect(
+				screen.getByRole("heading", {
+					name: "Financial transparency · Q2 2026",
+				}),
+			).toBeTruthy(),
+		);
+		expect(screen.queryByText("Private transaction workspace")).toBeNull();
+	});
+
+	it("shows account coverage and previews a validated CSV import", async () => {
+		await renderPlatform(<FinancialPage />);
+		expect(screen.getByRole("heading", { name: "Glass ledger" })).toBeTruthy();
+		expect(screen.getByText("4/4")).toBeTruthy();
+
+		fireEvent.click(
+			screen.getByRole("button", { name: /accounts & imports/i }),
+		);
+		const csvText =
+			"transaction_id,account,date,direction,amount,currency,description,category,fund,status\n" +
+			"ui-1,Operating checking ··1842,2026-08-08,inbound,100.00,USD,Anonymous donor,Contributions,General fund,posted";
+		const csv = new File([csvText], "financials.csv", { type: "text/csv" });
+		Object.defineProperty(csv, "text", { value: async () => csvText });
+		fireEvent.change(screen.getByLabelText("Financial CSV"), {
+			target: { files: [csv] },
+		});
+		await waitFor(() =>
+			expect(
+				screen.getByText((_content, element) =>
+					Boolean(
+						element?.tagName === "P" &&
+							element.textContent?.includes("1 valid rows"),
+					),
+				),
+			).toBeTruthy(),
+		);
+		expect(
+			screen.getByRole("button", { name: "Import valid rows" }),
+		).not.toHaveProperty("disabled", true);
+	});
+
+	it("supports transaction review and disclosure-policy controls", async () => {
+		await renderPlatform(<FinancialPage />);
+		fireEvent.click(screen.getByRole("button", { name: /transactions/i }));
+		fireEvent.click(screen.getByText("Public USDC contribution"));
+		expect(
+			screen.getByRole("heading", { name: "Review transaction" }),
+		).toBeTruthy();
+		expect(screen.getByLabelText("USD reporting value")).toBeTruthy();
+		fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+		fireEvent.click(screen.getByRole("button", { name: /disclosure/i }));
+		expect(screen.getByText("Disclosure policy v1")).toBeTruthy();
+		expect(screen.getAllByText("Names always protected")).toHaveLength(6);
+	});
+
+	it("renders only sanitized snapshot data on the public view", () => {
+		render(<PublicFinancialPage organizationSlug="icn" />);
+		expect(
+			screen.getByRole("heading", { name: /Financial transparency · Q2 2026/ }),
+		).toBeTruthy();
+		expect(screen.getAllByText("Anonymous donation").length).toBeGreaterThan(0);
+		expect(screen.getByText("Payroll")).toBeTruthy();
+		expect(screen.getAllByText("Protected").length).toBeGreaterThan(0);
+		expect(screen.queryByText(/private employee roster/i)).toBeNull();
+		expect(screen.queryByText(/private recipient/i)).toBeNull();
+		expect(screen.queryByText(/privileged matter/i)).toBeNull();
+		expect(screen.queryByText(/Demo111/)).toBeNull();
+		expect(screen.getByText("Locally verified hash")).toBeTruthy();
+	});
+
+	it("shows a failed optional anchor without implying onchain verification", () => {
+		const workspace = structuredClone(financialSeed);
+		workspace.snapshots[0].verification = "anchor-failed";
+		workspace.snapshots[0].anchor = {
+			network: "devnet",
+			error: "Verification service unavailable.",
+		};
+		window.localStorage.setItem(
+			"tiecamel.financial-preview.v1",
+			JSON.stringify(workspace),
+		);
+
+		render(<PublicFinancialPage organizationSlug="icn" />);
+		expect(screen.getByText("Anchor needs attention")).toBeTruthy();
+		expect(screen.getByText("Verification service unavailable.")).toBeTruthy();
+		expect(screen.queryByText("Verified on Solana")).toBeNull();
 	});
 });

@@ -1,9 +1,6 @@
 import { DefaultAzureCredential } from "@azure/identity";
 import { SecretClient } from "@azure/keyvault-secrets";
-import {
-	BlobServiceClient,
-	type BlockBlobClient,
-} from "@azure/storage-blob";
+import { BlobServiceClient, type BlockBlobClient } from "@azure/storage-blob";
 import { createHash } from "node:crypto";
 import {
 	Connection,
@@ -20,18 +17,21 @@ const MEMO_PROGRAM_ID = new PublicKey(
 );
 
 export function integrityMemo(commitment: string) {
-	const normalized = commitment.toLowerCase();
-	if (!/^[a-f0-9]{64}$/.test(normalized)) {
-		throw new Error("A Solana integrity commitment must be a SHA-256 hash.");
-	}
+	const normalized = normalizedCommitment(commitment);
 	return `tiecamel:commit:v2:${normalized}`;
+}
+
+export function financialIntegrityMemo(commitment: string) {
+	return `tiecamel:financial:v1:${normalizedCommitment(commitment)}`;
 }
 
 export async function anchorIntegrity(command: IntegrityAnchorCommand) {
 	const expectedMemo =
 		command.proofFormat === "tiecamel-repository-commit/v2"
 			? integrityMemo(command.commitment)
-			: `tiecamel:v1:${command.commitment.toLowerCase()}`;
+			: command.proofFormat === "tiecamel-financial-snapshot/v1"
+				? financialIntegrityMemo(command.commitment)
+				: `tiecamel:v1:${command.commitment.toLowerCase()}`;
 	if (command.memo !== expectedMemo) {
 		throw new Error("Anchor memo does not match the integrity commitment.");
 	}
@@ -81,7 +81,9 @@ export async function anchorIntegrity(command: IntegrityAnchorCommand) {
 		})
 		.find(Boolean);
 	if (observedMemo !== command.memo) {
-		throw new Error("Confirmed Solana transaction did not contain the expected commit memo.");
+		throw new Error(
+			"Confirmed Solana transaction did not contain the expected commit memo.",
+		);
 	}
 	const cluster = command.network === "devnet" ? "?cluster=devnet" : "";
 	const result = {
@@ -92,6 +94,14 @@ export async function anchorIntegrity(command: IntegrityAnchorCommand) {
 	};
 	await storeReceipt(command.idempotencyKey, result);
 	return result;
+}
+
+function normalizedCommitment(commitment: string) {
+	const normalized = commitment.toLowerCase();
+	if (!/^[a-f0-9]{64}$/.test(normalized)) {
+		throw new Error("A Solana integrity commitment must be a SHA-256 hash.");
+	}
+	return normalized;
 }
 
 async function loadPayer() {
@@ -174,7 +184,9 @@ async function sealCommitManifests(command: IntegrityAnchorCommand) {
 		.update(command.commitManifest)
 		.digest("hex");
 	if (commitHash !== command.commitment) {
-		throw new Error("Commit manifest hash does not match the requested commitment.");
+		throw new Error(
+			"Commit manifest hash does not match the requested commitment.",
+		);
 	}
 	const parsed = JSON.parse(command.commitManifest) as { treeSha256?: string };
 	const treeHash = createHash("sha256")
@@ -201,10 +213,7 @@ async function sealCommitManifests(command: IntegrityAnchorCommand) {
 	]);
 }
 
-async function uploadImmutableJson(
-	blob: BlockBlobClient,
-	body: string,
-) {
+async function uploadImmutableJson(blob: BlockBlobClient, body: string) {
 	try {
 		await blob.upload(body, Buffer.byteLength(body), {
 			conditions: { ifNoneMatch: "*" },

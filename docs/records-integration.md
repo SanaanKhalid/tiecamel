@@ -58,11 +58,13 @@ only the signed Azure verification callback can restore healthy state.
 ## Public integrity
 
 Public Transparency repositories may opt into Solana anchoring. After Azure
-seals the approved bytes and canonical publication manifest, TieCamel submits
-only `tiecamel:v1:<manifest-sha256>` to the Solana Memo program. The Solana
-transaction is advisory public proof; Azure evidence and Convex authorization
-remain the operational source of truth. A failed anchor never rolls back an
-accepted record, but it remains visibly pending/failed until retried.
+seals the approved bytes and canonical commit manifest, TieCamel submits only
+`tiecamel:commit:v2:<commit-sha256>` to the Solana Memo program. An organization
+may separately anchor an approved financial snapshot with
+`tiecamel:financial:v1:<snapshot-sha256>`. The transaction is advisory public
+proof; Azure evidence and Convex authorization remain the operational source
+of truth. A failed anchor never rolls back an accepted record or snapshot, but
+it remains visibly pending/failed until retried.
 
 ## Production setup
 
