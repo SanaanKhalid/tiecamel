@@ -25,10 +25,13 @@ The ignored `.env.development.local` file points local development to this deplo
 - Backend status (September 20, 2026): current repository, financial and governance
   functions/schema deployed from `0674fba`; production governance worker health
   returned HTTP 200 after deployment. This is not an onboarding launch.
-- Frontend status: latest observed Cloudflare release remains July 29, 2026,
-  version `032d09f3-ef82-4b3a-904d-4e630f66f9ca`. Live settings show demo identity;
-  its served bundle references development Convex. Frontend release is held pending
-  a labeled-demo versus live-onboarding decision, not silently treated as current.
+- Frontend status (September 20, 2026): the project owner selected a labeled public
+  demo. Deployed source `ff50239`, Cloudflare version
+  `7275fa54-66e4-4e5d-a572-84caf8348325`, to `app.tiecamel.com` in `public-demo` mode.
+  It opens the latest responsibility overview with a site-wide demo notice and
+  browser-only sample data. Convex and Clerk connections are disabled for this
+  frontend; it connects to neither development nor production client records.
+  Live verification shows an explicit unavailable message. This is not onboarding.
 - Azure integration: intentionally disabled. The existing Terraform deployment
   is the development integration plane and its signed callbacks target
   `careful-setter-342`; provision a separate production Terraform environment
@@ -38,3 +41,7 @@ Do not use Clerk `pk_test_` or `sk_test_` credentials in production. Set `VITE_C
 
 See the [fresh readiness audit](../../docs/production-readiness-audit-2026-09-20.md)
 for direct observations, deployment verification and untested launch gates.
+
+Use `pnpm deploy:demo` for subsequent updates to this public demonstration. It
+builds with explicit demo isolation before publishing. Do not substitute the
+ordinary `deploy:app` command, which can inherit local Vite configuration.

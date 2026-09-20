@@ -5,8 +5,35 @@
 **Not ready for real nonprofit onboarding.** A reachable website and successful
 tests do not establish an operational client service. The audit began read-only;
 the project owner then explicitly requested production deployment. The latest
-Convex backend was deployed, while frontend release awaits a choice between a
-labeled demo and completing real client sign-in first.
+Convex backend was deployed. The owner subsequently selected a clearly labeled
+demo frontend release, which is now live; real client onboarding remains blocked.
+
+## Follow-up: public demo released
+
+After the audit, the owner explicitly requested option 1: publish the latest
+features as a clearly labeled demo. Source `ff50239` is deployed as Cloudflare
+version `7275fa54-66e4-4e5d-a572-84caf8348325` at `https://app.tiecamel.com`.
+
+- The new responsibility overview is the landing page; responsibilities,
+  approvals, community reporting, documents and financial previews are accessible.
+- A site-wide notice explains sample data, browser-only changes and the absence
+  of server uploads, real alerts and on-chain approvals.
+- Explicit `public-demo` mode overrides backend/identity configuration. Built
+  client/server assets were checked for the known Convex deployment addresses and
+  embedded Clerk keys: none were found. The frontend is deliberately disconnected
+  from both development and production Convex; the production backend remains
+  separately deployed, not activated for anonymous demo users.
+- Public demo routes receive the sample-data provider. Verification routes show
+  an explicit unavailable message rather than mounting live proof queries.
+- A live-browser server/client clock mismatch was found and fixed by rendering
+  browser-specific sample state only after hydration. The final live browser check
+  reported no console errors while checking overview, approvals, financials and
+  settings. The local demo acknowledgement flow was also exercised.
+- 122 application/integration tests, application TypeScript checks and the demo
+  build passed. No provider configuration, Azure resources, private client
+  records, signing authorities or production notification settings were changed.
+
+The observations below describe the audit snapshot before this demo release.
 
 ## Direct observations before deployment
 
@@ -62,8 +89,8 @@ Production Convex insights reported no OCC/resource-limit issues over the last
 
 ## Remaining launch gates
 
-1. Choose frontend release scope. A labeled demo must not be advertised as client
-   onboarding. A client release requires live authentication, production backend
+1. The labeled demo scope is now selected and published; it must not be advertised
+   as client onboarding. A client release requires live authentication, production backend
    configuration and fail-closed behavior when configuration is incomplete.
 2. Provision and verify a separate production document integration plane. Do not
    redirect development callbacks or reuse its client evidence store as production.

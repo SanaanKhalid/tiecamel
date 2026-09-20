@@ -105,3 +105,11 @@ recruitment and production rollout are not implied by a successful local build.
   production worker heartbeats. Frontend and Azure remain unreleased pending
   release scope and production provisioning; this is not client onboarding.
   See [the readiness audit](production-readiness-audit-2026-09-20.md).
+- September 20 public-demo release: the owner selected publishing the latest
+  interface as a clearly labeled demo. Source `ff50239` was deployed to the app
+  domain as Cloudflare version `7275fa54-66e4-4e5d-a572-84caf8348325`. Explicit demo
+  mode disables backend/identity connections, labels every page, uses browser-only
+  sample records and declines live proof verification. New dashboard is the landing
+  page. 122 app/integration tests, TypeScript and demo build passed; live-browser
+  checks passed after correcting a server/browser demo-clock hydration mismatch.
+  This frontend release does not enable client onboarding or real approvals.
