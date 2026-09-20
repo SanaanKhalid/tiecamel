@@ -1,0 +1,19 @@
+[toolchain]
+anchor_version = "0.31.1"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+tiecamel_governance = "4G9rXL6BLXEKWM9QT6YWSBpXaTFBGmYbLB77P3vpZtxD"
+
+[programs.devnet]
+tiecamel_governance = "4G9rXL6BLXEKWM9QT6YWSBpXaTFBGmYbLB77P3vpZtxD"
+
+[provider]
+cluster = "Localnet"
+wallet = ".local/solana/test-payer.json"
+
+[workspace]
+members = ["programs/tiecamel-governance"]

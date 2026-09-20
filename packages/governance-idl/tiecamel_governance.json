@@ -1,0 +1,1133 @@
+{
+  "address": "4G9rXL6BLXEKWM9QT6YWSBpXaTFBGmYbLB77P3vpZtxD",
+  "metadata": {
+    "name": "tiecamel_governance",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Non-custodial critical-obligation governance and reporting commitments"
+  },
+  "instructions": [
+    {
+      "name": "amend_board",
+      "docs": [
+        "Roster replacement/key recovery uses the CURRENT roster's quorum, never a service key."
+      ],
+      "discriminator": [
+        44,
+        194,
+        61,
+        127,
+        246,
+        118,
+        4,
+        219
+      ],
+      "accounts": [
+        {
+          "name": "board",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  97,
+                  114,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "board.chain_id",
+                "account": "Board"
+              }
+            ]
+          }
+        },
+        {
+          "name": "proposer",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "expected_policy_version",
+          "type": "u64"
+        },
+        {
+          "name": "expected_parent",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "members",
+          "type": {
+            "vec": {
+              "defined": {
+                "name": "Member"
+              }
+            }
+          }
+        },
+        {
+          "name": "threshold",
+          "type": "u8"
+        },
+        {
+          "name": "service",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "append_reporting_checkpoint",
+      "discriminator": [
+        173,
+        110,
+        22,
+        26,
+        11,
+        22,
+        161,
+        215
+      ],
+      "accounts": [
+        {
+          "name": "board",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  97,
+                  114,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "board.chain_id",
+                "account": "Board"
+              }
+            ]
+          }
+        },
+        {
+          "name": "proposer",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "expected_policy_version",
+          "type": "u64"
+        },
+        {
+          "name": "expected_parent",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "commitment",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "approve_resolution",
+      "discriminator": [
+        239,
+        215,
+        26,
+        98,
+        160,
+        130,
+        11,
+        221
+      ],
+      "accounts": [
+        {
+          "name": "board",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  97,
+                  114,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "board.chain_id",
+                "account": "Board"
+              }
+            ]
+          },
+          "relations": [
+            "case"
+          ]
+        },
+        {
+          "name": "case",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  115,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "board"
+              },
+              {
+                "kind": "account",
+                "path": "case.case_id",
+                "account": "CriticalCase"
+              }
+            ]
+          }
+        },
+        {
+          "name": "actor",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "expected_revision",
+          "type": "u64"
+        },
+        {
+          "name": "expected_parent",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "evidence_commitment",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "policy_version",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "finalize_resolution",
+      "discriminator": [
+        191,
+        74,
+        94,
+        214,
+        45,
+        150,
+        152,
+        125
+      ],
+      "accounts": [
+        {
+          "name": "board",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  97,
+                  114,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "board.chain_id",
+                "account": "Board"
+              }
+            ]
+          },
+          "relations": [
+            "case"
+          ]
+        },
+        {
+          "name": "case",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  115,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "board"
+              },
+              {
+                "kind": "account",
+                "path": "case.case_id",
+                "account": "CriticalCase"
+              }
+            ]
+          }
+        },
+        {
+          "name": "actor",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "expected_revision",
+          "type": "u64"
+        },
+        {
+          "name": "expected_parent",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "evidence_commitment",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "initialize_board",
+      "discriminator": [
+        146,
+        47,
+        165,
+        250,
+        246,
+        28,
+        104,
+        227
+      ],
+      "accounts": [
+        {
+          "name": "board",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  97,
+                  114,
+                  100
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "chain_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "chain_id",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "members",
+          "type": {
+            "vec": {
+              "defined": {
+                "name": "Member"
+              }
+            }
+          }
+        },
+        {
+          "name": "threshold",
+          "type": "u8"
+        },
+        {
+          "name": "service",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "propose_resolution",
+      "discriminator": [
+        19,
+        68,
+        181,
+        23,
+        194,
+        146,
+        152,
+        252
+      ],
+      "accounts": [
+        {
+          "name": "board",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  97,
+                  114,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "board.chain_id",
+                "account": "Board"
+              }
+            ]
+          },
+          "relations": [
+            "case"
+          ]
+        },
+        {
+          "name": "case",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  115,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "board"
+              },
+              {
+                "kind": "account",
+                "path": "case.case_id",
+                "account": "CriticalCase"
+              }
+            ]
+          }
+        },
+        {
+          "name": "actor",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "expected_revision",
+          "type": "u64"
+        },
+        {
+          "name": "expected_parent",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "evidence_commitment",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "reassign_case",
+      "discriminator": [
+        6,
+        125,
+        100,
+        139,
+        231,
+        104,
+        129,
+        23
+      ],
+      "accounts": [
+        {
+          "name": "board",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  97,
+                  114,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "board.chain_id",
+                "account": "Board"
+              }
+            ]
+          },
+          "relations": [
+            "case"
+          ]
+        },
+        {
+          "name": "case",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  115,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "board"
+              },
+              {
+                "kind": "account",
+                "path": "case.case_id",
+                "account": "CriticalCase"
+              }
+            ]
+          }
+        },
+        {
+          "name": "actor",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "expected_revision",
+          "type": "u64"
+        },
+        {
+          "name": "expected_parent",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "owner_identity",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "register_case",
+      "discriminator": [
+        163,
+        145,
+        117,
+        84,
+        100,
+        61,
+        1,
+        229
+      ],
+      "accounts": [
+        {
+          "name": "board",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  97,
+                  114,
+                  100
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "board.chain_id",
+                "account": "Board"
+              }
+            ]
+          }
+        },
+        {
+          "name": "case",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  115,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "board"
+              },
+              {
+                "kind": "arg",
+                "path": "case_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "actor",
+          "signer": true
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "case_id",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "owner_identity",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "expected_parent",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "notice_commitment",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Board",
+      "discriminator": [
+        79,
+        48,
+        160,
+        63,
+        153,
+        132,
+        240,
+        56
+      ]
+    },
+    {
+      "name": "CriticalCase",
+      "discriminator": [
+        96,
+        208,
+        142,
+        215,
+        82,
+        176,
+        77,
+        131
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "GovernanceCheckpoint",
+      "discriminator": [
+        234,
+        105,
+        172,
+        80,
+        94,
+        70,
+        207,
+        28
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidRoster",
+      "msg": "The roster must contain 3–12 valid, non-service identities"
+    },
+    {
+      "code": 6001,
+      "name": "WeakPolicy",
+      "msg": "Critical controls cannot be reduced below two independent approvals"
+    },
+    {
+      "code": 6002,
+      "name": "DirectorRequired",
+      "msg": "A director must participate"
+    },
+    {
+      "code": 6003,
+      "name": "DuplicatePerson",
+      "msg": "One person or key cannot occupy two roster positions"
+    },
+    {
+      "code": 6004,
+      "name": "QuorumRequired",
+      "msg": "Current roster quorum is required"
+    },
+    {
+      "code": 6005,
+      "name": "Unauthorized",
+      "msg": "The signer is not an adopted reviewer or permitted service"
+    },
+    {
+      "code": 6006,
+      "name": "UnknownOwner",
+      "msg": "Owner identity must be on the adopted roster"
+    },
+    {
+      "code": 6007,
+      "name": "SelfApproval",
+      "msg": "Owner and evidence submitter cannot approve closure"
+    },
+    {
+      "code": 6008,
+      "name": "DuplicateApproval",
+      "msg": "This person has already approved"
+    },
+    {
+      "code": 6009,
+      "name": "StalePolicy",
+      "msg": "The policy changed; resubmit and review evidence again"
+    },
+    {
+      "code": 6010,
+      "name": "StaleEvidence",
+      "msg": "The evidence does not match this approval"
+    },
+    {
+      "code": 6011,
+      "name": "StaleParent",
+      "msg": "The record head changed; refresh before signing"
+    },
+    {
+      "code": 6012,
+      "name": "StaleRevision",
+      "msg": "The case revision changed; refresh before signing"
+    },
+    {
+      "code": 6013,
+      "name": "NotInReview",
+      "msg": "Closure evidence must be under review"
+    },
+    {
+      "code": 6014,
+      "name": "AlreadyResolved",
+      "msg": "Resolved cases cannot be rewritten"
+    },
+    {
+      "code": 6015,
+      "name": "EmptyCommitment",
+      "msg": "Commitments cannot be empty"
+    },
+    {
+      "code": 6016,
+      "name": "Overflow",
+      "msg": "Monotonic counter overflow"
+    }
+  ],
+  "types": [
+    {
+      "name": "Approval",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": "pubkey"
+          },
+          {
+            "name": "identity",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "evidence_revision",
+            "type": "u64"
+          },
+          {
+            "name": "policy_version",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Board",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "chain_id",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "members",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "Member"
+                }
+              }
+            }
+          },
+          {
+            "name": "threshold",
+            "type": "u8"
+          },
+          {
+            "name": "service",
+            "type": "pubkey"
+          },
+          {
+            "name": "policy_version",
+            "type": "u64"
+          },
+          {
+            "name": "sequence",
+            "type": "u64"
+          },
+          {
+            "name": "head",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CriticalCase",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "board",
+            "type": "pubkey"
+          },
+          {
+            "name": "case_id",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "owner_identity",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "submitter_identity",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "notice_commitment",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "evidence_commitment",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "revision",
+            "type": "u64"
+          },
+          {
+            "name": "evidence_revision",
+            "type": "u64"
+          },
+          {
+            "name": "policy_version",
+            "type": "u64"
+          },
+          {
+            "name": "phase",
+            "type": {
+              "defined": {
+                "name": "Phase"
+              }
+            }
+          },
+          {
+            "name": "approvals",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "Approval"
+                }
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GovernanceCheckpoint",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "board",
+            "type": "pubkey"
+          },
+          {
+            "name": "case",
+            "type": "pubkey"
+          },
+          {
+            "name": "kind",
+            "type": "u8"
+          },
+          {
+            "name": "sequence",
+            "type": "u64"
+          },
+          {
+            "name": "parent",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "head",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "commitment",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "policy_version",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Member",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": "pubkey"
+          },
+          {
+            "name": "identity",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "director",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Phase",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Open"
+          },
+          {
+            "name": "Review"
+          },
+          {
+            "name": "Resolved"
+          }
+        ]
+      }
+    }
+  ]
+}

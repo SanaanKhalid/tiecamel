@@ -14,6 +14,9 @@
     "dev:web": "pnpm --filter @tiecamel/web dev",
     "format": "pnpm --filter @tiecamel/app format",
     "lint": "pnpm --filter @tiecamel/app lint",
-    "test": "pnpm --recursive --if-present --filter './apps/*' test"
+    "test": "pnpm --recursive --if-present --filter './apps/*' test",
+    "governance:build": "anchor build --no-idl -- --tools-version v1.56 && anchor idl build --out packages/governance-idl/tiecamel_governance.json --out-ts packages/governance-idl/tiecamel_governance.ts",
+    "governance:test": "node scripts/test-governance-localnet.mjs",
+    "governance:verify": "node scripts/verify-governance-proof.mjs"
   }
 }

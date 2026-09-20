@@ -70,3 +70,9 @@ recruitment and production rollout are not implied by a successful local build.
   attachments are not auto-imported; officers use the managed upload pipeline.
 - Repository workspace reads now respect repository assignments. Quarantined
   documents cannot be downloaded, and real organizations cannot receive demo fixtures.
+- Deliverable 5: focused Anchor program, generated IDL, typed transaction builders,
+  salted evidence commitments and database-independent CLI proof verification.
+  Separate local signing keys exercised self-approval rejection, service isolation,
+  director/quorum requirements, stale heads, evidence replacement, roster changes,
+  handover, immutable closure and finalized proof tampering checks. No public network
+  deployment or live passkey integration is implied; real critical closure stays gated.
