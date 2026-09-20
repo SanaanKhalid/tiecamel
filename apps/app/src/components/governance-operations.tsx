@@ -5,6 +5,7 @@ import type { Id } from "../../convex/_generated/dataModel";
 import type { Person } from "../governance/model";
 import { usePlatform } from "../platform/store";
 import { NoticeForm } from "./governance-page";
+import { PilotReadiness } from "./pilot-readiness";
 
 const button =
 	"rounded-lg border border-[#cbdacf] bg-white px-3 py-2 text-xs font-semibold text-[#315e40] disabled:opacity-50";
@@ -25,6 +26,7 @@ export function GovernanceOperations({
 	const inbox = useQuery(api.inbound.inbox, scope);
 	const delivery = useQuery(api.delivery.status, scope);
 	const contact = useQuery(api.delivery.myContact, scope);
+	const readiness = useQuery(api.readiness.status, scope);
 	const enableInbox = useMutation(api.inbound.enable);
 	const retryMail = useMutation(api.inbound.retryRetrieval);
 	const retryDelivery = useMutation(api.delivery.retryBlocked);
@@ -63,6 +65,7 @@ export function GovernanceOperations({
 			className="mx-auto max-w-[1440px] space-y-4 px-4 pb-8 sm:px-7 lg:px-9"
 			aria-label="Notice intake and delivery operations"
 		>
+			<PilotReadiness readiness={readiness} />
 			{error && (
 				<p
 					role="alert"

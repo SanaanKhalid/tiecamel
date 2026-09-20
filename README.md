@@ -4,6 +4,19 @@ TieCamel is a repository-based accountability platform for mission-driven
 organizations. Teams manage issues, review document changes, accept immutable
 records, and selectively publish approved history.
 
+The hackathon build adds a nonprofit board workflow: notices become assigned
+responsibilities with actual deadlines, independent evidence review, escalation,
+and limited community reporting. Email/WhatsApp delivery and forwarded-notice
+intake are configuration-gated; demos never send real alerts.
+
+Live critical closure is deliberately disabled until individual passkey signing
+and public-network receipt verification are integrated. The focused Solana program
+is compiled and tested on a local validator, not deployed to a public network.
+See the [implementation ledger](docs/hackathon-build-log.md),
+[pilot operations runbook](docs/governance-operations.md), and
+[Solana controls and verification](docs/solana-anchor-program.md) for verified scope
+and remaining launch gates.
+
 ## Workspace
 
 - `apps/app` — TanStack Start repository platform and public SSR views
@@ -14,7 +27,8 @@ records, and selectively publish approved history.
 - `apps/app/DEPLOYMENTS.md` — development and production environment map
 - `PRODUCT_PLAN.md` — product, pilot, and technical roadmap
 
-Shared packages will live under `packages/` as the product grows.
+- `programs/tiecamel-governance` — independent critical-approval Anchor program
+- `packages/governance-idl` — generated program interface and TypeScript types
 
 ## Requirements
 

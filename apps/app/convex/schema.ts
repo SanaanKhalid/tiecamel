@@ -866,7 +866,9 @@ export default defineSchema({
 		whatsappConsentedAt: v.optional(v.number()),
 		whatsappVerifiedAt: v.optional(v.number()),
 		updatedAt: v.number(),
-	}).index("by_member", ["membershipId"]),
+	})
+		.index("by_member", ["membershipId"])
+		.index("by_organization", ["organizationId"]),
 	notificationOutbox: defineTable({
 		organizationId: v.id("organizations"),
 		alertId: v.id("governanceAlerts"),

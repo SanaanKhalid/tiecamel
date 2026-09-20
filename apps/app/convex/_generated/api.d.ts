@@ -34,6 +34,7 @@ import type * as organizations from "../organizations.js";
 import type * as platform from "../platform.js";
 import type * as publicRepositories from "../publicRepositories.js";
 import type * as publications from "../publications.js";
+import type * as readiness from "../readiness.js";
 import type * as repositories from "../repositories.js";
 import type * as uploads from "../uploads.js";
 import type * as verification from "../verification.js";
@@ -71,6 +72,7 @@ declare const fullApi: ApiFromModules<{
   platform: typeof platform;
   publicRepositories: typeof publicRepositories;
   publications: typeof publications;
+  readiness: typeof readiness;
   repositories: typeof repositories;
   uploads: typeof uploads;
   verification: typeof verification;

@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { escalationFor } from "../src/governance/model";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import {
@@ -118,15 +119,29 @@ export const context = internalQuery({
 		]);
 		const user = membership ? await ctx.db.get(membership.userId) : null;
 		const obligation = alert ? await ctx.db.get(alert.obligationId) : null;
+		const state = obligation?.control;
 		if (
 			!organization ||
 			organization.demoOnly ||
 			organization.status === "suspended" ||
 			membership?.status !== "active" ||
+			membership.role === "member" ||
+			membership.organizationId !== row.organizationId ||
+			alert?.organizationId !== row.organizationId ||
+			alert.membershipId !== row.membershipId ||
+			obligation?.organizationId !== row.organizationId ||
+			!state ||
 			!user ||
-			obligation?.control?.phase === "resolved"
+			state.phase === "resolved"
 		)
 			return null;
+		const eligible =
+			state.ownerId === String(membership._id) ||
+			state.backupId === String(membership._id) ||
+			(state.reviewerId === String(membership._id) &&
+				escalationFor(state, Date.now()) >= 3) ||
+			(state.critical && membership.role === "board");
+		if (!eligible) return null;
 		const destination =
 			row.channel === "email" ? user.email : (contact?.whatsappNumber ?? "");
 		const optedIn =

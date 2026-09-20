@@ -175,6 +175,8 @@ export const workspace = query({
 			.take(100);
 		return {
 			cases,
+			publicCommunitySlug:
+				(await ctx.db.get(args.organizationId))?.publicSlug ?? null,
 			publications: publications.map((entry) => ({
 				text: entry.text,
 				approvedAt: entry.approvedAt,

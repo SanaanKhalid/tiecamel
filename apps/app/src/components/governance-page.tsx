@@ -194,6 +194,22 @@ function LiveGovernancePage({ tab }: { tab: GovernanceTab }) {
 				alertCount={workspace.alerts.length}
 				publications={workspace.publications}
 			/>
+			{tab === "community" && workspace.publicCommunitySlug && (
+				<div className="mx-auto max-w-[1440px] px-4 pb-6 sm:px-7 lg:px-9">
+					<a
+						className={secondary}
+						href={`/public/${encodeURIComponent(workspace.publicCommunitySlug)}/community`}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Open public community page
+					</a>
+					<p className="mt-2 text-xs text-[#687d6e]">
+						No sign-in required. Only limited counts and approved board updates
+						are shared.
+					</p>
+				</div>
+			)}
 			<GovernanceOperations
 				roster={workspace.roster}
 				now={workspace.serverTime}

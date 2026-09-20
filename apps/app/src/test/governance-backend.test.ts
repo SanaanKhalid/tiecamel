@@ -64,6 +64,72 @@ async function setup() {
 	return { t, owner, ...seed, input };
 }
 describe("persistent governance authorization and races", () => {
+	it("keeps readiness tenant-scoped and never exposes provider credentials", async () => {
+		const s = await setup();
+		vi.stubEnv("RESEND_API_KEY", "not-for-output");
+		vi.stubEnv("TWILIO_AUTH_TOKEN", "also-not-for-output");
+		const result = await s.owner.query(api.readiness.status, {
+			organizationId: s.organizationId,
+		});
+		expect(result.liveCriticalClosureReady).toBe(false);
+		expect(JSON.stringify(result)).not.toContain("not-for-output");
+		await expect(
+			s.owner.query(api.readiness.status, { organizationId: s.otherId }),
+		).rejects.toThrow("membership");
+		await expect(
+			s.t
+				.withIdentity({ subject: "clerk-4" })
+				.query(api.readiness.status, { organizationId: s.organizationId }),
+		).rejects.toThrow("Board access");
+	});
+	it("suppresses queued alerts when the recipient loses their officer role", async () => {
+		const s = await setup();
+		await s.owner.mutation(api.governance.register, {
+			organizationId: s.organizationId,
+			input: s.input,
+		});
+		const claims = await s.t.mutation(internal.delivery.claim, {});
+		const contexts = await Promise.all(
+			claims.map((claim) => s.t.query(internal.delivery.context, claim)),
+		);
+		const ownerClaim =
+			claims[
+				contexts.findIndex((context) => context?.row.membershipId === s.ids[0])
+			];
+		expect(ownerClaim).toBeDefined();
+		await s.t.run((ctx) => ctx.db.patch(s.ids[0], { role: "member" }));
+		expect(await s.t.query(internal.delivery.context, ownerClaim)).toBeNull();
+	});
+	it("suppresses the former owner's queued alerts after documented handover", async () => {
+		const s = await setup();
+		const obligationId = await s.owner.mutation(api.governance.register, {
+			organizationId: s.organizationId,
+			input: s.input,
+		});
+		const claims = await s.t.mutation(internal.delivery.claim, {});
+		const contexts = await Promise.all(
+			claims.map((claim) => s.t.query(internal.delivery.context, claim)),
+		);
+		const ownerClaim =
+			claims[
+				contexts.findIndex((context) => context?.row.membershipId === s.ids[0])
+			];
+		await s.t
+			.withIdentity({ subject: "clerk-3" })
+			.mutation(api.governance.act, {
+				organizationId: s.organizationId,
+				obligationId,
+				expectedRevision: 1,
+				command: {
+					type: "reassign",
+					ownerId: s.ids[1],
+					backupId: s.ids[2],
+					reviewerId: s.ids[3],
+					reason: "Treasurer handover recorded by the board",
+				},
+			});
+		expect(await s.t.query(internal.delivery.context, ownerClaim)).toBeNull();
+	});
 	it("rejects cross-tenant registration and membership assignments", async () => {
 		const s = await setup();
 		await expect(

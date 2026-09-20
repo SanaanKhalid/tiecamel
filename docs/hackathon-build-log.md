@@ -76,3 +76,8 @@ recruitment and production rollout are not implied by a successful local build.
   director/quorum requirements, stale heads, evidence replacement, roster changes,
   handover, immutable closure and finalized proof tampering checks. No public network
   deployment or live passkey integration is implied; real critical closure stays gated.
+- Deliverable 6: board-facing pilot-readiness checklist distinguishes observed
+  configuration from live-tested delivery, checks independent reviewer capacity and
+  missing verified contacts, and keeps secure signing explicitly blocked. Queued
+  alert eligibility is rechecked after role/assignment changes. Community workspaces
+  link to the public, limited-disclosure view without granting additional access.

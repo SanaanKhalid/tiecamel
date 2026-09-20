@@ -1,5 +1,33 @@
 # Governance operations runbook
 
+## Pilot-readiness checklist
+
+The board workspace includes a read-only checklist of registered categories,
+source confirmation, eligible independent reviewers, messaging setup, verified
+WhatsApp consent, notice inbox and worker freshness. Configuration alone is labelled
+**Needs live test**, never delivered or pilot-ready. A fresh worker heartbeat does
+not prove that a provider works. The secure-approval item remains blocked until the
+individual-signing and finalized-receipt integration is completed and reviewed.
+
+Use this sequence before relying on a pilot:
+
+1. Inventory all known obligations with the board; omissions are not discovered by
+   the app. Confirm exact deadlines against original authority notices.
+2. Check assignments leave two independent reviewers, including a director. Verify
+   the underlying people, not merely two membership records.
+3. Configure provider secrets in the deployment environment, never in chat or Git.
+   Test dedicated inbound routing and signed delivery callbacks with consenting users.
+4. Exercise an unacknowledged notice, backup escalation, failed delivery and a missing
+   worker heartbeat. Give an external outage responder a documented manual fallback.
+5. Inspect the public community view while signed out; counts are automatic, details
+   require disclosure review. Do not upload real private notices to a demo organization.
+6. Complete the secure signing gates in [the program runbook](solana-anchor-program.md).
+   Do not remove the live critical-closure block merely to make a demo appear complete.
+
+Queued notifications recheck current membership, organization, role and assignment
+before sending. A former owner who is no longer an eligible recipient will not receive
+an old queued alert. Reading a provider receipt never acknowledges a responsibility.
+
 ## Deployment boundaries
 
 Local UI and development Convex have been exercised. This is **not** a production
