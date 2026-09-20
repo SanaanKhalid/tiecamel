@@ -99,3 +99,9 @@ recruitment and production rollout are not implied by a successful local build.
   provider-independent implementation. Preserve the inactive signing adapter;
   do not provision a replacement provider or weaken individual-approval controls.
   Live critical approvals and closure remain disabled.
+- September 20 live audit/deployment: production Convex was missing the new
+  governance modules. After explicit deployment authorization, deployed current
+  functions/schema from `0674fba`, confirmed 128 functions/routes and healthy
+  production worker heartbeats. Frontend and Azure remain unreleased pending
+  release scope and production provisioning; this is not client onboarding.
+  See [the readiness audit](production-readiness-audit-2026-09-20.md).

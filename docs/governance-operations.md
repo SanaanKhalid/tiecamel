@@ -30,7 +30,9 @@ an old queued alert. Reading a provider receipt never acknowledges a responsibil
 
 ## Deployment boundaries
 
-Local UI and development Convex have been exercised. This is **not** a production
+Local UI and development Convex have been exercised. Current Convex functions were
+also deployed to production on September 20, 2026, and worker heartbeats verified;
+frontend and provider provisioning remain incomplete. This is **not** a production
 launch or a guarantee that all obligations will be discovered. The system covers
 the responsibilities registered by an organization. Critical pilot closure is
 blocked until secure individual signing is integrated and provisioned.
