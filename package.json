@@ -10,6 +10,7 @@
     "deploy:app": "pnpm governance:sdk && pnpm --filter @tiecamel/app run deploy",
     "build:demo": "pnpm governance:sdk && node scripts/build-app-demo.mjs",
     "build:operational-test": "pnpm governance:sdk && node --env-file=apps/app/.env.development.local scripts/build-app-operational-test.mjs",
+    "deploy:operational-test": "pnpm build:operational-test && pnpm --filter @tiecamel/app exec wrangler deploy --name tiecamel-app --keep-vars",
     "deploy:demo": "pnpm build:demo && pnpm --filter @tiecamel/app exec wrangler deploy --keep-vars",
     "deploy:web": "pnpm --filter @tiecamel/web run deploy",
     "dev": "pnpm governance:sdk && pnpm --parallel --filter @tiecamel/app --filter @tiecamel/web dev",

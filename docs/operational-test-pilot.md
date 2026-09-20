@@ -1,5 +1,23 @@
 # Operational test pilot
 
+## Updated deployment decision
+
+The owner explicitly selected **https://app.tiecamel.com** for operational
+testing, replacing the browser-only demo on that host. The test build now targets
+the existing `tiecamel-app` Worker; no separate test site is required. The backing
+Convex and Azure services remain development/test infrastructure, with the same
+synthetic-data and critical-closure restrictions. `admin@webnyl.com` is the sole
+approved email alert recipient. WhatsApp remains unconfigured; no phone recipient
+has been approved.
+
+Use `pnpm deploy:operational-test` for this release. It rebuilds with explicit
+development configuration and preserves Worker variables. Clerk server credentials
+must be present securely on the Worker. `pnpm deploy:demo` restores the disconnected
+browser-only demonstration if needed; it does not delete test records.
+
+The initial separate-host recommendation and verification snapshot below are
+historical; this explicit owner decision supersedes them.
+
 ## Scope and status
 
 Requested September 20, 2026: mock client identities with real services behind
