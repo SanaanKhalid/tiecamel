@@ -16,6 +16,23 @@ remain required before these adapters can serve a nonprofit.
 
 ## Modules and trust boundaries
 
+### Confirmed application origin
+
+The project owner confirmed the intended live application URL on September 20,
+2026:
+
+- Application origin: `https://app.tiecamel.com` (no trailing slash).
+- Passkey relying-party ID: `app.tiecamel.com` (hostname only).
+
+Use this exact hostname for live enrollment and signing. Do not substitute the
+parent domain, a deployment preview hostname or localhost. The existing browser
+adapter requires the enrolled relying-party ID to match the current hostname.
+Development fixtures remain separate from real enrollment. This records the
+deployment decision; it does not verify DNS, TLS, provider configuration or a
+successful live passkey ceremony, and it does not enable critical approvals.
+
+### Implementation
+
 - `packages/governance`: portable builders, account decoders, salted evidence
   commitments, two-minute approval intents and exact-message signature checks.
 - `apps/app/src/governance/passkey-approval.ts`: Turnkey WebAuthn adapter with

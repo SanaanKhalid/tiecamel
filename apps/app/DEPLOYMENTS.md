@@ -13,6 +13,10 @@ The ignored `.env.development.local` file points local development to this deplo
 
 ## Production
 
+- Intended user-facing application origin: `https://app.tiecamel.com`, confirmed
+  by the project owner on September 20, 2026. Individual passkey enrollment must
+  use relying-party ID `app.tiecamel.com`. This confirmation is not a deployment
+  or a verification of DNS, TLS or signing-provider setup.
 - Convex deployment: `resolute-tortoise-895`
 - Application URL: `https://resolute-tortoise-895.convex.cloud`
 - Dashboard: `https://dashboard.convex.dev/t/sanaan-khalid/tiecamel/resolute-tortoise-895`
