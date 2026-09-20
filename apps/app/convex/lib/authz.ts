@@ -35,6 +35,11 @@ export async function requireMembership(
 		const organization = await ctx.db.get(membership.organizationId);
 		if (!organization || organization.status === "suspended")
 			throw new Error("Organization access is suspended");
+		if (
+			organization.operationalTest &&
+			process.env.TIECAMEL_OPERATIONAL_TEST_ENABLED !== "true"
+		)
+			throw new Error("Operational testing is disabled");
 	}
 
 	return membership ? { identity, user, membership } : null;

@@ -12,6 +12,8 @@ vi.mock("@tanstack/react-router", async (original) => ({
 }));
 vi.mock("../config/client", () => ({
 	publicDemoMode: true,
+	operationalTestMode: false,
+	operationalTestConfigured: false,
 	// Deliberately inconsistent: the boundary must still avoid live providers.
 	clientConfig: {
 		demoMode: true,

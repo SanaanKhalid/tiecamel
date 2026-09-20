@@ -13,6 +13,10 @@ export type ClientConfig = {
 const env = import.meta.env;
 // A public demonstration must never inherit a developer's backend or identity.
 export const publicDemoMode = env.MODE === "public-demo";
+export const operationalTestMode = env.MODE === "operational-test";
+export const operationalTestConfigured =
+	Boolean(env.VITE_CLERK_PUBLISHABLE_KEY?.startsWith("pk_test_")) &&
+	env.VITE_CONVEX_URL === "https://careful-setter-342.convex.cloud";
 
 export const clientConfig: ClientConfig = {
 	id: env.VITE_TIECAMEL_CLIENT_ID || "demo-nonprofit",
@@ -21,7 +25,9 @@ export const clientConfig: ClientConfig = {
 	supportEmail: env.VITE_TIECAMEL_SUPPORT_EMAIL || "support@tiecamel.com",
 	landingUrl: env.VITE_TIECAMEL_LANDING_URL || "http://localhost:4321",
 	accent: env.VITE_TIECAMEL_ACCENT || "#092d2a",
-	demoMode: publicDemoMode || env.VITE_TIECAMEL_DEMO_MODE !== "false",
+	demoMode:
+		!operationalTestMode &&
+		(publicDemoMode || env.VITE_TIECAMEL_DEMO_MODE !== "false"),
 	authConfigured: !publicDemoMode && Boolean(env.VITE_CLERK_PUBLISHABLE_KEY),
 	convexConfigured: !publicDemoMode && Boolean(env.VITE_CONVEX_URL),
 };

@@ -470,6 +470,7 @@ export const community = query({
 		return {
 			organization: organization.name,
 			demo: organization.demoOnly === true,
+			operationalTest: organization.operationalTest === true,
 			summary: communitySummary(
 				obligations.flatMap((entry) => (entry.control ? [entry.control] : [])),
 				Date.now(),

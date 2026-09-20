@@ -1,3 +1,5 @@
+import { testRecipientAllowed } from "./testRecipients";
+
 export type DeliveryResult = {
 	status: "accepted" | "blocked" | "failed" | "uncertain";
 	providerId?: string;
@@ -10,6 +12,7 @@ export type DeliveryRequest = {
 	destination: string;
 	url: string;
 	optedIn: boolean;
+	operationalTest?: boolean;
 };
 export type ProviderConfig = {
 	enabled?: string;
@@ -20,6 +23,9 @@ export type ProviderConfig = {
 	whatsappFrom?: string;
 	templateSid?: string;
 	callbackBase?: string;
+	testEnabled?: string;
+	testRecipients?: string;
+	testWhatsappTemplateSid?: string;
 };
 /** No private notice title, tax amount, source text or attachment leaves the secure app. */
 export async function sendAlert(
@@ -27,6 +33,19 @@ export async function sendAlert(
 	config: ProviderConfig,
 	fetcher: typeof fetch = fetch,
 ): Promise<DeliveryResult> {
+	if (
+		request.operationalTest &&
+		(config.testEnabled !== "true" ||
+			!testRecipientAllowed(
+				request.channel,
+				request.destination,
+				config.testRecipients,
+			))
+	)
+		return {
+			status: "blocked",
+			error: "Operational testing is disabled or recipient is not allowlisted",
+		};
 	if (config.enabled !== "true")
 		return {
 			status: "blocked",
@@ -54,15 +73,18 @@ export async function sendAlert(
 		body = JSON.stringify({
 			from: config.emailFrom,
 			to: [request.destination],
-			subject: "TieCamel: a board responsibility needs attention",
-			text: `A registered responsibility needs your attention. Sign in to review the current notice, owner and actual deadline.\n\n${request.url}\n\nReceiving or reading this alert does not acknowledge or resolve the responsibility.`,
+			subject: `${request.operationalTest ? "[TEST] " : ""}TieCamel: a board responsibility needs attention`,
+			text: `${request.operationalTest ? "Operational test only — synthetic responsibility, not a real nonprofit notice.\n\n" : ""}A registered responsibility needs your attention. Sign in to review the current notice, owner and actual deadline.\n\n${request.url}\n\nReceiving or reading this alert does not acknowledge or resolve the responsibility.`,
 		});
 	} else {
+		const templateSid = request.operationalTest
+			? config.testWhatsappTemplateSid
+			: config.templateSid;
 		if (
 			!config.twilioSid ||
 			!config.twilioToken ||
 			!config.whatsappFrom ||
-			!config.templateSid ||
+			!templateSid ||
 			!config.callbackBase
 		)
 			return {
@@ -83,7 +105,7 @@ export async function sendAlert(
 		body = new URLSearchParams({
 			From: `whatsapp:${config.whatsappFrom}`,
 			To: `whatsapp:${request.destination}`,
-			ContentSid: config.templateSid,
+			ContentSid: templateSid,
 			ContentVariables: JSON.stringify({ "1": request.url }),
 			StatusCallback: `${config.callbackBase.replace(/\/$/, "")}/webhooks/twilio?delivery=${encodeURIComponent(request.id)}`,
 		}).toString();

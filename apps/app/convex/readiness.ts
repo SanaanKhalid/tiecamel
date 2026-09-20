@@ -61,6 +61,7 @@ export const status = query({
 		);
 		return pilotReadiness({
 			demo: organization?.demoOnly === true,
+			operationalTest: organization?.operationalTest === true,
 			roster,
 			cases: obligations.flatMap((row) => (row.control ? [row.control] : [])),
 			whatsappMemberIds: contacts
@@ -84,7 +85,9 @@ export const status = query({
 						process.env.TWILIO_ACCOUNT_SID &&
 						process.env.TWILIO_AUTH_TOKEN &&
 						process.env.TWILIO_WHATSAPP_FROM &&
-						process.env.TWILIO_ALERT_TEMPLATE_SID &&
+						(organization?.operationalTest
+							? process.env.TWILIO_TEST_ALERT_TEMPLATE_SID
+							: process.env.TWILIO_ALERT_TEMPLATE_SID) &&
 						process.env.TWILIO_VERIFY_SERVICE_SID,
 				),
 				inbound: Boolean(

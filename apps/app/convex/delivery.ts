@@ -12,6 +12,7 @@ import {
 } from "./_generated/server";
 import { nextDeliveryStatus, sendAlert } from "./lib/notificationProviders";
 import { requirePlatformSession } from "./lib/platformAuth";
+import { testRecipientAllowed } from "./lib/testRecipients";
 
 const scope = {
 	organizationId: v.id("organizations"),
@@ -148,7 +149,13 @@ export const context = internalQuery({
 			row.channel === "email"
 				? !!user.email
 				: !!contact?.whatsappConsentedAt && !!contact?.whatsappVerifiedAt;
-		return { row, destination, optedIn, slug: organization.slug };
+		return {
+			row,
+			destination,
+			optedIn,
+			slug: organization.slug,
+			operationalTest: organization.operationalTest === true,
+		};
 	},
 });
 export const finish = internalMutation({
@@ -243,10 +250,17 @@ export const dispatch = internalAction({
 						channel: context.row.channel,
 						destination: context.destination,
 						optedIn: context.optedIn,
+						operationalTest: context.operationalTest,
 						url: `${process.env.TIECAMEL_APP_URL ?? ""}/${encodeURIComponent(context.slug)}/responsibilities`,
 					},
 					{
 						enabled: process.env.TIECAMEL_ALERT_DELIVERY_ENABLED,
+						testEnabled: process.env.TIECAMEL_OPERATIONAL_TEST_ENABLED,
+						testRecipients:
+							context.row.channel === "email"
+								? process.env.TIECAMEL_TEST_EMAIL_RECIPIENTS
+								: process.env.TIECAMEL_TEST_WHATSAPP_RECIPIENTS,
+						testWhatsappTemplateSid: process.env.TWILIO_TEST_ALERT_TEMPLATE_SID,
 						resendKey: process.env.RESEND_API_KEY,
 						emailFrom: process.env.TIECAMEL_ALERT_FROM,
 						twilioSid: process.env.TWILIO_ACCOUNT_SID,
@@ -376,6 +390,8 @@ export const myContact = query({
 			.unique();
 		return {
 			membershipId: session.membership._id,
+			operationalTest:
+				(await ctx.db.get(args.organizationId))?.operationalTest === true,
 			email: session.user.email,
 			contact,
 			demo: "demoSessionId" in session,
@@ -428,6 +444,16 @@ export const verifyPhone = action({
 		const phone = current.contact?.whatsappNumber;
 		if (!phone || !current.contact?.whatsappConsentedAt)
 			throw new Error("Opt in with your own phone number first");
+		if (
+			current.operationalTest &&
+			(process.env.TIECAMEL_OPERATIONAL_TEST_ENABLED !== "true" ||
+				!testRecipientAllowed(
+					"whatsapp",
+					phone,
+					process.env.TIECAMEL_TEST_WHATSAPP_RECIPIENTS,
+				))
+		)
+			throw new Error("Test phone recipient is not allowlisted");
 		const sid = process.env.TWILIO_ACCOUNT_SID,
 			token = process.env.TWILIO_AUTH_TOKEN,
 			service = process.env.TWILIO_VERIFY_SERVICE_SID;

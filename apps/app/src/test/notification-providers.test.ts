@@ -20,6 +20,76 @@ const config = {
 	emailFrom: "alerts@example.invalid",
 };
 describe("notification provider boundaries", () => {
+	it("blocks test delivery to unlisted recipients even with live credentials", async () => {
+		const fetcher = vi.fn();
+		for (const testRecipients of [
+			undefined,
+			"*@example.invalid",
+			"someone@example.invalid",
+		]) {
+			expect(
+				(
+					await sendAlert(
+						{ ...request, operationalTest: true },
+						{ ...config, testEnabled: "true", testRecipients },
+						fetcher,
+					)
+				).status,
+			).toBe("blocked");
+		}
+		expect(
+			(
+				await sendAlert(
+					{ ...request, operationalTest: true },
+					{ ...config, testRecipients: request.destination },
+					fetcher,
+				)
+			).status,
+		).toBe("blocked");
+		expect(fetcher).not.toHaveBeenCalled();
+	});
+	it("labels allowlisted test email and keeps provider acceptance distinct from delivery", async () => {
+		const fetcher = vi
+			.fn()
+			.mockResolvedValue(new Response(JSON.stringify({ id: "test-email" })));
+		const result = await sendAlert(
+			{ ...request, operationalTest: true },
+			{
+				...config,
+				testEnabled: "true",
+				testRecipients: ` other@example.invalid, ${request.destination.toUpperCase()} `,
+			},
+			fetcher,
+		);
+		expect(result.status).toBe("accepted");
+		const message = JSON.parse(fetcher.mock.calls[0][1].body);
+		expect(message.subject).toMatch(/^\[TEST\]/);
+		expect(message.text).toContain("not a real nonprofit notice");
+	});
+	it("requires a separate test WhatsApp template and an exact phone allowlist", async () => {
+		const fetcher = vi.fn();
+		const result = await sendAlert(
+			{
+				...request,
+				channel: "whatsapp",
+				destination: "+15551234567",
+				operationalTest: true,
+			},
+			{
+				...config,
+				testEnabled: "true",
+				testRecipients: "+15551234567",
+				twilioSid: "AC123",
+				twilioToken: "test",
+				whatsappFrom: "+15557654321",
+				templateSid: "production-template",
+				callbackBase: "https://test.convex.site",
+			},
+			fetcher,
+		);
+		expect(result.status).toBe("blocked");
+		expect(fetcher).not.toHaveBeenCalled();
+	});
 	it("does not send without explicit enablement, credentials or consent", async () => {
 		const fetcher = vi.fn();
 		expect((await sendAlert(request, {}, fetcher)).status).toBe("blocked");

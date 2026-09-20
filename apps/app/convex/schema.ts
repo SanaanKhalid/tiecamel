@@ -123,6 +123,7 @@ const publicationStatus = v.union(
 export default defineSchema({
 	organizations: defineTable({
 		demoOnly: v.optional(v.boolean()),
+		operationalTest: v.optional(v.boolean()),
 		name: v.string(),
 		slug: v.string(),
 		publicSlug: v.optional(v.string()),

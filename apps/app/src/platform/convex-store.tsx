@@ -1,3 +1,4 @@
+import { UserButton, useAuth } from "@clerk/tanstack-react-start";
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { type ReactNode, useEffect, useRef, useState } from "react";
@@ -58,12 +59,41 @@ function AuthenticatedConvexPlatformProvider({
 	onSwitchDemoMember,
 }: ConvexPlatformProviderProps) {
 	const convexAuth = useConvexAuth();
+	const clerkAuth = useAuth();
 	const choices = useQuery(
 		api.organizations.choices,
 		convexAuth.isAuthenticated ? {} : "skip",
 	);
 	const select = useMutation(api.organizations.select);
 	const [selectionError, setSelectionError] = useState("");
+	if (
+		clerkAuth.isSignedIn &&
+		!convexAuth.isLoading &&
+		!convexAuth.isAuthenticated
+	)
+		return (
+			<main className="p-8" role="alert">
+				<UserButton />
+				<h1>Backend sign-in unavailable</h1>
+				<p>
+					Your sign-in has not authenticated with the records service. Check the
+					Clerk Convex JWT template and issuer configuration. No sample data has
+					been substituted.
+				</p>
+			</main>
+		);
+	if (convexAuth.isAuthenticated && choices?.length === 0)
+		return (
+			<main className="p-8">
+				<UserButton />
+				<h1>Workspace access required</h1>
+				<p>
+					This account has no available organization membership. Ask the
+					operator to provision your assigned test account; signing up does not
+					grant access.
+				</p>
+			</main>
+		);
 	if (convexAuth.isAuthenticated && choices === undefined)
 		return (
 			<main className="p-8" aria-busy="true">

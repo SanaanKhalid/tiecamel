@@ -25,6 +25,7 @@ export async function requirePlatformSession(
 		const organization = await ctx.db.get(demo.organizationId);
 		if (
 			!organization?.demoOnly ||
+			organization.operationalTest ||
 			(organizationId && organizationId !== demo.organizationId)
 		)
 			throw new Error("Demo sessions cannot access pilot organizations");

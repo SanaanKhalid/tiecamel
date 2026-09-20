@@ -20,7 +20,10 @@ export const choices = query({
 					.filter((entry) => entry.status === "active")
 					.map(async (entry) => {
 						const organization = await ctx.db.get(entry.organizationId);
-						return organization && organization.status !== "suspended"
+						return organization &&
+							organization.status !== "suspended" &&
+							(!organization.operationalTest ||
+								process.env.TIECAMEL_OPERATIONAL_TEST_ENABLED === "true")
 							? {
 									id: organization._id,
 									name: organization.name,
@@ -53,7 +56,9 @@ export const select = mutation({
 			!membership ||
 			membership.status !== "active" ||
 			!organization ||
-			organization.status === "suspended"
+			organization.status === "suspended" ||
+			(organization.operationalTest &&
+				process.env.TIECAMEL_OPERATIONAL_TEST_ENABLED !== "true")
 		)
 			throw new Error("Organization access is unavailable");
 		await ctx.db.patch(user._id, {

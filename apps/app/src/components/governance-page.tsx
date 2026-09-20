@@ -1468,6 +1468,12 @@ function LivePublicGovernance({
 	return (
 		<div className="mx-auto max-w-4xl space-y-5 p-6">
 			<h1 className="text-2xl font-semibold">{result.organization}</h1>
+			{result.operationalTest && (
+				<p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+					Operational test data and synthetic identities — not a real
+					nonprofit's compliance report.
+				</p>
+			)}
 			{result.demo && (
 				<p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
 					Demonstration data — not a real organization's compliance report.

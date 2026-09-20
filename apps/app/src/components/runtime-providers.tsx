@@ -10,12 +10,50 @@ import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-import { clientConfig, publicDemoMode, runtimeConfig } from "../config/client";
+import {
+	clientConfig,
+	operationalTestConfigured,
+	operationalTestMode,
+	publicDemoMode,
+	runtimeConfig,
+} from "../config/client";
 import { ConvexPlatformProvider } from "../platform/convex-store";
 import { PlatformProvider } from "../platform/store";
 import { PublicDemoBoundary } from "./public-demo-boundary";
 
 export function RuntimeProviders({ children }: { children: React.ReactNode }) {
+	if (operationalTestMode) {
+		return (
+			<>
+				<aside
+					role="note"
+					className="border-b border-amber-300 bg-amber-50 px-6 py-3 text-sm text-amber-950"
+				>
+					Operational test pilot — test identities, persistent records and real
+					configured services. Use synthetic documents only. Alerts are
+					recipient-restricted. Not for real nonprofit operations; critical
+					closure remains disabled.
+				</aside>
+				{operationalTestConfigured ? (
+					<ConfiguredRuntimeProviders>{children}</ConfiguredRuntimeProviders>
+				) : (
+					<main className="p-8" role="alert">
+						Test pilot unavailable: development sign-in and backend
+						configuration are required. No sample workspace has been
+						substituted.
+					</main>
+				)}
+			</>
+		);
+	}
+	return <ConfiguredRuntimeProviders>{children}</ConfiguredRuntimeProviders>;
+}
+
+function ConfiguredRuntimeProviders({
+	children,
+}: {
+	children: React.ReactNode;
+}) {
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
 	});

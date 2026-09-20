@@ -12,7 +12,14 @@ const config = defineConfig(({ mode }) => ({
 	plugins: [
 		...(mode === "test"
 			? []
-			: [cloudflare({ viteEnvironment: { name: "ssr" } })]),
+			: [
+					cloudflare({
+						viteEnvironment: { name: "ssr" },
+						...(mode === "operational-test"
+							? { configPath: "wrangler.operational-test.jsonc" }
+							: {}),
+					}),
+				]),
 		devtools(),
 		tailwindcss(),
 		tanstackStart(),

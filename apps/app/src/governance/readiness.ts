@@ -9,6 +9,7 @@ export type ReadinessCheck = {
 };
 export type ReadinessInput = {
 	demo: boolean;
+	operationalTest?: boolean;
 	roster: Person[];
 	cases: Responsibility[];
 	whatsappMemberIds: string[];
@@ -58,6 +59,18 @@ export function pilotReadiness(input: ReadinessInput) {
 		staff.some((person) => person.role === "board") &&
 		blockedCases === 0;
 	const checks: ReadinessCheck[] = [
+		...(input.operationalTest
+			? [
+					{
+						id: "test-identities",
+						title: "Operational test identities",
+						state: "attention" as const,
+						detail:
+							"Synthetic test users do not establish real board-member identity or independent human review. Outbound recipients are restricted by the server allowlist.",
+						next: "Use synthetic documents and consenting test recipients only. Verify each external service end to end before claiming it is operational.",
+					},
+				]
+			: []),
 		{
 			id: "inventory",
 			title: "Responsibility inventory",
@@ -75,7 +88,7 @@ export function pilotReadiness(input: ReadinessInput) {
 		{
 			id: "people",
 			title: "Independent review capacity",
-			state: hasBoard ? "observed" : "attention",
+			state: hasBoard && !input.operationalTest ? "observed" : "attention",
 			detail: `${people.size} distinct active staff identities; ${blockedCases} critical cases lack two eligible reviewers including a director.`,
 			next: "Confirm real people and roles. Owners and evidence submitters cannot review their own closure; separate submitters may require a fourth person.",
 		},
@@ -139,6 +152,7 @@ export function pilotReadiness(input: ReadinessInput) {
 	];
 	return {
 		demo: input.demo,
+		operationalTest: input.operationalTest === true,
 		liveCriticalClosureReady: false as const,
 		checks,
 		categories: (["tax", "filing", "insurance", "grant", "other"] as const).map(

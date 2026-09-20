@@ -1,6 +1,6 @@
 import { Show, SignInButton, SignUpButton } from "@clerk/tanstack-react-start";
 import { ShieldCheck, Users } from "lucide-react";
-import { clientConfig } from "../config/client";
+import { clientConfig, operationalTestMode } from "../config/client";
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
 	if (clientConfig.demoMode || !clientConfig.authConfigured) return children;
@@ -35,7 +35,9 @@ function SignInScreen() {
 					{clientConfig.shortName}
 				</p>
 				<h1 className="mt-3 text-4xl font-semibold tracking-[-0.04em]">
-					Shared accountability starts with verified access.
+					{operationalTestMode
+						? "Sign in with your assigned test account."
+						: "Shared accountability starts with verified access."}
 				</h1>
 				<p className="mt-4 leading-7 text-slate-600">
 					Sign in to manage repository issues, review proposed records, and
@@ -50,14 +52,16 @@ function SignInScreen() {
 							Sign in
 						</button>
 					</SignInButton>
-					<SignUpButton mode="modal">
-						<button
-							type="button"
-							className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
-						>
-							Request access
-						</button>
-					</SignUpButton>
+					{!operationalTestMode && (
+						<SignUpButton mode="modal">
+							<button
+								type="button"
+								className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
+							>
+								Request access
+							</button>
+						</SignUpButton>
+					)}
 				</div>
 				<div className="mt-7 flex items-center gap-3 border-t border-slate-100 pt-6 text-sm text-slate-500">
 					<Users className="size-4 text-teal-700" /> Access is scoped to your
