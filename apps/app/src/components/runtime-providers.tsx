@@ -10,14 +10,22 @@ import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-import { clientConfig, runtimeConfig } from "../config/client";
+import { clientConfig, publicDemoMode, runtimeConfig } from "../config/client";
 import { ConvexPlatformProvider } from "../platform/convex-store";
 import { PlatformProvider } from "../platform/store";
+import { PublicDemoBoundary } from "./public-demo-boundary";
 
 export function RuntimeProviders({ children }: { children: React.ReactNode }) {
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
 	});
+	if (publicDemoMode) {
+		return (
+			<PlatformProvider>
+				<PublicDemoBoundary pathname={pathname}>{children}</PublicDemoBoundary>
+			</PlatformProvider>
+		);
+	}
 	if (import.meta.env.DEV && pathname === "/dev/approval-review")
 		return <>{children}</>;
 	if (pathname.startsWith("/public/") || pathname.startsWith("/verify/")) {

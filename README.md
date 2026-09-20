@@ -60,6 +60,20 @@ pnpm dev:app
 pnpm dev:web
 ```
 
+### Public demonstration release
+
+`pnpm build:demo` builds the latest interface in the explicit `public-demo` mode.
+`pnpm deploy:demo` builds and publishes that demo to the existing app Worker.
+This mode forces browser-only sample data, disables Convex/Clerk connections even
+if local environment files contain credentials, and labels every page as a demo.
+The landing page opens the responsibility overview. Live proof verification is
+unavailable; client onboarding, server uploads, alert delivery and on-chain
+approvals are not enabled. Use only synthetic information in this demonstration.
+
+Use this explicit demo command while the hosted app is a demonstration; the normal
+`deploy:app` command does not provide this isolation policy. Do not treat a demo
+deployment as completion of the production onboarding gates.
+
 ## Client environments
 
 The app can run without credentials using the isolated ICN preview dataset. To

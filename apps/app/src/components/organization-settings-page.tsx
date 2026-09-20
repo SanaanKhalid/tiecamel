@@ -10,7 +10,7 @@ import {
 	Users,
 } from "lucide-react";
 import { useState } from "react";
-import { clientConfig } from "../config/client";
+import { clientConfig, publicDemoMode } from "../config/client";
 import { usePlatform } from "../platform/store";
 import { Avatar } from "./platform-ui";
 
@@ -321,13 +321,21 @@ export function OrganizationSettingsPage() {
 							/>
 							<Service
 								title="Managed record storage"
-								ready
-								detail="Private uploads and immutable accepted records"
+								ready={!publicDemoMode}
+								detail={
+									publicDemoMode
+										? "Browser-only sample records; server uploads disabled"
+										: "Private uploads and immutable accepted records"
+								}
 							/>
 							<Service
 								title="Document processing"
 								ready={false}
-								detail="Scanning, extraction, comparison, and verification"
+								detail={
+									publicDemoMode
+										? "Not connected in this demo"
+										: "Scanning, extraction, comparison, and verification"
+								}
 							/>
 						</div>
 					</section>

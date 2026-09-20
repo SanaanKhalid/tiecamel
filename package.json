@@ -8,6 +8,8 @@
     "convex:dev": "pnpm --filter @tiecamel/app convex:dev",
     "convex:deploy": "pnpm --filter @tiecamel/app convex:deploy",
     "deploy:app": "pnpm governance:sdk && pnpm --filter @tiecamel/app run deploy",
+    "build:demo": "pnpm governance:sdk && node scripts/build-app-demo.mjs",
+    "deploy:demo": "pnpm build:demo && pnpm --filter @tiecamel/app exec wrangler deploy --keep-vars",
     "deploy:web": "pnpm --filter @tiecamel/web run deploy",
     "dev": "pnpm governance:sdk && pnpm --parallel --filter @tiecamel/app --filter @tiecamel/web dev",
     "dev:app": "pnpm governance:sdk && pnpm --filter @tiecamel/app dev",

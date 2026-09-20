@@ -1,3 +1,4 @@
+import { publicDemoMode } from "../config/client";
 import type { PlatformData } from "./types";
 
 const now = "2026-07-24T16:00:00.000Z";
@@ -6,8 +7,10 @@ export const platformSeed: PlatformData = {
 	organization: {
 		id: "org-icn",
 		slug: "icn",
-		name: "Islamic Center of Naperville",
-		shortName: "ICN",
+		name: publicDemoMode
+			? "TieCamel Demo Foundation"
+			: "Islamic Center of Naperville",
+		shortName: publicDemoMode ? "Demo Foundation" : "ICN",
 		description:
 			"Shared governance, compliance, funding, and public accountability records.",
 	},

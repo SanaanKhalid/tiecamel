@@ -6,6 +6,7 @@ import {
 	useMemo,
 	useState,
 } from "react";
+import { publicDemoMode } from "../config/client";
 import { platformSeed } from "./seed";
 import type {
 	ChangeRequest,
@@ -114,7 +115,9 @@ export type PlatformStore = PlatformData & {
 };
 
 export const PlatformContext = createContext<PlatformStore | null>(null);
-const DEMO_STORAGE_KEY = "tiecamel.demo-workspace.v4";
+const DEMO_STORAGE_KEY = publicDemoMode
+	? "tiecamel.public-demo-workspace.v1"
+	: "tiecamel.demo-workspace.v4";
 const DEMO_STORAGE_VERSION = 4;
 
 export function PlatformProvider({ children }: { children: ReactNode }) {
