@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { RuntimeProviders } from "../components/runtime-providers";
 import { usePlatform } from "../platform/store";
@@ -32,6 +33,17 @@ function SampleWorkspace() {
 	return <p>{platform.organization.name}</p>;
 }
 describe("public demo runtime boundary", () => {
+	it("does not server-render browser-specific sample clocks or saved data", () => {
+		route.pathname = "/";
+		const html = renderToString(
+			<RuntimeProviders>
+				<SampleWorkspace />
+			</RuntimeProviders>,
+		);
+		expect(html).toContain("Loading the sample workspace");
+		expect(html).toContain("Interactive demo");
+		expect(html).not.toContain("TieCamel Demo Foundation");
+	});
 	it.each([
 		"/",
 		"/icn/overview",
