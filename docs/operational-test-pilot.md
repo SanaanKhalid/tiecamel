@@ -18,7 +18,52 @@ browser-only demonstration if needed; it does not delete test records.
 The initial separate-host recommendation and verification snapshot below are
 historical; this explicit owner decision supersedes them.
 
-## Scope and status
+### Activated on the main site — September 20, 2026
+
+- Frontend source `7d04d03`, Worker version
+  `0900ea7b-5108-40a3-8ae0-d0776d19e055`, is live at `app.tiecamel.com`.
+- Operational-test backend functions deployed to `careful-setter-342` with type
+  checking. The main host deliberately uses test infrastructure; this is not a
+  claim that a production nonprofit service is ready.
+- Development Clerk server credentials configured securely on the existing
+  Worker. The owner approved `admin@webnyl.com` for sign-in as well as alerts.
+- Created `[TEST] TieCamel Test Foundation` (`test-tiecamel`) with an empty
+  restricted Compliance repository and six distinct Clerk identities. The owner
+  signs in with the approved email. The other five are synthetic operator-test
+  identities with reserved example addresses, not publicly shared test logins.
+  Their alert destinations all map to the approved owner inbox.
+- Enabled operational testing and configured the exact email recipient allowlist,
+  main-site app URL and development callback base. Disabled legacy anonymous demo
+  sessions. Outbound delivery remains explicitly **disabled**: Resend/Twilio
+  credentials are absent. No alert email or WhatsApp message has been sent.
+- Live signed Clerk JWT queries succeeded for all six identities. Five staff roles
+  see the test repository; the member role sees none. Temporary operator-created
+  sessions were revoked after each check. This verifies backend authentication
+  and repository visibility, not a human OTP login or the full records workflow.
+- Main-site browser shows the test warning and opens the real Clerk development
+  sign-in modal without console errors. Both worker heartbeats were current.
+- 134 tests, TypeScript and the test build passed. Two opt-in local-validator tests
+  were not run. No document-processing, email-delivery, backup-restore or on-chain
+  approval success is claimed for this activation.
+
+Operator utilities (load development credentials securely):
+
+```sh
+node --env-file=apps/app/.env.development.local scripts/provision-operational-test.mjs admin@webnyl.com
+node --env-file=apps/app/.env.development.local scripts/check-operational-test.mjs
+```
+
+Provisioning now exists: do not rerun the first command expecting a reset. It
+refuses to overwrite an existing tenant. The second command creates short-lived
+test sessions, checks the live tenant/repository boundary, and revokes its sessions.
+
+Next external prerequisite for real email alerts is an email delivery service.
+The existing adapter uses Resend; another provider requires an adapter and receipt
+verification work. Twilio is needed only for the currently implemented WhatsApp
+channel/phone verification, not for core sign-in or document storage. No provider
+account or paid service was created during activation.
+
+## Initial implementation snapshot
 
 Requested September 20, 2026: mock client identities with real services behind
 them. This is a separate stage from the browser-only public demo and from real

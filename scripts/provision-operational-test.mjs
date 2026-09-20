@@ -24,7 +24,7 @@ if (instance.environment_type !== "development") throw new Error("Not a developm
 const people = [];
 for (const role of ["owner", "finance", "secretary", "reviewer", "board", "member"]) {
   const externalId = `tiecamel-operational-test-v1-${role}`;
-  const email = role === "owner" ? ownerEmail : `tiecamel-operational-test-${role}@example.invalid`;
+  const email = role === "owner" ? ownerEmail : `tiecamel-operational-test-${role}@example.com`;
   const matches = await clerk(`/users?email_address=${encodeURIComponent(email)}`);
   if (!Array.isArray(matches) || matches.length > 1) throw new Error("Ambiguous test identity");
   let user = matches[0];
@@ -34,7 +34,7 @@ for (const role of ["owner", "finance", "secretary", "reviewer", "board", "membe
     private_metadata: { tiecamelOperationalTest: true, role },
   });
   // All synthetic officer notifications go to the owner's explicitly allowed test inbox.
-  // Non-owner Clerk accounts have non-routable addresses, no public test OTP, and
+  // Non-owner Clerk accounts use reserved example addresses, no public test OTP, and
   // are used through operator-created test sessions, not public role switching.
   people.push({ clerkUserId: user.id, name: `Test ${role}`, email: ownerEmail, role });
   console.log(`Prepared test ${role} identity`);
