@@ -15,6 +15,7 @@ import { Route as AppInboxRouteImport } from './routes/_app.inbox'
 import { Route as AppSearchRouteImport } from './routes/_app.search'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppWorkRouteImport } from './routes/_app.work'
+import { Route as DevApprovalReviewRouteImport } from './routes/dev.approval-review'
 import { Route as VerifyCommitHashRouteImport } from './routes/verify.$commitHash'
 import { Route as AppOrganizationIndexRouteImport } from './routes/_app.$organization.index'
 import { Route as AppOrganizationApprovalsRouteImport } from './routes/_app.$organization.approvals'
@@ -64,6 +65,11 @@ const AppWorkRoute = AppWorkRouteImport.update({
   id: '/work',
   path: '/work',
   getParentRoute: () => AppRoute,
+} as any)
+const DevApprovalReviewRoute = DevApprovalReviewRouteImport.update({
+  id: '/dev/approval-review',
+  path: '/dev/approval-review',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const VerifyCommitHashRoute = VerifyCommitHashRouteImport.update({
   id: '/verify/$commitHash',
@@ -189,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRoute
   '/work': typeof AppWorkRoute
+  '/dev/approval-review': typeof DevApprovalReviewRoute
   '/verify/$commitHash': typeof VerifyCommitHashRoute
   '/$organization/approvals': typeof AppOrganizationApprovalsRoute
   '/$organization/community': typeof AppOrganizationCommunityRoute
@@ -215,6 +222,7 @@ export interface FileRoutesByTo {
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRoute
   '/work': typeof AppWorkRoute
+  '/dev/approval-review': typeof DevApprovalReviewRoute
   '/verify/$commitHash': typeof VerifyCommitHashRoute
   '/': typeof AppIndexRoute
   '/$organization/approvals': typeof AppOrganizationApprovalsRoute
@@ -244,6 +252,7 @@ export interface FileRoutesById {
   '/_app/search': typeof AppSearchRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/work': typeof AppWorkRoute
+  '/dev/approval-review': typeof DevApprovalReviewRoute
   '/verify/$commitHash': typeof VerifyCommitHashRoute
   '/_app/': typeof AppIndexRoute
   '/_app/$organization/approvals': typeof AppOrganizationApprovalsRoute
@@ -274,6 +283,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/work'
+    | '/dev/approval-review'
     | '/verify/$commitHash'
     | '/$organization/approvals'
     | '/$organization/community'
@@ -300,6 +310,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/work'
+    | '/dev/approval-review'
     | '/verify/$commitHash'
     | '/'
     | '/$organization/approvals'
@@ -328,6 +339,7 @@ export interface FileRouteTypes {
     | '/_app/search'
     | '/_app/settings'
     | '/_app/work'
+    | '/dev/approval-review'
     | '/verify/$commitHash'
     | '/_app/'
     | '/_app/$organization/approvals'
@@ -353,6 +365,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  DevApprovalReviewRoute: typeof DevApprovalReviewRoute
   VerifyCommitHashRoute: typeof VerifyCommitHashRoute
   PublicOrganizationRepositoryRoute: typeof PublicOrganizationRepositoryRoute
   PublicOrganizationCommunityRoute: typeof PublicOrganizationCommunityRoute
@@ -402,6 +415,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/work'
       preLoaderRoute: typeof AppWorkRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/dev/approval-review': {
+      id: '/dev/approval-review'
+      path: '/dev/approval-review'
+      fullPath: '/dev/approval-review'
+      preLoaderRoute: typeof DevApprovalReviewRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/verify/$commitHash': {
       id: '/verify/$commitHash'
@@ -605,6 +625,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  DevApprovalReviewRoute: DevApprovalReviewRoute,
   VerifyCommitHashRoute: VerifyCommitHashRoute,
   PublicOrganizationRepositoryRoute: PublicOrganizationRepositoryRoute,
   PublicOrganizationCommunityRoute: PublicOrganizationCommunityRoute,

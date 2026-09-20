@@ -30,6 +30,9 @@
     "@tanstack/react-router-ssr-query": "1.167.1",
     "@tanstack/react-start": "1.168.32",
     "@tanstack/router-plugin": "1.168.23",
+    "@tiecamel/governance": "workspace:^",
+    "@turnkey/http": "6.5.0",
+    "@turnkey/webauthn-stamper": "0.6.0",
     "convex": "^1.42.3",
     "lucide-react": "^0.545.0",
     "react": "^19.2.0",
@@ -39,6 +42,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.4.5",
     "@cloudflare/vite-plugin": "^1.46.0",
+    "@solana/web3.js": "1.98.4",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/devtools-vite": "0.8.1",
     "@tanstack/router-cli": "1.167.21",

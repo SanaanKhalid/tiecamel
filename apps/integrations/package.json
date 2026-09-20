@@ -15,6 +15,8 @@
     "@azure/service-bus": "^7.9.5",
     "@azure/storage-blob": "^12.30.0",
     "@solana/web3.js": "^1.98.4",
+    "@tiecamel/governance": "workspace:^",
+    "bs58": "6.0.0",
     "google-auth-library": "^10.5.0"
   },
   "devDependencies": {

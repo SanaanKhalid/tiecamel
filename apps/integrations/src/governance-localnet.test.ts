@@ -16,11 +16,18 @@ import {
 	decodeCase,
 	GOVERNANCE_PROGRAM_ID,
 	initializeBoard,
+	inspectApprovalIntent,
 	privateEvidenceCommitment,
 	reassignCase,
 	registerCase,
 	reportingCheckpoint,
 } from "./governance-client.js";
+import {
+	type ApprovalBinding,
+	prepareApprovalIntent,
+	reconcileApprovalReceipt,
+	sponsorAndSubmitApproval,
+} from "./governance-signing.js";
 import {
 	type CriticalProofBundle,
 	verifyCriticalProof,
@@ -29,6 +36,162 @@ import {
 // Explicit opt-in: this suite spends only local-validator SOL, never a public network balance.
 const rpcUrl = process.env.TIECAMEL_SOLANA_TEST_RPC;
 describe.runIf(Boolean(rpcUrl))("deployed governance program", () => {
+	it("sponsors an exact individually signed approval and reconciles its finalized receipt", async () => {
+		if (
+			!rpcUrl ||
+			!["127.0.0.1", "localhost", "[::1]"].includes(new URL(rpcUrl).hostname)
+		)
+			throw new Error("Loopback test RPC required");
+		const rpc = new Connection(rpcUrl, "confirmed");
+		const [service, owner, reviewer, director] = Array.from({ length: 4 }, () =>
+			Keypair.generate(),
+		);
+		const people = [owner, reviewer, director];
+		const members = people.map((person, i) => ({
+			key: person.publicKey,
+			identity: randomBytes(32),
+			director: i === 2,
+		}));
+		const chainId = randomBytes(32),
+			caseId = randomBytes(32),
+			board = boardAddress(chainId),
+			caseKey = caseAddress(board, caseId),
+			commitment = randomBytes(32);
+		const airdrop = await rpc.requestAirdrop(service.publicKey, 2_000_000_000);
+		await rpc.confirmTransaction(
+			{ signature: airdrop, ...(await rpc.getLatestBlockhash()) },
+			"confirmed",
+		);
+		const send = (ix: TransactionInstruction, signers: Keypair[] = []) =>
+			sendAndConfirmTransaction(
+				rpc,
+				new Transaction().add(ix),
+				[service, ...signers],
+				{ commitment: "confirmed" },
+			);
+		const boardState = async () => {
+			const account = await rpc.getAccountInfo(board);
+			if (!account) throw new Error("No board");
+			return decodeBoard(account.data);
+		};
+		await send(
+			initializeBoard({
+				chainId,
+				members,
+				threshold: 2,
+				service: service.publicKey,
+				payer: service.publicKey,
+				quorum: [reviewer.publicKey, director.publicKey],
+			}),
+			[reviewer, director],
+		);
+		await send(
+			registerCase({
+				board,
+				caseId,
+				ownerIdentity: members[0].identity,
+				parent: (await boardState()).head,
+				noticeCommitment: randomBytes(32),
+				actor: service.publicKey,
+				payer: service.publicKey,
+			}),
+		);
+		const proposal = await send(
+			caseAction("propose_resolution", {
+				board,
+				case: caseKey,
+				actor: owner.publicKey,
+				revision: 1n,
+				parent: (await boardState()).head,
+				commitment,
+			}),
+			[owner],
+		);
+		await rpc.confirmTransaction(
+			{ signature: proposal, ...(await rpc.getLatestBlockhash()) },
+			"finalized",
+		);
+		const network = {
+			network: "localnet" as const,
+			genesisHash: await rpc.getGenesisHash(),
+			feePayer: service.publicKey.toBase58(),
+		};
+		const binding: ApprovalBinding = {
+			organizationId: "test-org",
+			membershipId: "test-reviewer",
+			userId: "person-reviewer",
+			obligationId: "test-case",
+			appRevision: 8,
+			signerIdentity: members[1].identity.toString("hex"),
+			signer: reviewer.publicKey.toBase58(),
+			active: true,
+			chainId: chainId.toString("hex"),
+			caseId: caseId.toString("hex"),
+			evidenceCommitment: commitment.toString("hex"),
+		};
+		await expect(
+			prepareApprovalIntent(
+				rpc,
+				{
+					...binding,
+					signer: owner.publicKey.toBase58(),
+					signerIdentity: members[0].identity.toString("hex"),
+				},
+				network,
+			),
+		).rejects.toThrow(/own evidence/);
+		await expect(
+			prepareApprovalIntent(rpc, binding, {
+				...network,
+				genesisHash: Keypair.generate().publicKey.toBase58(),
+			}),
+		).rejects.toThrow(/network/);
+		const intent = await prepareApprovalIntent(rpc, binding, network);
+		const tx = inspectApprovalIntent(intent, Date.now());
+		tx.partialSign(reviewer);
+		const signed = tx
+			.serialize({ requireAllSignatures: false })
+			.toString("hex");
+		await expect(
+			sponsorAndSubmitApproval(
+				rpc,
+				intent,
+				signed,
+				{ ...binding, appRevision: 9 },
+				service,
+			),
+		).rejects.toThrow(/context changed/);
+		await expect(
+			sponsorAndSubmitApproval(rpc, intent, signed, binding, owner),
+		).rejects.toThrow(/sponsor/);
+		const submission = await sponsorAndSubmitApproval(
+			rpc,
+			intent,
+			signed,
+			binding,
+			service,
+		);
+		expect(submission.status).toBe("submitted");
+		await rpc.confirmTransaction(
+			{
+				signature: submission.signature,
+				blockhash: intent.blockhash,
+				lastValidBlockHeight: intent.lastValidBlockHeight,
+			},
+			"finalized",
+		);
+		expect(
+			(await reconcileApprovalReceipt(rpc, intent, submission.signature))
+				.status,
+		).toBe("finalized");
+		await expect(
+			sponsorAndSubmitApproval(rpc, intent, signed, binding, service),
+		).rejects.toThrow(/already approved/);
+		const stored = await rpc.getAccountInfo(caseKey, "finalized");
+		if (!stored) throw new Error("No case");
+		expect(decodeCase(stored.data).approvals).toHaveLength(1);
+		expect(decodeCase(stored.data).phase).toBe(1); // One person's signature is not closure.
+	}, 120_000);
 	it("enforces independent, revision-bound approval and verifies the finalized proof", async () => {
 		if (!rpcUrl) throw new Error("Explicit local test RPC is required");
 		const url = new URL(rpcUrl);

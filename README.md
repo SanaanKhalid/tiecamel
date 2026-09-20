@@ -12,6 +12,9 @@ intake are configuration-gated; demos never send real alerts.
 Live critical closure is deliberately disabled until individual passkey signing
 and public-network receipt verification are integrated. The focused Solana program
 is compiled and tested on a local validator, not deployed to a public network.
+Individual signing and fee-sponsoring adapters are implemented and locally tested;
+enrollment and durable application integration are still launch gates. See the
+[individual approvals integration guide](docs/individual-approvals.md).
 See the [implementation ledger](docs/hackathon-build-log.md),
 [pilot operations runbook](docs/governance-operations.md), and
 [Solana controls and verification](docs/solana-anchor-program.md) for verified scope
@@ -28,6 +31,7 @@ and remaining launch gates.
 - `PRODUCT_PLAN.md` — product, pilot, and technical roadmap
 
 - `programs/tiecamel-governance` — independent critical-approval Anchor program
+- `packages/governance` — shared browser/server transaction and approval-intent SDK
 - `packages/governance-idl` — generated program interface and TypeScript types
 
 ## Requirements

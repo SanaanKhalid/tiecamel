@@ -18,6 +18,8 @@ export function RuntimeProviders({ children }: { children: React.ReactNode }) {
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
 	});
+	if (import.meta.env.DEV && pathname === "/dev/approval-review")
+		return <>{children}</>;
 	if (pathname.startsWith("/public/") || pathname.startsWith("/verify/")) {
 		return clientConfig.convexConfigured ? (
 			<PublicConvexBridge>{children}</PublicConvexBridge>

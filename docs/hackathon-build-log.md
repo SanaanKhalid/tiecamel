@@ -81,3 +81,17 @@ recruitment and production rollout are not implied by a successful local build.
   missing verified contacts, and keeps secure signing explicitly blocked. Queued
   alert eligibility is rechecked after role/assignment changes. Community workspaces
   link to the public, limited-disclosure view without granting additional access.
+- Deliverable 7: portable governance SDK, exact-message individual approval
+  intents, WebAuthn-only Turnkey signing adapter, separate server fee sponsorship
+  and finalized receipt reconciliation. The plain-language review requires
+  explicit consent and distinguishes submission from confirmation. A local-chain
+  scenario verifies a real reviewer signature and fee sponsor; the browser preview
+  is explicitly simulated. No live signing endpoint, enrollment or public-network
+  deployment is claimed. Durable authenticated intent storage, crash-safe receipt
+  application and provider provisioning remain required; critical closure stays
+  gated. See [the integration guide](individual-approvals.md).
+- Deliverable 7 verification: 115 application/integration tests, 11 Rust tests and
+  2 actual local-validator scenarios passed. All workspace production builds and
+  application/integration TypeScript checks passed. Browser consent, pending
+  receipt and refreshed-review states were checked; simulation fixtures were
+  absent from production output. No production deployment was performed.
