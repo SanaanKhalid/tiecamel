@@ -95,3 +95,7 @@ recruitment and production rollout are not implied by a successful local build.
   application/integration TypeScript checks passed. Browser consent, pending
   receipt and refreshed-review states were checked; simulation fixtures were
   absent from production output. No production deployment was performed.
+- September 20 decision: defer Turnkey account/provider setup and continue
+  provider-independent implementation. Preserve the inactive signing adapter;
+  do not provision a replacement provider or weaken individual-approval controls.
+  Live critical approvals and closure remain disabled.

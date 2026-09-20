@@ -15,6 +15,9 @@ is compiled and tested on a local validator, not deployed to a public network.
 Individual signing and fee-sponsoring adapters are implemented and locally tested;
 enrollment and durable application integration are still launch gates. See the
 [individual approvals integration guide](docs/individual-approvals.md).
+Turnkey setup is deferred by project-owner decision; no provider account is
+required for continued development, and no replacement provider is selected.
+The inactive adapter remains in the codebase; live critical closure stays gated.
 See the [implementation ledger](docs/hackathon-build-log.md),
 [pilot operations runbook](docs/governance-operations.md), and
 [Solana controls and verification](docs/solana-anchor-program.md) for verified scope

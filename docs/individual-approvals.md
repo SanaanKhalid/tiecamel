@@ -14,6 +14,21 @@ exposed by this deliverable. Enrollment, durable intent storage, authenticated
 workflow integration, public-network deployment and application reconciliation
 remain required before these adapters can serve a nonprofit.
 
+## Current decision: defer Turnkey setup
+
+On September 20, 2026, the project owner chose to skip Turnkey setup for now.
+Do not request a Turnkey account, provision provider resources or treat Turnkey
+credentials as a blocker to ongoing development. The existing inactive adapter
+is retained as tested implementation work; retaining it does not select or
+activate a production provider. No replacement signing provider has been chosen.
+
+Continue provider-independent work: authenticated intent storage, crash-safe
+reconciliation, notice intake, deadline escalation and community reporting.
+Individual cryptographic approval remains a requirement before enabling live
+critical closure. Demo approvals remain explicitly simulated; application-only
+records must not be described as independently signed Solana approvals. This
+decision does not authorize service-owned reviewer keys or bypassing the gate.
+
 ## Modules and trust boundaries
 
 ### Confirmed application origin
@@ -69,10 +84,12 @@ verification remains possible after the original signing window expires. A
 receipt only proves the exact on-chain action; it does not prove the underlying
 document is truthful or that a tax obligation has legally been discharged.
 
-## Required next implementation
+## Requirements before live signing (provider setup deferred)
 
-1. **Individual enrollment.** Bind an authenticated, verified person to a
-   user-controlled Turnkey sub-organization and passkey. Provision the Solana
+1. **Individual enrollment.** After a signing approach is selected, bind an
+   authenticated, verified person to a user-controlled signing identity. For the
+   retained Turnkey adapter, this would be a sub-organization and passkey; that
+   provider setup is currently deferred. Provision the Solana
    signing account, prove possession, and save only public enrollment metadata.
    Verify root users, policies and recovery authority: a backend-controlled root
    or recovery path must not silently become an alternative approver. Test
