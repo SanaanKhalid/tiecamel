@@ -73,6 +73,11 @@ const evidenceCommand = {
 const evidence = () =>
 	applyCommand(confirmed(), evidenceCommand, roster[0], roster, now + 2);
 describe("governance control invariants", () => {
+	it("does not allow tax liability oversight to be downgraded", () => {
+		expect(() =>
+			createResponsibility({ ...input, critical: false }, roster, now),
+		).toThrow("critical board oversight");
+	});
 	it("requires three different people, even when one user has duplicate memberships", () => {
 		expect(() =>
 			createResponsibility(

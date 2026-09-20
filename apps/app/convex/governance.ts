@@ -198,9 +198,19 @@ export const register = mutation({
 		...scope,
 		input: v.object(responsibilityInput),
 		linkedIssueId: v.optional(v.id("platformIssues")),
+		inboundNoticeId: v.optional(v.id("inboundNotices")),
 	},
 	handler: async (ctx, args) => {
 		const session = await staffSession(ctx, args);
+		if (args.inboundNoticeId) {
+			const notice = await ctx.db.get(args.inboundNoticeId);
+			if (
+				!notice ||
+				notice.organizationId !== args.organizationId ||
+				notice.status !== "unconfirmed"
+			)
+				throw new Error("Incoming notice is unavailable or already linked");
+		}
 		if (args.linkedIssueId) {
 			const issue = await ctx.db.get(args.linkedIssueId);
 			if (
@@ -237,6 +247,11 @@ export const register = mutation({
 				status: "todo",
 				state: "open",
 				updatedAt: now,
+			});
+		if (args.inboundNoticeId)
+			await ctx.db.patch(args.inboundNoticeId, {
+				status: "linked",
+				obligationId: id,
 			});
 		const obligation = await ctx.db.get(id);
 		if (!obligation) throw new Error("Responsibility was not stored");
@@ -480,7 +495,13 @@ async function queueAlerts(
 		if (state.dueAt - now <= days * DAY && state.dueAt > now)
 			stages.push(`due-${days}`);
 	// Catch-up uses the most urgent reminder, not a burst of every missed reminder.
-	const stage = level >= 2 ? `escalation-${level}` : stages.at(-1);
+	const stage =
+		level >= 2
+			? `escalation-${level}-day-${Math.floor((now - state.createdAt) / DAY)}`
+			: (stages.at(-1) ??
+				(now >= state.nextCheckAt
+					? `follow-up-day-${Math.floor((now - state.nextCheckAt) / DAY)}`
+					: undefined));
 	if (!stage) return;
 	const roster = await governanceRoster(ctx, obligation.organizationId);
 	const ids = new Set([
@@ -504,7 +525,7 @@ async function queueAlerts(
 				.unique()
 		)
 			continue;
-		await ctx.db.insert("governanceAlerts", {
+		const alertId = await ctx.db.insert("governanceAlerts", {
 			organizationId: obligation.organizationId,
 			obligationId: obligation._id,
 			membershipId: membershipId as Id<"memberships">,
@@ -512,6 +533,19 @@ async function queueAlerts(
 			stage,
 			createdAt: now,
 		});
+		const organization = await ctx.db.get(obligation.organizationId);
+		for (const channel of ["email", "whatsapp"] as const)
+			await ctx.db.insert("notificationOutbox", {
+				organizationId: obligation.organizationId,
+				alertId,
+				membershipId: membershipId as Id<"memberships">,
+				channel,
+				status: organization?.demoOnly ? "suppressed" : "queued",
+				attempts: 0,
+				nextAttemptAt: now,
+				createdAt: now,
+				updatedAt: now,
+			});
 	}
 }
 export const sweep = internalMutation({

@@ -64,9 +64,15 @@ function AuthenticatedConvexPlatformProvider({
 	);
 	const select = useMutation(api.organizations.select);
 	const [selectionError, setSelectionError] = useState("");
+	if (convexAuth.isAuthenticated && choices === undefined)
+		return (
+			<main className="p-8" aria-busy="true">
+				Loading organization access…
+			</main>
+		);
 	if (
 		choices &&
-		choices.length > 1 &&
+		choices.length > 0 &&
 		!choices.some((entry) => entry.selected)
 	) {
 		return (

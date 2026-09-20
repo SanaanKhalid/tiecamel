@@ -9,3 +9,9 @@ crons.interval(
 	{},
 );
 export default crons;
+crons.interval(
+	"board alert delivery",
+	{ minutes: 1 },
+	internal.delivery.dispatch,
+	{},
+);

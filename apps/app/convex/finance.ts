@@ -184,7 +184,8 @@ export const ensureDemoSeeded = mutation({
 		const organization = await ctx.db.get(session.membership.organizationId);
 		if (
 			!organization ||
-			(organization.slug !== "icn" && !("demoSessionId" in session))
+			!organization.demoOnly ||
+			!("demoSessionId" in session)
 		) {
 			return { created: false };
 		}

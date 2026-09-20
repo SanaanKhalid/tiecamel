@@ -174,4 +174,96 @@ describe("persistent governance authorization and races", () => {
 			await s.t.query(api.demoSessions.validate, { token: "expired" }),
 		).toBe(false);
 	});
+	it("preserves provider receipts that arrive before send completion without acknowledging the case", async () => {
+		const s = await setup();
+		const obligationId = await s.owner.mutation(api.governance.register, {
+			organizationId: s.organizationId,
+			input: s.input,
+		});
+		const claims = await s.t.mutation(internal.delivery.claim, {});
+		expect(claims.length).toBeGreaterThan(0);
+		const claim = claims[0];
+		const context = await s.t.query(internal.delivery.context, claim);
+		expect(context?.row.channel).toBe("email");
+		await s.t.mutation(internal.delivery.receipt, {
+			providerId: "email-race",
+			channel: "email",
+			status: "delivered",
+		});
+		await s.t.mutation(internal.delivery.finish, {
+			...claim,
+			status: "accepted",
+			providerId: "email-race",
+		});
+		await s.t.run(async (ctx) => {
+			expect((await ctx.db.get(claim.id))?.status).toBe("delivered");
+			expect((await ctx.db.get(obligationId))?.control?.acknowledgedBy).toEqual(
+				[],
+			);
+		});
+	});
+	it("blocks unverified WhatsApp destinations and enforces verification throttling", async () => {
+		const s = await setup();
+		await s.owner.mutation(api.delivery.setWhatsAppConsent, {
+			organizationId: s.organizationId,
+			number: "+15551234567",
+			consent: true,
+		});
+		await s.owner.mutation(api.governance.register, {
+			organizationId: s.organizationId,
+			input: s.input,
+		});
+		const claims = await s.t.mutation(internal.delivery.claim, {});
+		const contexts = await Promise.all(
+			claims.map((claim) => s.t.query(internal.delivery.context, claim)),
+		);
+		expect(
+			contexts
+				.filter((context) => context?.row.channel === "whatsapp")
+				.every((context) => !context?.optedIn),
+		).toBe(true);
+		for (let i = 0; i < 5; i += 1)
+			await s.t.mutation(internal.delivery.reservePhoneVerification, {
+				membershipId: s.ids[0],
+				number: "+15551234567",
+			});
+		await expect(
+			s.t.mutation(internal.delivery.reservePhoneVerification, {
+				membershipId: s.ids[0],
+				number: "+15551234567",
+			}),
+		).rejects.toThrow("Too many");
+	});
+	it("does not seed simulated financial or repository data into real organizations", async () => {
+		const s = await setup();
+		expect(await s.owner.mutation(api.platform.ensureSeeded, {})).toEqual({
+			created: false,
+		});
+		expect(await s.owner.mutation(api.finance.ensureDemoSeeded, {})).toEqual({
+			created: false,
+		});
+	});
+	it("requires explicit organization selection for a multi-organization user", async () => {
+		const s = await setup();
+		await s.t.run(async (ctx) => {
+			const membership = await ctx.db.get(s.ids[0]);
+			if (!membership) throw new Error("Missing test member");
+			await ctx.db.insert("memberships", {
+				organizationId: s.otherId,
+				userId: membership.userId,
+				role: "finance",
+				status: "active",
+				createdAt: Date.now(),
+			});
+		});
+		await expect(s.owner.query(api.platform.workspace, {})).rejects.toThrow(
+			"Select an organization",
+		);
+		await s.owner.mutation(api.organizations.select, {
+			organizationId: s.organizationId,
+		});
+		expect(
+			(await s.owner.query(api.platform.workspace, {})).organization._id,
+		).toBe(s.organizationId);
+	});
 });

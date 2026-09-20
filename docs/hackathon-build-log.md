@@ -63,3 +63,10 @@ recruitment and production rollout are not implied by a successful local build.
   publications are append-only; proposing a correction does not erase older updates.
 - Development Convex functions deployed to `careful-setter-342` for browser tests.
   Production Convex and production hosting have not been deployed by this work.
+- Deliverable 4: durable email/WhatsApp outbox, worker leases, bounded retries,
+  signed provider callbacks, race-safe delivery receipts, WhatsApp opt-in and
+  ownership verification, incoming plain-text email review queue, and health
+  endpoint. External sends require explicit server-side enablement. Forwarded
+  attachments are not auto-imported; officers use the managed upload pipeline.
+- Repository workspace reads now respect repository assignments. Quarantined
+  documents cannot be downloaded, and real organizations cannot receive demo fixtures.

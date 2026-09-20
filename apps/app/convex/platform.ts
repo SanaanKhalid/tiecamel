@@ -1,7 +1,10 @@
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { type MutationCtx, mutation, query } from "./_generated/server";
-import { requirePlatformSession } from "./lib/platformAuth";
+import {
+	readableRepositoryIds,
+	requirePlatformSession,
+} from "./lib/platformAuth";
 
 export const overview = query({
 	args: {},
@@ -49,6 +52,11 @@ export const overview = query({
 				.order("desc")
 				.take(50),
 		]);
+		const readable = await readableRepositoryIds(
+			ctx,
+			repositories,
+			session.membership,
+		);
 		return {
 			organization,
 			viewer: {
@@ -56,11 +64,13 @@ export const overview = query({
 				name: session.user.name,
 				role: session.membership.role,
 			},
-			repositories,
-			issues,
-			changes,
-			records,
-			notifications,
+			repositories: repositories.filter((entry) => readable.has(entry._id)),
+			issues: issues.filter((entry) => readable.has(entry.repositoryId)),
+			changes: changes.filter((entry) => readable.has(entry.repositoryId)),
+			records: records.filter((entry) => readable.has(entry.repositoryId)),
+			notifications: notifications.filter((entry) =>
+				readable.has(entry.repositoryId),
+			),
 		};
 	},
 });
@@ -275,6 +285,25 @@ export const workspace = query({
 					.unique(),
 			),
 		);
+		const readable = await readableRepositoryIds(
+			ctx,
+			repositories,
+			session.membership,
+		);
+		const visible = <T extends { repositoryId: Id<"repositories"> }>(
+			entries: T[],
+		) => entries.filter((entry) => readable.has(entry.repositoryId));
+		const admin = ["administrator", "owner"].includes(session.membership.role);
+		const targetIds = new Set(
+			[
+				...repositories.filter((entry) => readable.has(entry._id)),
+				...visible(issues),
+				...visible(changes),
+				...visible(records),
+				...visible(recordVersions),
+				...visible(repositoryCommits),
+			].map((entry) => String(entry._id)),
+		);
 		return {
 			organization,
 			viewerMembershipId: session.membership._id,
@@ -282,31 +311,43 @@ export const workspace = query({
 			teams,
 			teamMembers,
 			locations,
-			labels,
-			repositories: repositories.map((repository, index) => ({
-				repository,
-				rules: rules[index],
-			})),
-			issues,
-			comments,
-			changes,
-			revisions,
-			files,
-			reviews,
-			checks,
-			findings,
-			diffs,
-			documentArtifacts,
-			records,
-			recordVersions,
-			repositoryCommits,
-			integrityAnchors,
-			providerConnections,
-			storageConfigs,
-			publicationJobs,
-			baselineImports,
-			activity,
-			notifications,
+			labels: labels.filter(
+				(entry) => !entry.repositoryId || readable.has(entry.repositoryId),
+			),
+			repositories: repositories
+				.map((repository, index) => ({
+					repository,
+					rules: rules[index],
+				}))
+				.filter((entry) => readable.has(entry.repository._id)),
+			issues: visible(issues),
+			comments: visible(comments),
+			changes: visible(changes),
+			revisions: visible(revisions),
+			files: visible(files),
+			reviews: visible(reviews),
+			checks: visible(checks),
+			findings: findings.filter((entry) =>
+				targetIds.has(String(entry.changeRequestId)),
+			),
+			diffs: diffs.filter((entry) =>
+				targetIds.has(String(entry.changeRequestId)),
+			),
+			documentArtifacts: visible(documentArtifacts),
+			records: visible(records),
+			recordVersions: visible(recordVersions),
+			repositoryCommits: visible(repositoryCommits),
+			integrityAnchors: integrityAnchors.filter(
+				(entry) => entry.repositoryId && readable.has(entry.repositoryId),
+			),
+			providerConnections: admin ? providerConnections : [],
+			storageConfigs: visible(storageConfigs),
+			publicationJobs: visible(publicationJobs),
+			baselineImports: visible(baselineImports),
+			activity: admin
+				? activity
+				: activity.filter((entry) => targetIds.has(entry.targetId)),
+			notifications: visible(notifications),
 		};
 	},
 });
@@ -315,6 +356,7 @@ export const ensureSeeded = mutation({
 	args: { demoSessionToken: v.optional(v.string()) },
 	handler: async (ctx, args) => {
 		const session = await requirePlatformSession(ctx, args.demoSessionToken);
+		if (!("demoSessionId" in session)) return { created: false };
 		const organizationId = session.membership.organizationId;
 		const existing = await ctx.db
 			.query("repositories")

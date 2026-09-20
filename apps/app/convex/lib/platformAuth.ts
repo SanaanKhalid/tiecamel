@@ -127,3 +127,29 @@ export async function requireActiveMembershipIds(
 	}
 	return memberships.filter(Boolean);
 }
+
+export async function readableRepositoryIds(
+	ctx: Ctx,
+	repositories: Doc<"repositories">[],
+	membership: Doc<"memberships">,
+) {
+	const allowed = new Set<Id<"repositories">>();
+	for (const repository of repositories) {
+		if (repository.organizationId !== membership.organizationId) continue;
+		if (
+			["owner", "administrator"].includes(membership.role) ||
+			["members", "public"].includes(repository.visibility)
+		) {
+			allowed.add(repository._id);
+			continue;
+		}
+		const assignment = await ctx.db
+			.query("repositoryMembers")
+			.withIndex("by_repository_and_member", (q) =>
+				q.eq("repositoryId", repository._id).eq("membershipId", membership._id),
+			)
+			.unique();
+		if (assignment) allowed.add(repository._id);
+	}
+	return allowed;
+}

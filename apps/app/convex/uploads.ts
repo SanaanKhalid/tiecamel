@@ -225,6 +225,8 @@ export const getDownloadTarget = query({
 			(item) => item.azureBlobRef === args.objectRef,
 		);
 		if (file) {
+			if (file.processingStatus !== "ready")
+				throw new Error("Document is quarantined or still being processed");
 			await requireRepositoryAccess(
 				ctx,
 				file.repositoryId,

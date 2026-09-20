@@ -44,6 +44,7 @@ import {
 	previewSeed,
 } from "../governance/preview";
 import { usePlatform } from "../platform/store";
+import { GovernanceOperations } from "./governance-operations";
 
 export type GovernanceTab =
 	| "overview"
@@ -180,18 +181,24 @@ function LiveGovernancePage({ tab }: { tab: GovernanceTab }) {
 			: undefined,
 	};
 	return (
-		<GovernanceWorkspace
-			tab={tab}
-			cases={workspace.cases}
-			roster={workspace.roster}
-			viewerId={workspace.viewerId}
-			summary={workspace.summary}
-			now={workspace.serverTime}
-			demo={workspace.demo}
-			actions={actions}
-			alertCount={workspace.alerts.length}
-			publications={workspace.publications}
-		/>
+		<>
+			<GovernanceWorkspace
+				tab={tab}
+				cases={workspace.cases}
+				roster={workspace.roster}
+				viewerId={workspace.viewerId}
+				summary={workspace.summary}
+				now={workspace.serverTime}
+				demo={workspace.demo}
+				actions={actions}
+				alertCount={workspace.alerts.length}
+				publications={workspace.publications}
+			/>
+			<GovernanceOperations
+				roster={workspace.roster}
+				now={workspace.serverTime}
+			/>
+		</>
 	);
 }
 function PreviewGovernancePage({ tab }: { tab: GovernanceTab }) {
@@ -682,18 +689,20 @@ function nextStep(state: Responsibility) {
 					: "Submit closure evidence";
 }
 
-function NoticeForm({
+export function NoticeForm({
 	roster,
 	now,
 	onSubmit,
 	onCancel,
 	busy,
+	initial,
 }: {
 	roster: Person[];
 	now: number;
 	onSubmit: (input: NewResponsibility) => Promise<void>;
 	onCancel: () => void;
 	busy: boolean;
+	initial?: Pick<NewResponsibility, "title" | "source" | "sourceExcerpt">;
 }) {
 	const people = roster.filter(
 		(person) => person.active && person.role !== "member",
@@ -736,6 +745,7 @@ function NoticeForm({
 				<Label text="What needs attention?">
 					<input
 						name="title"
+						defaultValue={initial?.title}
 						required
 						maxLength={180}
 						className={field}
@@ -754,6 +764,7 @@ function NoticeForm({
 				<Label text="Source / issuing authority">
 					<input
 						name="source"
+						defaultValue={initial?.source}
 						required
 						maxLength={1000}
 						className={field}
@@ -772,6 +783,7 @@ function NoticeForm({
 				<Label text="Exact supporting text from the notice">
 					<textarea
 						name="excerpt"
+						defaultValue={initial?.sourceExcerpt}
 						required
 						maxLength={4000}
 						className={field}

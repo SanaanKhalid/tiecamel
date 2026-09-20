@@ -16,6 +16,11 @@ dist-ssr/
 coverage/
 playwright-report/
 test-results/
+.local/
+target/
+.anchor/
+test-ledger/
+**/*-keypair.json
 
 .terraform/
 *.tfstate

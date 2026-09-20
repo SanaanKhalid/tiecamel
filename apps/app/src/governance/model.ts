@@ -136,6 +136,8 @@ export function createResponsibility(
 	roster: Person[],
 	now: number,
 ): Responsibility {
+	if (input.category === "tax" && !input.critical)
+		throw new Error("Tax responsibilities require critical board oversight");
 	requireText(input.title, "Title", 180);
 	requireText(input.source, "Notice source", 1000);
 	requireText(input.sourceExcerpt, "Source excerpt");
@@ -201,7 +203,7 @@ export function closureReadiness(state: Responsibility, roster: Person[]) {
 		hasDirector,
 		ready:
 			state.phase === "review" &&
-			!!state.confirmedAt &&
+			state.confirmedAt !== undefined &&
 			!!state.evidence &&
 			approvals.length >= required &&
 			(!state.critical || hasDirector),

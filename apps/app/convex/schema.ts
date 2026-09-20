@@ -857,6 +857,79 @@ export default defineSchema({
 		name: v.string(),
 		lastSweepAt: v.number(),
 	}).index("by_name", ["name"]),
+	alertContacts: defineTable({
+		verificationWindowAt: v.optional(v.number()),
+		verificationAttempts: v.optional(v.number()),
+		organizationId: v.id("organizations"),
+		membershipId: v.id("memberships"),
+		whatsappNumber: v.optional(v.string()),
+		whatsappConsentedAt: v.optional(v.number()),
+		whatsappVerifiedAt: v.optional(v.number()),
+		updatedAt: v.number(),
+	}).index("by_member", ["membershipId"]),
+	notificationOutbox: defineTable({
+		organizationId: v.id("organizations"),
+		alertId: v.id("governanceAlerts"),
+		membershipId: v.id("memberships"),
+		channel: v.union(v.literal("email"), v.literal("whatsapp")),
+		status: v.union(
+			v.literal("queued"),
+			v.literal("sending"),
+			v.literal("accepted"),
+			v.literal("delivered"),
+			v.literal("failed"),
+			v.literal("blocked"),
+			v.literal("uncertain"),
+			v.literal("suppressed"),
+		),
+		attempts: v.number(),
+		nextAttemptAt: v.number(),
+		leaseToken: v.optional(v.string()),
+		leaseUntil: v.optional(v.number()),
+		providerId: v.optional(v.string()),
+		error: v.optional(v.string()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_status_and_next", ["status", "nextAttemptAt"])
+		.index("by_organization", ["organizationId"])
+		.index("by_provider", ["providerId"]),
+	deliveryReceipts: defineTable({
+		providerId: v.string(),
+		channel: v.union(v.literal("email"), v.literal("whatsapp")),
+		status: v.union(
+			v.literal("accepted"),
+			v.literal("delivered"),
+			v.literal("failed"),
+		),
+		receivedAt: v.number(),
+	}).index("by_provider_and_channel", ["providerId", "channel"]),
+	inboundMailRoutes: defineTable({
+		organizationId: v.id("organizations"),
+		address: v.string(),
+		createdAt: v.number(),
+	})
+		.index("by_address", ["address"])
+		.index("by_organization", ["organizationId"]),
+	inboundNotices: defineTable({
+		organizationId: v.id("organizations"),
+		providerEmailId: v.string(),
+		sender: v.string(),
+		subject: v.string(),
+		excerpt: v.string(),
+		status: v.union(
+			v.literal("pending"),
+			v.literal("unconfirmed"),
+			v.literal("linked"),
+			v.literal("failed"),
+		),
+		attachmentCount: v.number(),
+		error: v.optional(v.string()),
+		obligationId: v.optional(v.id("obligations")),
+		createdAt: v.number(),
+	})
+		.index("by_provider_email", ["providerEmailId"])
+		.index("by_organization", ["organizationId"]),
 	governanceAlerts: defineTable({
 		organizationId: v.id("organizations"),
 		obligationId: v.id("obligations"),

@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import {
+	readableRepositoryIds,
 	requireActiveMembershipIds,
 	requirePlatformSession,
 	requireRepositoryAccess,
@@ -33,12 +34,24 @@ export const list = query({
 				.collect();
 		}
 		const session = await requirePlatformSession(ctx, args.demoSessionToken);
-		return ctx.db
+		const repositories = await ctx.db
+			.query("repositories")
+			.withIndex("by_organization", (q) =>
+				q.eq("organizationId", session.membership.organizationId),
+			)
+			.collect();
+		const readable = await readableRepositoryIds(
+			ctx,
+			repositories,
+			session.membership,
+		);
+		const issues = await ctx.db
 			.query("platformIssues")
 			.withIndex("by_organization", (q) =>
 				q.eq("organizationId", session.membership.organizationId),
 			)
 			.collect();
+		return issues.filter((entry) => readable.has(entry.repositoryId));
 	},
 });
 
