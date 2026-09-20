@@ -38,7 +38,8 @@ export function pilotReadiness(input: ReadinessInput) {
 				person.userId !== state.evidence?.submittedByUser,
 		);
 		return (
-			!owner?.active ||
+			!owner ||
+			!isGovernanceStaff(owner) ||
 			new Set(eligible.map((person) => person.userId)).size < 2 ||
 			!eligible.some((person) => person.role === "board")
 		);

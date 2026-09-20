@@ -103,6 +103,27 @@ describe("honest pilot readiness", () => {
 			).toBe("attention");
 		}
 	});
+	it("flags a revoked owner even when enough other reviewers remain", () => {
+		const input = fixture();
+		input.roster = [
+			...roster.map((person) =>
+				person.id === "member-0"
+					? { ...person, role: "member" as const }
+					: person,
+			),
+			{
+				id: "member-3",
+				userId: "user-3",
+				name: "Additional reviewer",
+				role: "reviewer",
+				active: true,
+			},
+		];
+		expect(
+			pilotReadiness(input).checks.find((check) => check.id === "people")
+				?.state,
+		).toBe("attention");
+	});
 	it("keeps demos and incomplete WhatsApp consent explicitly unready", () => {
 		const input = fixture();
 		input.demo = true;
